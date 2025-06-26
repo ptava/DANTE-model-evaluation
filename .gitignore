@@ -5,6 +5,15 @@
 *.toc
 *.pdf
 *.synctex.gz
+*.bbl
+*.blg
+*-blx.aux
+*-blx.bib
+*.bbl
+*.xml
+*.upa
+*.upb
+*.bcf
 
 # Ignore OpenFOAM run artifacts
 0/
