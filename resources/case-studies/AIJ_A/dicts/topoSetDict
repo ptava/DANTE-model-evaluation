@@ -1,0 +1,69 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+cells_scaling 1.0;
+
+actions
+(
+
+    //- Select cells associated with patch
+    {
+        name    bl_cells;
+        type    cellSet;
+        action  new;
+        source  patchToCell;
+        patches ( ground building );
+    }
+
+    //- Cells neighbours of input cellSet
+    {
+        name        bl_cells;
+        source      haloToCell;
+        type        cellSet;
+        action      add;
+        set         bl_cells;
+        steps       #calc " max(int($cells_scaling*12),2) ";
+    }
+
+    //- Add cells of inflow region defined by a box
+    {
+        name        bl_cells;
+        type        cellSet;
+        action      add;
+        source      boxToCell;
+        sourceInfo
+        {
+            box ( -1.5 -1.5 -1.5 ) ( -0.2 1.5 1.5 );
+            inside      true;
+        }
+    }
+
+    //- Add cells of outflow region defined by a box
+    {
+        name        bl_cells;
+        type        cellSet;
+        action      add;
+        source      boxToCell;
+        sourceInfo
+        {
+            box ( 0.7 -1.5 -1.5 ) ( 1.5 1.5 1.5 );
+            inside      true;
+        }
+    }
+
+);
+
+// ************************************************************************* //

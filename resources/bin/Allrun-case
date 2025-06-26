@@ -1,0 +1,51 @@
+#!/bin/bash
+cd "${0%/*}" || exit                        
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions 
+. $(git rev-parse --show-toplevel)/bin/UtilFunctions || exit
+#------------------------------------------------------------------------------
+
+# User parameters
+scale=0.25      # Set cells number scaling parameter
+deltaT=0.05     # Set acquisition time of post-processing
+startTime=1.3   # Set time to start averaging the solution (end of transient startup)
+endTime=2.0     # Set time to end the simulation
+smoothing=True  # Set to True if you want to smooth the mesh (requires cfmesh)
+resourcesDir="resources"  # Directory with resources
+
+#------------------------------------------------------------------------------
+# Copy source files
+
+blockMeshSource="${resourcesDir}/mesh/blockMeshDict"
+topoSetSource="${resourcesDir}/mesh/topoSetDict"
+
+blockMeshTarget="system/blockMeshDict"
+topoSetTarget="system/topoSetDict"
+
+copy_file_if_exists "$blockMeshSource" "$blockMeshTarget"
+copy_file_if_exists "$topoSetSource" "$topoSetTarget"
+
+#------------------------------------------------------------------------------
+# Make changes in files
+
+protected_fos=(
+    "${resourcesDir}/FOs/FOfieldAverage"
+    "${resourcesDir}/FOs/FOyPlus"
+    "${resourcesDir}/FOs/FOsolverInfo"
+    "${resourcesDir}/FOs/FOsurfacesValue"
+)
+set_acquisition_time $deltaT $startTime $endTime "${protected_fos[@]}"
+set_scaling $scale "$blockMeshTarget" "$topoSetTarget"
+
+#------------------------------------------------------------------------------
+# Create the computation domain
+
+./Allrun.pre ${smoothing}
+
+#------------------------------------------------------------------------------
+# Run the simulation and reconstruct the results
+
+runApplication decomposePar
+runParallel $(getApplication)
+runApplication reconstructPar
+
+#------------------------------------------------------------------------------

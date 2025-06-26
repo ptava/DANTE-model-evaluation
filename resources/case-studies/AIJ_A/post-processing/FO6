@@ -1,0 +1,20 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+yPlus
+{
+    type            yPlus;
+    libs            (fieldFunctionObjects);
+    region          region0;
+    log             true;
+    executeControl  timeStep;
+    executeInterval 10;
+    writeControl    writeTime;
+}
+
+// ************************************************************************* //

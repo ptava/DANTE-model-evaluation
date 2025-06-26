@@ -1,0 +1,179 @@
+#!/bin/bash
+###############################################################################
+# set_acquisition_time <Δt> <startTime> <endTime> [protected‑file …]
+#
+# • Updates system/controlDict:
+#       endTime        ← <endTime>
+#       writeInterval  ← <endTime>
+# • Updates every Function Object (*.FOs/*):
+#       timeStart      ← <startTime>
+#       timeEnd        ← <endTime>
+#   …and, unless the FO file is listed in the “protected” arguments…
+#       executeInterval ← <Δt>
+#       writeInterval   ← <Δt>
+#
+# Any extra arguments (4‑N) are treated as **basenames** of FO files that must
+# keep their original execute/write intervals.
+###############################################################################
+set_acquisition_time() {
+    local acquisition_dt="$1"       # acquisition delta time
+    local start_time="$2"           # start acquisition time
+    local end_time="$3"             # end simulation and acquisition time
+    local -a protected=("${@:4}")   # remaining args → array of protected files
+
+    local control_dict="system/controlDict"
+    local fo_dir="system/FOs"
+
+    #--- sanity checks ---#
+    [[ -f $control_dict ]] || { echo "ERROR: ${control_dict} not found"; exit 1; }
+    [[ -d $fo_dir       ]] || { echo "ERROR: ${fo_dir} directory not found"; exit 1; }
+
+    #--- 1. patch controlDict ---#
+    sed -Ei "
+        s/(^[[:space:]]*endTime[[:space:]]).*/\1${end_time};/;
+        s/(^[[:space:]]*writeInterval[[:space:]]).*/\1${end_time};/
+    " "$control_dict"
+
+    #--- 2. patch each Function Object file ---#
+    mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0)
+
+    for fo in "${fo_files[@]}"; do
+        sed -Ei "
+            s/(^[[:space:]]*timeStart[[:space:]]).*/\1${start_time};/;
+            s/(^[[:space:]]*timeEnd[[:space:]]).*/\1${end_time};/
+        " "$fo"
+
+        if [[ ! " ${protected[*]} " =~ " $(basename "$fo") " ]]; then
+            sed -Ei "
+                s/(^[[:space:]]*executeInterval[[:space:]]).*/\1${acquisition_dt};/;
+                s/(^[[:space:]]*writeInterval[[:space:]]).*/\1${acquisition_dt};/
+            " "$fo"
+        fi
+    done
+}
+
+###############################################################################
+# copy_file_if_exists <source> <destination>
+#
+# • Copies <source> to <destination> **only** if <source> is a regular file.
+# • Check if directory tree exist.
+# • Preserves timestamps and permissions (cp -p).
+###############################################################################
+copy_file_if_exists() {
+    local src="$1"
+    local dst="$2"
+
+    if [[ -z $src || -z $dst ]]; then
+        echo "Usage: copy_file_if_exists <source> <destination>" >&2
+        exit 1
+    fi
+
+    if [[ ! -f $src ]]; then
+        echo "Warning: $(basename -- "$src") not found – skipping." >&2
+        exit 1
+    fi
+
+    local dst_dir
+    dst_dir=$(dirname "$dst")
+    if [[ ! -d $dst_dir ]]; then
+        echo "ERROR: could not find $dst_dir" >&2
+        exit 1
+    fi
+
+    echo "Copying $src → $dst"
+    cp -p "$src" "$dst"
+}
+
+###############################################################################
+# set_scaling <scale> [<file1> <file2> …]
+#
+# • Sets the scaling factor for the given files.
+# • The scaling factor is set as "cells_scaling" in the files.
+#
+#################################################################################
+set_scaling() {
+    local scale="$1"
+    shift
+    local files=("$@")
+
+    #--- sanity: need at least one argument ---#
+    if [[ -z $scale || ${#files[@]} -eq 0 ]]; then
+        echo "Usage: set_scaling <scale> [<file1> <file2> …]" >&2
+        exit 1
+    fi
+
+    #--- set scaling factor in each file ---#
+    for file in "${files[@]}"; do
+        if [[ -f $file ]]; then
+            sed -Ei "s/(cells_scaling[[:space:]]).*/\1$scale;/" "$file"
+        else
+            echo "Warning: $(basename -- "$file") not found – skipping." >&2
+        fi
+    done
+}
+###############################################################################
+# setFOs <FOsDir>
+#
+# • Sets the Function Objects directory to the given path.
+# • Adds all FOs in the directory to system/controlDict/functions.
+#
+###############################################################################
+setFOs() {
+    local fo_dir="$1"
+
+    #--- sanity checks ---#
+    if [[ -z $fo_dir || ! -d $fo_dir ]]; then
+        echo "Usage: setFOs <FOsDir>" >&2
+        exit 1
+    fi
+
+    local control_dict="system/controlDict"
+
+    if [[ ! -f $control_dict ]]; then
+        echo "ERROR: ${control_dict} not found in system folder" >&2
+        exit 1
+    fi
+
+    #--- add FOs to controlDict ---#
+    local fo_files
+    mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0)
+
+    IFS=$'\n' readarray -t sorted_fo_files < <(
+      for f in "${fo_files[@]}"; do
+        filename=$(basename "$f")
+        [[ $filename =~ ^FO_([0-9]+)$ ]] && printf "%05d\t%s\n" "${BASH_REMATCH[1]}" "$f"
+      done | sort | cut -f2-
+    )
+
+    echo "functions {" > "$control_dict"
+    for fo in "${sorted_fo_files[@]}"; do
+        echo "Adding Function Object: $(basename "$fo")"
+        echo "#include \"$(basename "$fo")\"" >> "$control_dict"
+    done
+    echo "}" >> "$control_dict"
+}
+###############################################################################
+# prepare <directory> <caseName>
+#
+# • Build OpenFOAM folder for a single simulation or comparative analysis.
+#
+###############################################################################
+prepare() {
+    local dir="$1"
+    local case_name="$2"
+
+    #--- sanity checks ---#
+    if [[ -z $dir || -z $case_name ]]; then
+        echo "Usage: prepare <directory> <caseName>" >&2
+        exit 1
+    fi
+
+    if [[ ! -d $dir ]]; then
+        echo "ERROR: Directory $dir does not exist." >&2
+        exit 1
+    fi
+
+    #--- create case directory structure ---#
+    mkdir -p "$dir/$case_name/system/FOs"
+    echo "Created directory structure for case '$case_name' in '$dir'."
+}

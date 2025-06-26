@@ -1,0 +1,137 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated as
+% required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+\datalist[entry]{nty/global//global/global}
+  \entry{Chang2003}{article}{}
+    \name{author}{2}{}{%
+      {{hash=CJC}{%
+         family={Chang},
+         familyi={C\bibinitperiod},
+         given={J.\bibnamedelima C.},
+         giveni={J\bibinitperiod\bibinitdelim C\bibinitperiod},
+      }}%
+      {{hash=HSR}{%
+         family={Hanna},
+         familyi={H\bibinitperiod},
+         given={S.\bibnamedelima R.},
+         giveni={S\bibinitperiod\bibinitdelim R\bibinitperiod},
+      }}%
+    }
+    \strng{namehash}{CJCHSR1}
+    \strng{fullhash}{CJCHSR1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelyear}{2003}
+    \field{labeldatesource}{}
+    \field{sortinit}{C}
+    \field{sortinithash}{C}
+    \field{abstract}{%
+    This paper reviews methods to evaluate the performance of air quality
+  models, which are tools that predict the fate of gases and aerosols upon
+  their release into the atmosphere. Because of the large economic, public
+  health, and environmental impacts often associated with the use of air
+  quality model results, it is important that these models be properly
+  evaluated. A comprehensive model evaluation methodology makes use of
+  scientific assessments of the model technical algorithms, statistical
+  evaluations using field or laboratory data, and operational assessments by
+  users in real-world applications. The focus of the current paper is on the
+  statistical evaluation component. It is important that a statistical model
+  evaluation exercise should start with clear definitions of the evaluation
+  objectives and specification of hypotheses to be tested. A review is given of
+  a set of model evaluation methodologies, including the BOOT and the ASTM
+  evaluation software, Taylor's nomogram, the figure of merit in space, and the
+  CDF approach. Because there is not a single best performance measure or best
+  evaluation methodology, it is recommended that a suite of different
+  performance measures be applied. Suggestions are given concerning the
+  magnitudes of the performance measures expected of “good” models. For
+  example, a good model should have a relative mean bias less than about 30{\%}
+  and a relative scatter less than about a factor of two. In order to
+  demonstrate some of the air quality model evaluation methodologies, two
+  simple baseline urban dispersion models are evaluated using the Salt Lake
+  City Urban 2000 field data. The importance of assumptions concerning details
+  such as minimum concentration and pairing of data are shown. Typical plots
+  and tables are presented, including determinations of whether the difference
+  in the relative mean bias between the two models is statistically significant
+  at the 95{\%} confidence level.%
+    }
+    \verb{doi}
+    \verb 10.1007/s00703-003-0070-7
+    \endverb
+    \field{issn}{01777971}
+    \field{number}{1-3}
+    \field{pages}{167\bibrangedash 196}
+    \field{title}{{Air quality model performance evaluation}}
+    \field{volume}{87}
+    \field{journaltitle}{Meteorology and Atmospheric Physics}
+    \field{year}{2003}
+  \endentry
+
+  \entry{Oberkampf2010}{book}{}
+    \name{author}{2}{}{%
+      {{hash=OWL}{%
+         family={Oberkampf},
+         familyi={O\bibinitperiod},
+         given={William\bibnamedelima L.},
+         giveni={W\bibinitperiod\bibinitdelim L\bibinitperiod},
+      }}%
+      {{hash=RCJ}{%
+         family={Roy},
+         familyi={R\bibinitperiod},
+         given={Christopher\bibnamedelima J.},
+         giveni={C\bibinitperiod\bibinitdelim J\bibinitperiod},
+      }}%
+    }
+    \list{publisher}{1}{%
+      {Cambridge University Press}%
+    }
+    \strng{namehash}{OWLRCJ1}
+    \strng{fullhash}{OWLRCJ1}
+    \field{labelnamesource}{author}
+    \field{labeltitlesource}{title}
+    \field{labelyear}{2010}
+    \field{labeldatesource}{}
+    \field{sortinit}{O}
+    \field{sortinithash}{O}
+    \field{abstract}{%
+    Advances in scientific computing have made modelling and simulation an
+  important part of the decision-making process in engineering, science, and
+  public policy. This book provides a comprehensive and systematic development
+  of the basic concepts, principles, and procedures for verification and
+  validation of models and simulations. The emphasis is placed on models that
+  are described by partial differential and integral equations and the
+  simulations that result from their numerical solution. The methods described
+  can be applied to a wide range of technical fields, from the physical
+  sciences, engineering and technology and industry, through to environmental
+  regulations and safety, product and plant safety, financial investing, and
+  governmental regulations. This book will be genuinely welcomed by
+  researchers, practitioners, and decision makers in a broad range of fields,
+  who seek to improve the credibility and reliability of simulation results. It
+  will also be appropriate either for university courses or for independent
+  study.%
+    }
+    \field{booktitle}{Verification and Validation in Scientific Computing}
+    \verb{doi}
+    \verb 10.1017/CBO9780511760396
+    \endverb
+    \field{isbn}{9780511760396}
+    \field{issn}{10010645}
+    \field{title}{{Verification and validation in scientific computing}}
+    \field{year}{2010}
+  \endentry
+\enddatalist
+\endinput

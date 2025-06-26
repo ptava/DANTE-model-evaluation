@@ -1,0 +1,41 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+// Check yPlus value on ground wall
+groundyPlus
+{
+    type            surfaceFieldValue;
+    libs            ("libfieldFunctionObjects.so");
+    fields          (yPlus);
+    writeFields     false;
+    log             false;
+    surfaceFormat   none;
+    regionType      patch;
+    name            ground;
+    operation       max;
+    writeControl    timeStep;
+    writeInterval   10;
+}
+
+// Check yPlus value on building walls
+buildingyPlus
+{
+    type            surfaceFieldValue;
+    libs            ("libfieldFunctionObjects.so");
+    fields          (yPlus);
+    writeFields     false;
+    log             false;
+    surfaceFormat   none;
+    regionType      patch;
+    name            building;
+    operation       max;
+    writeControl    timeStep;
+    writeInterval   10;
+}
+
+// ************************************************************************* //

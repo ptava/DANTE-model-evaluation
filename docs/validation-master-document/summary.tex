@@ -1,0 +1,58 @@
+\documentclass[a4paper, 12pt]{article}
+\usepackage{graphicx}
+\PassOptionsToPackage{hyphens}{url}\usepackage[hidelinks]{hyperref}
+\usepackage{amsmath, amssymb}
+\usepackage{geometry}
+\usepackage{booktabs}
+\usepackage{overpic}
+\usepackage{pdfcomment} 
+\usepackage{subcaption}
+
+% Set the page geometry
+\geometry{a4paper, margin=1in}
+
+% Title and author information
+\title{Computational Model Evaluation for Urban Microclimate Simulations}
+\author{SMARTLab}
+\date{\today}
+
+% Bibliography management
+\usepackage[style=mla-new,eprint=true,backend=bibtex,citestyle=authoryear]{biblatex}
+\addbibresource{bibliography.bib}
+\setlength\bibitemsep{1.5\baselineskip}
+
+
+\begin{document}
+
+%-------------------- Title -------------------------------------------------------------
+
+\maketitle
+
+%-------------------- Abstract ----------------------------------------------------------
+\begin{abstract}
+\noindent
+This document presents a structured approach for the evaluation of computational models used in urban microclimate simulations. It serves two main purposes:
+\begin{itemize}
+    \item To outline a hierarchical validation strategy that decomposes the problem into subproblems, benchmarks, and test cases, using both controlled experimental and real-world datasets to ensure accuracy and reliability;
+    \item To provide an up-to-date inventory of publicly available test cases relevant to computational model evaluation in the urban microclimate domain.
+\end{itemize}
+\end{abstract}
+
+%------------------- Table of Contents --------------------------------------------------
+
+\tableofcontents
+
+%------------------- Sections -----------------------------------------------------------
+
+\include{sections/introduction}
+
+\include{sections/strategy_definition}
+
+\include{sections/datasets}
+
+\include{sections/case_studies}
+
+\printbibliography[title={References}]
+
+\end{document}
+

@@ -1,0 +1,50 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+caseInfo1
+{
+    type        caseInfo;
+    libs        (utilityFunctionObjects);
+    writeControl writeTime;
+
+    writeFormat json;
+
+    dictionaries
+    {
+        fvSolution
+        {
+            name        "fvSolution";
+        }
+        schemes
+        {
+            name        "fvSchemes";
+            include
+            (
+                "/ddtSchemes"
+                "/gradSchemes"
+                "/divSchemes"
+            );
+        }
+        turbulence
+        {
+            name        "turbulenceProperties";
+        }
+        controlDict
+        {
+            path        "<system>/controlDict";
+            include
+            (
+                "application"
+                "deltaT"
+                "startTime"
+                "endTime"
+                "maxCo"
+            );
+        }
+    }
+}

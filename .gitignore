@@ -1,0 +1,24 @@
+# Ignore LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.pdf
+*.synctex.gz
+
+# Ignore OpenFOAM run artifacts
+0/
+[1-9]*
+[0-9]*.[0-9]*
+processor*
+polyMesh/
+extended*/
+trisurface/
+dynamicCode/
+log.*
+*.OpenFOAM
+*.foam
+
+# python analysis artifacts
+*.png
+
