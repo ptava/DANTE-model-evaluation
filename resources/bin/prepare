@@ -105,6 +105,13 @@ parse_args() {
     # Functions arguments
     case_name="${positional[0]}"
     dir="${positional[1]}"
+    case_folder="${case_name}/${dir}"
+    case_reference="${CASE_STUDIES_DIR}/${case_name}"
+
+    if [[ -d ${case_folder} ]]; then
+        echo "Error: Case folder '${case_folder}' already exists." >&2
+        exit 1
+    fi
 }
 
 
@@ -138,8 +145,6 @@ prepare() {
     fi
 
     #--- create main case folder ---#
-    local case_folder="${case_name}/${dir}"
-    local case_reference="${CASE_STUDIES_DIR}/${case_name}"
 
     # make subdirectories
     mkdir -p "${case_folder}/constant"
@@ -147,35 +152,40 @@ prepare() {
     mkdir -p "${case_folder}/resources"
 
     # copy executable scripts to case folder
-    cp "${BIN_DIR}/{Allrun_case,Allclean_case,util_functions}" "${case_folder}/."
+    cp "${BIN_DIR}/Allrun_case" "${case_folder}/."
+    cp "${BIN_DIR}/Allclean_case" "${case_folder}/."
+    cp "${BIN_DIR}/Util_functions" "${case_folder}/."
 
     # copy files from case reference to case folder
     cp "${case_reference}/dicts/"* "${case_folder}/system/."
     cp "${case_reference}/properties/"* "${case_folder}/constant/."
     cp -r "${case_reference}/boundary_conditions/boundaryData" "${case_folder}/constant/."
     cp -r "${case_reference}/boundary_conditions/0.orig" "${case_folder}/."
-    cp -r "${case_reference}/function_objects" "${case_folder}/resources/"
-    cp -r "${case_reference}/data" "${case_folder}/resources/"
+    cp -r "${case_reference}/function_objects" "${case_folder}/resources/."
+    cp -r "${case_reference}/data" "${case_folder}/resources/."
 
-    echo "... Created case folder"
+    echo "++++++ Created case folder"
 
     #--- create analysis folder embedding case folder ---#
     if [[ $MODE_ANALYSIS == true ]]; then
-        local analysis_folder="${case_name}/analysis/${dir}"
-        local setups_folder="${analysis_folder}/setups.orig"
-        local resource_folder="${analysis_folder}/resources"
+        local setups_folder="${case_folder}/setups.orig"
+        local resource_folder="${case_folder}/resources"
+        local temp_folder="temp"
+        mv "${case_folder}" ${temp_folder}
+        
         # make subdirectories
-        mkdir -p "${analysis_folder}"
         mkdir -p "${setups_folder}"
         mkdir -p "${resource_folder}"
 
         # move case folder to setups.orig/common and data to resources
-        mv "${case_folder}" "${setups_folder}/common"
-        mv "${case_folder}/resources/data" "${resource_folder}/data"
+        mv "${temp_folder}/resources/data" "${resource_folder}/."
+        mv "${temp_folder}" "${setups_folder}/common"
 
         # copy executable scripts to analysis folder
-        cp "${BIN_DIR}/{Allrun-analysis,Allclean-analysis}" "${analysis_folder}/."
-        echo "... Created analysis folder"
+        cp "${BIN_DIR}/Allrun_analysis" "${case_folder}/."
+        cp "${BIN_DIR}/Allclean_analysis" "${case_folder}/."
+
+        echo "++++++ Created analysis folder"
     fi
 }
 
