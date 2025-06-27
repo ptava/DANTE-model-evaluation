@@ -1,0 +1,194 @@
+#!/bin/bash
+###############################################################################
+# prepare <case_name> <directoryName> [--analysis]
+#
+# • Build OpenFOAM folder for a single URANS simulation or comparative analysis
+#   for a ready-to-run test case (<case_name>).
+#   --> if --analysis then <caseFolder> is <case_name>/<directoryName>
+#   --> else <caseFolder> is <case_name>/<directoryName>/setups.orig/common
+#
+# • Ready-to-run test cases are located in the resources/case_studies directory
+#   and must be as follows:
+#   <case_name>
+#   ├── boundary_conditions
+#   │   ├── 0.orig                  --> <caseFolder>/
+#   │   └── boundaryData            --> <caseFolder>/constant/
+#   ├── data
+#   │   └── expData.csv             --> <caseFolder>/resources/
+#   ├── dicts                       --> <caseFolder>/system/
+#   │   ├── controlDict
+#   │   :
+#   │   └── fvSolution
+#   ├── function_objects            --> <caseFolder>/resources/
+#   │   ├── FO0
+#   │   :
+#   │   └── FON
+#   ├── geometry
+#   │   └── geometry.stl            --> <caseFolder>/resources/
+#   └── properties                  --> <caseFolder>/constant/
+#       ├── transportProperties
+#       :
+#       └── turbulenceProperties
+#
+###############################################################################
+#--- Safeguard ---#
+set -euo pipefail
+
+#--- Defaults ---#
+MODE_ANALYSIS=false
+ROOT_DIR=$(git rev-parse --show-toplevel)
+RESOURCES_DIR="${ROOT_DIR}/resources"
+CASE_STUDIES_DIR="${RESOURCES_DIR}/case_studies"
+BIN_DIR="${RESOURCES_DIR}/bin"
+
+#--- Usage Function ---#
+usage() {
+    local path
+    if command -v realpath &>/dev/null; then
+        path+=$(realpath --relative-to="$(pwd)" "${CASE_STUDIES_DIR}" 2>/dev/null)
+    else
+        path+=${CASE_STUDIES_DIR}
+    fi
+
+    cat <<EOF
+    Usage: $0 [OPTIONS] <case_name> <directory>
+
+    Prepare a case directory structure inside the given directory.
+
+    Arguments:
+        case_name           Name of ready-to-run test cases in 
+                            '${path}'.
+        directory           Parent directory where the case folder will be created.
+
+    Options:
+        -a, --analysis      Enable analysis mode (default: off)
+        -h, --help          Show this help message and exit
+EOF
+}
+
+# Parse arguments
+parse_args() {
+    local positional=()
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -a|--analysis)
+                MODE_ANALYSIS=true
+                shift
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            -*)
+                echo "Unknown option: $1"
+                usage
+                exit 1
+                ;;
+            *)
+                positional+=("$1")
+                shift
+                ;;
+        esac
+    done
+
+    if [[ -z ${ROOT_DIR} ]]; then
+        echo "Error: we are not in a git repository." >&2
+        exit 1
+    fi
+
+    if [[ ${#positional[@]} -ne 2 ]]; then
+        echo "Error: Expected exactly two arguments, got ${#positional[@]}." >&2
+        usage
+        exit 1
+    fi
+
+    # Functions arguments
+    case_name="${positional[0]}"
+    dir="${positional[1]}"
+}
+
+
+#--- Validate input argument ---#
+validate_case_name() {
+    if [[ ! -d "$CASE_STUDIES_DIR" ]]; then
+        echo "Error: '$CASE_STUDIES_DIR' does not exist." >&2
+        exit 1
+    fi
+
+    local available_cases
+    mapfile -t available_cases < <(find "$CASE_STUDIES_DIR" -mindepth 1 \
+        -maxdepth 1 -type d -printf '%f\n' | sort)
+
+    if [[ ! " ${available_cases[*]} " =~ " ${case_name} " ]]; then
+        echo "Error: Case '${case_name}' does not exist in '$CASE_STUDIES_DIR'." >&2
+        echo "Available cases:" >&2
+        for name in "${available_cases[@]}"; do
+            echo "  - $name" >&2
+        done
+        exit 1
+    fi
+}
+
+#--- main function ---#
+prepare() {
+    #--- sanity checks ---#
+    if [[ -z $dir || -z $case_name ]]; then
+        echo "Usage: prepare <case_name> <directory>" >&2
+        exit 1
+    fi
+
+    #--- create main case folder ---#
+    local case_folder="${case_name}/${dir}"
+    local case_reference="${CASE_STUDIES_DIR}/${case_name}"
+
+    # make subdirectories
+    mkdir -p "${case_folder}/constant"
+    mkdir -p "${case_folder}/system"
+    mkdir -p "${case_folder}/resources"
+
+    # copy executable scripts to case folder
+    cp "${BIN_DIR}/{Allrun_case,Allclean_case,util_functions}" "${case_folder}/."
+
+    # copy files from case reference to case folder
+    cp "${case_reference}/dicts/"* "${case_folder}/system/."
+    cp "${case_reference}/properties/"* "${case_folder}/constant/."
+    cp -r "${case_reference}/boundary_conditions/boundaryData" "${case_folder}/constant/."
+    cp -r "${case_reference}/boundary_conditions/0.orig" "${case_folder}/."
+    cp -r "${case_reference}/function_objects" "${case_folder}/resources/"
+    cp -r "${case_reference}/data" "${case_folder}/resources/"
+
+    echo "... Created case folder"
+
+    #--- create analysis folder embedding case folder ---#
+    if [[ $MODE_ANALYSIS == true ]]; then
+        local analysis_folder="${case_name}/analysis/${dir}"
+        local setups_folder="${analysis_folder}/setups.orig"
+        local resource_folder="${analysis_folder}/resources"
+        # make subdirectories
+        mkdir -p "${analysis_folder}"
+        mkdir -p "${setups_folder}"
+        mkdir -p "${resource_folder}"
+
+        # move case folder to setups.orig/common and data to resources
+        mv "${case_folder}" "${setups_folder}/common"
+        mv "${case_folder}/resources/data" "${resource_folder}/data"
+
+        # copy executable scripts to analysis folder
+        cp "${BIN_DIR}/{Allrun-analysis,Allclean-analysis}" "${analysis_folder}/."
+        echo "... Created analysis folder"
+    fi
+}
+
+#--- Entry point ---#
+main() {
+    parse_args "$@"
+    echo "Validating case name '${case_name}'..."
+    validate_case_name
+    echo "Preparing case directory structure for ${case_name} in ${dir}..."
+    prepare
+    echo "Completed"
+}
+
+#--- Execute ---#
+main "$@"
+
