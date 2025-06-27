@@ -9,16 +9,41 @@ This repository contains the up-to-date model evaluation strategy defined for ci
 ## Structure
     model-evaluation.git
     ├── docs
-    │   └── validation-master-document      # strategy definition, overview,
+    │   └── validation_master_document      # strategy definition, overview,
     │                                       # and test cases results
     ├── modules                             # additional modules for
     │                                       # model evaluation
     └── resources
         ├── bin                             # bash executables 
-        ├── case-studies                    # available case studies with
+        ├── case_studies                    # available case studies with
         │                                   # all required files
         └── dicts                           # common dictionaries for
                                             # OpenFOAM simulations
+
+ Ready-to-run test cases are located in the resources/case_studies directory
+   and must be as follows:
+
+    resources/case_studies/<case_name>
+    ├── boundary_conditions
+    │   ├── 0.orig                  # test case boundary conditions
+    │   └── boundaryData            # mapped boundary data
+    ├── data
+    │   └── expData.csv             # experimental data for validation
+    ├── dicts                       # test case dictionaries
+    │   ├── controlDict
+    │   :
+    │   └── fvSolution
+    ├── function_objects            # function objects for post-processing
+    │   ├── FO0
+    │   :
+    │   └── FON
+    ├── geometry                    # geometry files for the case
+    │   └── geometry.stl
+    └── properties                  # test case properties
+        ├── transportProperties
+        :
+        └── turbulenceProperties
+
 ## Notes
 
 ### Pre-processing
@@ -31,7 +56,11 @@ Grid smoothing is recommended. Grid generation based on the usage of [integratio
 ```
 
 #### Comparative analysis
-To enable quick set-up of OpenFOAM comparative analysis for a prepared case study (available in 'resources/case-studies/', user might exploit *prepare* function defined in 'resources/bin/UtilFunctions'
+To enable quick set-up of OpenFOAM comparative analysis for a prepared case study (available in 'resources/case_studies/', user might exploit *prepare* script to be executed within the repository:
+
+```bash
+    ./resources/bin/prepare <case_name> <folder_name>
+```
 
 
 ### Post-processing
