@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################################################################
-# prepare <case_name> <directoryName> [--analysis]
+# Prepare <case_name> <directoryName> [--analysis]
 #
 # • Build OpenFOAM folder for a single URANS simulation or comparative analysis
 #   for a ready-to-run test case (<case_name>).
@@ -138,12 +138,6 @@ validate_case_name() {
 
 #--- main function ---#
 prepare() {
-    #--- sanity checks ---#
-    if [[ -z $dir || -z $case_name ]]; then
-        echo "Usage: prepare <case_name> <directory>" >&2
-        exit 1
-    fi
-
     #--- create main case folder ---#
 
     # make subdirectories
@@ -164,7 +158,7 @@ prepare() {
     cp -r "${case_reference}/function_objects" "${case_folder}/resources/."
     cp -r "${case_reference}/data" "${case_folder}/resources/."
 
-    echo "++++++ Created case folder"
+    echo "+--- Created case folder"
 
     #--- create analysis folder embedding case folder ---#
     if [[ $MODE_ANALYSIS == true ]]; then
@@ -185,7 +179,7 @@ prepare() {
         cp "${BIN_DIR}/Allrun_analysis" "${case_folder}/."
         cp "${BIN_DIR}/Allclean_analysis" "${case_folder}/."
 
-        echo "++++++ Created analysis folder"
+        echo "+--- Created analysis folder"
     fi
 }
 

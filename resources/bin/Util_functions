@@ -152,31 +152,3 @@ setFOs() {
     done
     echo "}" >> "$control_dict"
 }
-###############################################################################
-# prepare <directoryName> <caseName>
-#
-# • Build OpenFOAM folder for a single URANS simulation or comparative analysis.
-#
-###############################################################################
-prepare() {
-    local dir="$1"
-    local case_name="$2"
-
-    #--- sanity checks ---#
-    if [[ -z $dir || -z $case_name ]]; then
-        echo "Usage: prepare <directory> <caseName>" >&2
-        exit 1
-    fi
-
-    if [[ ! -d $dir ]]; then
-        echo "ERROR: Directory $dir does not exist." >&2
-        exit 1
-    fi
-
-    #--- create main case folder ---#
-    mkdir -p "${case_name}/${dir}"
-
-
-
-    echo "Created directory structure for case '$case_name' in '$dir'."
-}

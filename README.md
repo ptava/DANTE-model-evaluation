@@ -59,7 +59,7 @@ Grid smoothing is recommended. Grid generation based on the usage of [integratio
 To enable quick set-up of OpenFOAM comparative analysis for a prepared case study (available in 'resources/case_studies/', user might exploit *prepare* script to be executed within the repository:
 
 ```bash
-    ./resources/bin/prepare <case_name> <folder_name>
+    ./resources/bin/Prepare <case_name> <folder_name>
 ```
 
 
