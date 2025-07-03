@@ -1,0 +1,66 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "userDict"
+
+actions
+(
+
+    //--- Select next-to-walls cells ---//
+
+    // Cells attached to wall patches
+    {
+        name    bl_cells;
+        type    cellSet;
+        action  new;
+        source  patchToCell;
+        patches ( ground building );
+    }
+
+    // Add cells neighbours to input cellSet
+    {
+        name        bl_cells;
+        source      haloToCell;
+        type        cellSet;
+        action      add;
+        set         bl_cells;
+        steps       #calc " min(int(1600*($/background/cells_scaling^2)-440*$/background/cells_scaling+20),2) "; // [2, 20]
+    }
+
+    //--- Select inner region where we do not want to smooth ---//
+    {
+        name        protected_cells;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( -1.5 -1.5 -1.5 ) ( 1.5 1.5 1.5 );
+            inside  false;
+        }
+    }
+
+    //--- Add cells 'bl_cells' to 'protected_cells' ---//
+    {
+        name        protected_cells;
+        type        cellSet;
+        action      add;
+        source      cellToCell;
+        set         bl_cells;
+    }
+);
+
+// ************************************************************************* //
