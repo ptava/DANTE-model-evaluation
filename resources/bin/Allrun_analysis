@@ -111,11 +111,10 @@ run_setup() {
 
         if [ "$parallel" = true ]
         then
-            # TO DO: before running Allrun-parallel we need to adjust processor numbers
-            # accordingly with SBATCH parameters 
-            ( cd "$dirResult" && ./Allrun-parallel )
+            ( cd "$dirResult" && ./Allrun-case )
         else
-            ( cd "$dirResult" && ./Allrun )
+            echo "TO DO: to run with single processor change 'Allrun_case' file" >&2
+            exit 1
         fi
 
 
@@ -145,7 +144,25 @@ run_setup() {
     fi
 }
 
-
+#######################################
+# Postprocess the given setup
+# run external python package for post-processing
+# package name: postProcess4Validation
+# look at github.com/ptava/postprocess4validation.git
+#
+# Outputs:
+#    Writes info results folder
+#######################################
+postprocess() {
+    quantitative-cli \
+        --exp-data resources/exp_data.csv \
+        --output-dir results/quantitative \
+        --save-only
+    qualitative-cli \
+        --exp-data resources/exp_data.csv \
+        --output-dir results/qualitative \
+        --save-only
+}
 #------------------------------------------------------------------------------
 
 for setup in $setups
@@ -170,13 +187,7 @@ done
 
 if notTest "$@" && [ "$run" = true ]
 then
-    # run external python package for post-processing
-    # package name: postProcess4Validation
-    # look at github.com/ptava/postProcess4Validation
-    quantitative-cli \
-        --exp-data resources/exp_data.csv \
-        --output-dir results \
-        --save-only
+    postprocess()
 fi
 
 

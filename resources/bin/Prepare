@@ -15,17 +15,21 @@
 #   │   └── boundaryData            --> <caseFolder>/constant/
 #   ├── data
 #   │   └── expData.csv             --> <caseFolder>/resources/
-#   ├── dicts                       --> <caseFolder>/system/
+#   ├── dicts                       --> <caseFolder>/resources/
 #   │   ├── controlDict
 #   │   :
 #   │   └── fvSolution
 #   ├── function_objects            --> <caseFolder>/resources/
-#   │   ├── FO0
+#   │   ├── FO_example_0
+#   │   ├── FO_example_1
 #   │   :
-#   │   └── FON
-#   ├── geometry
-#   │   └── geometry.stl            --> <caseFolder>/resources/
-#   └── properties                  --> <caseFolder>/constant/
+#   │   └── FO_example_N
+#   ├── geometry                    --> <caseFolder>/resources/
+#   │   ├── geometry_0.stl
+#   │   ├── geometry_1.stl
+#   │   :
+#   │   └── geometry_M.stl
+#   └── properties                  --> <caseFolder>/resources/
 #       ├── transportProperties
 #       :
 #       └── turbulenceProperties
@@ -141,22 +145,28 @@ prepare() {
     #--- create main case folder ---#
 
     # make subdirectories
-    mkdir -p "${case_folder}/constant"
-    mkdir -p "${case_folder}/system"
-    mkdir -p "${case_folder}/resources"
+    local constant_folder="${case_folder}/constant"
+    local system_folder="${case_folder}/system"
+    local resources_folder="${case_folder}/resources"
+
+    mkdir -p "${case_folder}"
+    mkdir -p "${constant_folder}"
+    mkdir -p "${system_folder}"
 
     # copy executable scripts to case folder
-    cp "${BIN_DIR}/Allrun_case" "${case_folder}/."
-    cp "${BIN_DIR}/Allclean_case" "${case_folder}/."
     cp "${BIN_DIR}/Util_functions" "${case_folder}/."
+    cp "${case_reference}/bin/"* "${case_folder}/."
 
-    # copy files from case reference to case folder
-    cp "${case_reference}/dicts/"* "${case_folder}/system/."
-    cp "${case_reference}/properties/"* "${case_folder}/constant/."
-    cp -r "${case_reference}/boundary_conditions/boundaryData" "${case_folder}/constant/."
+    # copy files from case reference to specific case folders
     cp -r "${case_reference}/boundary_conditions/0.orig" "${case_folder}/."
-    cp -r "${case_reference}/function_objects" "${case_folder}/resources/."
-    cp -r "${case_reference}/data" "${case_folder}/resources/."
+    cp -r "${case_reference}/boundary_conditions/boundaryData" "${constant_folder}/."
+
+    # copy files from case reference to resources folder
+    cp -r "${case_reference}/dicts" "${resources_folder}/."
+    cp -r "${case_reference}/geometry" "${resources_folder}/."
+    cp -r "${case_reference}/properties" "${resources_folder}/."
+    cp -r "${case_reference}/function_objects" "${resources_folder}/."
+    cp -r "${case_reference}/data" "${resources_folder}/."
 
     echo "+--- Created case folder"
 

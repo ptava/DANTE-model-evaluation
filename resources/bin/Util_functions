@@ -1,4 +1,5 @@
 #!/bin/bash
+
 ###############################################################################
 # set_acquisition_time <Δt> <startTime> <endTime> [protected‑file …]
 #
@@ -111,14 +112,37 @@ set_scaling() {
         fi
     done
 }
+
+###############################################################################
+# set_parallel <n_procs> <dictionary>
+#
+# • Sets the number of processsors in dictionary
+#
+#################################################################################
+set_scaling() {
+    local n_proc="$1"
+    local file="$2"
+
+    #--- sanity checks
+    if [[ -z "${n_proc}" || -z "${dict}" ]]; then
+        echo "Usage: set_parallel <n_proc> <dictionary>" >&2
+        exit 1
+    fi
+
+    #--- set number of processors --#
+    sed -Ei "s/(numberOfSubdomains[[:space:]]).*/\1$n_proc;/" "$file"
+}
+
 ###############################################################################
 # setFOs <FOsDir>
 #
-# • Sets the Function Objects directory to the given path.
 # • Adds all FOs in the directory to system/controlDict/functions.
+# • FOs are sorted by the number at the end of their filename.
+# • The FOs are included in the controlDict by inserting 'functions'
+#   dictionary at the second-to-last line of the controlDict file.
 #
 ###############################################################################
-setFOs() {
+set_fos() {
     local fo_dir="$1"
 
     #--- sanity checks ---#
@@ -138,17 +162,109 @@ setFOs() {
     local fo_files
     mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0)
 
+    echo "debug"
+    echo "${fo_files[@]}"
+
     IFS=$'\n' readarray -t sorted_fo_files < <(
       for f in "${fo_files[@]}"; do
         filename=$(basename "$f")
-        [[ $filename =~ ^FO_([0-9]+)$ ]] && printf "%05d\t%s\n" "${BASH_REMATCH[1]}" "$f"
+        if [[ $filename =~ ^FO_.*_([0-9]+)$ ]]; then
+            printf "%05d\t%s\n" "${BASH_REMATCH[1]}" "$f"
+        fi
       done | sort | cut -f2-
     )
 
-    echo "functions {" > "$control_dict"
+    echo "${sorted_fo_files[@]}"
+    
+    # Build the block to insert
+    fo_block="functions {\n"
     for fo in "${sorted_fo_files[@]}"; do
         echo "Adding Function Object: $(basename "$fo")"
-        echo "#include \"$(basename "$fo")\"" >> "$control_dict"
+        fo_block+="\t#include \"$(basename "$fo")\"\n"
     done
-    echo "}" >> "$control_dict"
+    fo_block+="}\n"
+
+    # Insert the block before the last line of controlDict
+    tmp_file=$(mktemp)
+    total_lines=$(wc -l < "$control_dict")
+    insert_line=$((total_lines - 1))
+    head -n "$insert_line" "$control_dict" > "$tmp_file"
+    echo -e "$fo_block" >> "$tmp_file"
+    tail -n 1 "$control_dict" >> "$tmp_file"
+
+    # Overwrite original controlDict
+    mv "$tmp_file" "$control_dict"
 }
+
+###############################################################################
+# check_resources [--resources <path-to-resources>]
+#
+# - To be used in already prepared case folder.
+# - Check if case folder has been prepared with required resources folders:
+#
+#     <path-to-resources>
+#     |
+#     +-- dicts
+#     +-- geometry
+#     +-- bin
+#     +-- properties
+#     +-- function_objects
+#
+# Outputs:
+#  - Exits with an error if any of the required folders are missing.
+#  - Returns folders paths
+#
+###############################################################################
+check_resources() {
+    local resources_dir="resources"
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -r|--resources)
+                if [[ -d "$2" ]]; then
+                    resources_dir="$2"
+                    shift 2
+                else
+                    echo "Error: Resources directory '$2' does not exist." >&2
+                    exit 1
+                fi
+                ;;
+            -*)
+                echo "Unknown option: $1"
+                usage
+                exit 1
+                ;;
+            *)
+                echo "Unknown parameter: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    dicts_dir="${resources_dir}/dicts"
+    geometry_dir="${resources_dir}/geometry"
+    bin_dir="${resources_dir}/bin"
+    properties_dir="${resources_dir}/properties"
+    postprocessing_dir="${resources_dir}/function_objects"
+
+    # Sanity checks
+    if [[ ! -d "${geometry_dir}" ]]; then
+        echo "Error: Geometry folder '${geometry_dir}' does not exist." >&2
+        exit 1
+    fi
+
+    if [[ ! -d "${dicts_dir}" ]]; then
+        echo "Error: Dicts folder '${dicts_dir}' does not exist." >&2
+        exit 1
+    fi
+
+    if [[ ! -d "${bin_dir}" ]]; then
+        echo "Error: Bin folder '${bin_dir}' does not exist." >&2
+        exit 1
+    fi
+
+    echo ${dicts_dir} ${geometry_dir} ${bin_dir} ${properties_dir} ${postprocessing_dir}
+
+}
+
+
