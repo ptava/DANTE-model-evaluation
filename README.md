@@ -34,11 +34,15 @@ This repository contains the up-to-date model evaluation strategy defined for ci
     │   :
     │   └── fvSolution
     ├── function_objects            # function objects for post-processing
-    │   ├── FO0
+    │   ├── FO_example_0
+    │   ├── FO_example_1
     │   :
-    │   └── FON
+    │   └── FO_example_N
     ├── geometry                    # geometry files for the case
-    │   └── geometry.stl
+    │   ├── geometry_0.stl
+    │   ├── geometry_1.stl
+    │   :
+    │   └── geometry_M.stl
     └── properties                  # test case properties
         ├── transportProperties
         :
@@ -62,6 +66,14 @@ To enable quick set-up of OpenFOAM comparative analysis for a prepared case stud
     ./resources/bin/Prepare <case_name> <folder_name>
 ```
 
+#### Function objects
+Function objects should be included in case studies to enable post-processing of the results. The function objects are defined in the `function_objects` directory of each case study. The user can add or modify function objects as needed. User need to use following format of file names for function objects:
+
+```
+    FO_<function_object_name>_<function_object_number>  (e.g. FO_mag_2)
+    <function_object_name> is a representative name of the function object
+    <function_object_number> is for the order of computation of the function object
+```
 
 ### Post-processing
 To enable quick analysis assessment in single simulations or comparative analyses, user might exploit optional post-processing tool:
