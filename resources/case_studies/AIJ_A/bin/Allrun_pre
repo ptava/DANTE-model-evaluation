@@ -1,0 +1,40 @@
+#!/bin/sh
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Check smoothing argument
+if [ -z "$1" ]; then
+    echo "No argument supplied. Using default value: False"
+    smoothing="false"
+else
+    smoothing=$1
+fi
+
+# Run applications: create grid
+runApplication blockMesh
+runApplication checkMesh
+    
+# Check if cfMesh is availabel (we'll use improveMeshQuality utility)
+if [ "$smoothing" = "True" ]; then
+    if [ ! -d "$WM_PROJECT_DIR/plugins/cfmesh/utilities/improveMeshQuality" ]
+    then
+        echo "cfMesh plugin not found. Please install cfMesh to use smoothing."
+        echo "Trying to run smoothing anyway..."
+    fi
+    
+    # Run application: smoothing via cfMesh foam-integration
+    runApplication topoSet  # create cellSet to be excluded from smoothing
+    runApplication improveMeshQuality -constrainedCellSet protected_cells
+fi
+
+# Renumbering
+restore0Dir
+runApplication renumberMesh -overwrite -constant
+
+# Check mesh quality
+runApplication -s smoothed checkMesh \
+    -allTopology -allGeometry -constant \
+    -writeAllFields -writeAllSurfaceFields
+
+#------------------------------------------------------------------------------
