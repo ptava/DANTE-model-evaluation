@@ -1,0 +1,130 @@
+#!/bin/bash
+###############################################################################
+# Set_scenario [--tag <tag>] [--folder <path-to-folder>] [--resources <path-to-resources>]
+#
+# - To be used in already prepared case folder.
+# - Define the case geometry/triSurface folder with stl files
+# - Copy scenario-related dictionaries
+# - <tag> cab be one of the following: 0H, 1H, 2H
+#
+###############################################################################
+#--- Safeguard ---#
+set -euo pipefail
+
+#--- Default --#
+TAG="OH"
+GEOMETRY_FOLDER="constant/triSurface"
+RESOURCE_DIR="resources"
+
+#--- Source utility functions ---#
+. ${BIN_DIR}/Util_functions || exit 1; echo "Util_functions not found in ${BIN_DIR}" >&2
+
+#--- Usage Function ---#
+usage() {
+    cat <<EOF
+    Usage: $0 [OPTIONS] --tag <tag>
+
+    Prepare case based on scenario selected by <tag>.
+
+    Options:
+        -t, --tag <tag>       Prepare case for the specified scenario tag (0H, 1H, or 2H)
+        -f, --folder <path-to-geometry-folder> Specify the folder to store stl files (default: constant/triSurface)
+        -r, --resources <path-to-resources> Specify the resources directory (default: resources)
+        -h, --help            Show this help message and exit
+
+EOF
+}
+
+# Parse arguments
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -t|--tag)
+                TAG="$2"
+                shift 2
+                ;;
+            -f|--folder)
+                GEOMETRY_FOLDER="$2"
+                shift 2
+                ;;
+            -r|--resources)
+                RESOURCE_DIR="$2"
+                shift 2
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            -*)
+                echo "Unknown option: $1"
+                usage
+                exit 1
+                ;;
+            *)
+                echo "Unknown parameter: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    dicts_dir="${RESOURCE_DIR}/dicts"
+    geometry_dir="${RESOURCE_DIR}/geometry"
+
+    # Sanity checks
+    if [[ ! -d "${geometry_dir}" ]]; then
+        echo "Error: Geometry folder '${GEOMETRY_FOLDER}' does not exist." >&2
+        exit 1
+    fi
+
+    if [[ ! -d "${dicts_dir}" ]]; then
+        echo "Error: Dicts folder '${dicts_dir}' does not exist." >&2
+        exit 1
+    fi
+}
+
+
+#--- main function ---#
+set_scenario() {
+
+    # Crate output folder for geoemtry files
+    mkdir -p "${GEOMETRY_FOLDER}"
+
+    # Copy geometry files to the specified folder
+    copy_file_if_exists "${STL_DIR}/BASE.stl" "${GEOMETRY_FOLDER}/."
+
+    case "${TAG}" in
+        0H)
+            echo "+--- Base stl file included (common to all configurations)"
+            ;;
+        1H)
+            copy_file_if_exists "${STL_DIR}/1H.stl" "${GEOMETRY_FOLDER}/."
+            echo "+--- 1H stl file included"
+            ;;
+        2H)
+            copy_file_if_exists "${STL_DIR}/2H.stl" "${GEOMETRY_FOLDER}/."
+            echo "+--- 2H stl file included"
+            ;;
+    esac
+
+    # Copy scenario-related dictionaries to the case folder
+    local surfaceFeaturesSource="../resources/files/surfaceFeatureExtractDict_${TAG}"
+    local snappyHexSource="../resources/files/snappyHexMeshDict_${TAG}"
+    local snappyHexTarget="./system/snappyHexMeshDict"
+    local surfaceFeaturesTarget="./system/surfaceFeatureExtractDict"
+    copy_file_if_exists "$snappyHexSource" "$snappyHexTarget"
+    copy_file_if_exists "$surfaceFeaturesSource" "$surfaceFeaturesTarget"
+
+    echo "+--- Scenario-related dictionaries included"
+}
+
+#--- Entry point ---#
+main() {
+    parse_args "$@"
+    echo "Preparing test case for scenario '${TAG}'..."
+    set_scenario
+    echo "Completed"
+}
+
+#--- Execute ---#
+main "$@"
+

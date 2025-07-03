@@ -1,0 +1,93 @@
+#!/bin/bash
+cd "${0%/*}" || exit                        
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions
+
+#------------------------------------------------------------------------------
+
+# User parameters
+nProc=16        # Set number of processors for parallel computing
+scenario="0H"   # Scenario tag (0H, 1H, or 2H)
+scale=0.25      # Set cells number scaling parameter
+delta_t=0.05     # Set acquisition time of post-processing
+start_time=1.3   # Set time to start averaging the solution (end of transient startup)
+end_time=2.0     # Set time to end the simulation
+smoothing=True  # Set to True if you want to smooth the mesh (requires cfmesh)
+
+local_resources="resources"     # Directory with resources
+local_dicts="system"            # Directory for local dictionaries
+local_properties="constant"     # Directory for local properties
+local_functions="${local_dicts}/function_objects" # Directory for local function objects
+local_geomtery="constant/triSurface" # Directory for local geometries
+
+#------------------------------------------------------------------------------
+# Source utility functions
+. ${BIN_DIR}/Util_functions || exit 1; echo "Util_functions not found in ${BIN_DIR}" >&2
+. ${BIN_DIR}/Set_scenario || exit 1; echo "Set_scenario not found in ${BIN_DIR}" >&2
+
+#------------------------------------------------------------------------------
+# Copy source files
+
+resorces_folders=$(check_resources "${resourcesDir}")
+read -r dicts_resources \
+        geometry_reosurces \
+        bin_resources \
+        properties_resources \
+        functions_resources <<< ${resorces_folders}
+
+declare -A files_to_copy=(
+    ["${dicts_resources}/blockMeshDict"]="${local_dicts}/blockMeshDict"
+    ["${dicts_resources}/topoSetDict"]="${local_dicts}/topoSetDict"
+    ["${dicts_resources}/decomposeParDict"]="${local_dicts}/decomposeParDict"
+    ["${dicts_resources}/fvSolution"]="${local_dicts}/fvSolution"
+    ["${dicts_resources}/fvSchemes"]="${local_dicts}/fvSchemes"
+    ["${dicts_resources}/controlDict"]="${local_dicts}/controlDict"
+    ["${dicts_resources}/userDict"]="${local_dicts}/userDict"
+    ["${properties_resources}/transportProperties"]="${local_properties}/transportProperties"
+    ["${properties_resources}/turbulenceProperties"]="${local_properties}/turbulenceProperties"
+)
+
+for source in "${!files_to_copy[@]}"; do
+    target="${files_to_copy[$source]}"
+    copy_file_if_exists "$source" "$target"
+done
+
+cp -r ${functions_resources} ${local_functions} || {
+    echo "Error copying function objects to ${local_functions}" >&2
+    exit 1
+}
+
+Set_scenario --tag ${scenario} \
+    --folder ${geometry_resources} \
+    --resources ${local_resources}
+
+#------------------------------------------------------------------------------
+# Make changes in files
+
+protected_fos=(
+    "${local_functions}/FO_yPlus_4"
+    "${local_functions}/FO_sampleyPlus_5"
+    "${local_functions}/FO_residuals_6"
+    "${local_functions}/FO_fieldAverage_9"
+    "${local_functions}/FO_setMaxCo_16"
+    "${local_functions}/FO_setRelaxationFactors_17"
+    "${local_functions}/FO_setOuterCorrectors_18"
+)
+
+set_fos "${local_functions}"
+set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}"
+set_scaling $scale "${local_dicts}/userDict"
+set_parallel $nProc "${local_dicts}/decomposeParDict"
+
+#------------------------------------------------------------------------------
+# Create the computation domain
+
+./Allrun.pre ${smoothing}
+
+#------------------------------------------------------------------------------
+# Run the simulation and reconstruct the results
+
+runApplication decomposePar
+runParallel $(getApplication)
+runApplication reconstructPar
+
+#------------------------------------------------------------------------------
