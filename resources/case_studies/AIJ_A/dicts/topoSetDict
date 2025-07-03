@@ -14,12 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-cells_scaling 1.0;
+#include "userDict"
 
 actions
 (
+    //--- Select next-to-walls cells ---//
 
-    //- Select cells associated with patch
+    // Cells attached to wall patches
     {
         name    bl_cells;
         type    cellSet;
@@ -28,42 +29,38 @@ actions
         patches ( ground building );
     }
 
-    //- Cells neighbours of input cellSet
+    // Add cells neighbours to input cellSet
     {
         name        bl_cells;
         source      haloToCell;
         type        cellSet;
         action      add;
         set         bl_cells;
-        steps       #calc " max(int($cells_scaling*12),2) ";
+        steps       #calc " min(int($/grid/cells_scaling*12),2) ";
     }
 
-    //- Add cells of inflow region defined by a box
+    //--- Select inner region where we do not want to smooth ---//
     {
-        name        bl_cells;
+        name        protected_cells;
         type        cellSet;
-        action      add;
+        action      new;
         source      boxToCell;
         sourceInfo
         {
-            box ( -1.5 -1.5 -1.5 ) ( -0.2 1.5 1.5 );
-            inside      true;
+            box     ( $/protected/min_x $/protected/min_y $/protected/min_z )
+                    ( $/protected/max_x $/protected/max_y $/protected/max_z );
+            inside  false;
         }
     }
 
-    //- Add cells of outflow region defined by a box
+    //--- Add cells 'bl_cells' to 'protected_cells' ---//
     {
-        name        bl_cells;
+        name        protected_cells;
         type        cellSet;
         action      add;
-        source      boxToCell;
-        sourceInfo
-        {
-            box ( 0.7 -1.5 -1.5 ) ( 1.5 1.5 1.5 );
-            inside      true;
-        }
+        source      cellToCell;
+        set         bl_cells;
     }
-
 );
 
 // ************************************************************************* //

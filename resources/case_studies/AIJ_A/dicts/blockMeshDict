@@ -14,10 +14,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// User parameters
-cells_scaling 1.0;
-building_ratio 2;
-
 // Grading towards building
 sr_building ((0.93 0.74 0.25) (0.07 0.36 0.30));
 sr_building_front ((0.93 0.74 0.25) (0.07 0.36 0.07));
@@ -50,21 +46,21 @@ sr_yLeft_up 0.9;
 sr_yRight_up #calc "1/$sr_yLeft_up";
 
 // Parameters for vertices as a function of building height
-building_height #calc "$building_ratio*0.08";
-z1_height       #calc "$building_ratio*0.12";
+building_height #calc "$/grid/building_ratio*0.08";
+z1_height       #calc "$/grid/building_ratio*0.12";
 z2_height       0.66;   
 z_height        #calc "$z1_height+$z2_height";  // grid height changes to maintain 
                                                 // same distance between building
                                                 // roof and top boundary
 
 // Cells number for varying scale parameter and building height
-bl_cells        #calc "int( $cells_scaling*55 )";
-z1              #calc "int( $building_ratio*$cells_scaling*40 )";
+bl_cells        #calc "int( $/grid/cells_scaling*55 )";
+z1              #calc "int( $/grid/building_ratio*$/grid/cells_scaling*40 )";
 z2              #calc "int( $cells_scaling*80 )";
-building        #calc "int( $cells_scaling*45 )";
-y               #calc "int( $cells_scaling*65 )";
-x1              #calc "int( $cells_scaling*50 )";
-x2              #calc "int( $cells_scaling*125 )";
+building        #calc "int( $/grid/cells_scaling*45 )";
+y               #calc "int( $/grid/cells_scaling*65 )";
+x1              #calc "int( $/grid/cells_scaling*50 )";
+x2              #calc "int( $/grid/cells_scaling*125 )";
 
 // O-grid vertices position on xy plane
 xy_distance 0.09;

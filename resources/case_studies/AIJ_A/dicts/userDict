@@ -1,0 +1,26 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+grid
+{
+    cells_scaling 1.0;
+    building_ratio 2;
+}
+
+protected
+{
+    min_x           -0.5;
+    min_y           -0.5;
+    min_z           -0.5;
+
+    max_x           0.5;
+    max_y           0.5;
+    max_z           0.5;
+}
+
+

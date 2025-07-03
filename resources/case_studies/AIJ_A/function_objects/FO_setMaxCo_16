@@ -1,0 +1,79 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+-------------------------------------------------------------------------------
+Description
+    Set the maximum Courant number (maxCo) and ramp it down slightly over time.
+
+\*---------------------------------------------------------------------------*/
+
+maxCo
+{
+    type		    coded;
+    libs            (utilityFunctionObjects);
+    name		    maxCoRampDown;
+    enabled         true;
+    executeControl  timeStep;
+    executeInterval 10;
+    writeControl    none;
+
+	codeRead
+	#{
+        const IOobject io
+            (
+                "customMaxCo",
+                mesh().time().constant(),
+                mesh().thisDb()
+            );
+
+        auto* ptr =
+            io.db().getObjectPtr<uniformDimensionedScalarField>(io.name());
+
+        if (!ptr)
+        {
+            Info<< "Registering relaxation factor " << io.name() << endl;
+            const Time& runTime = mesh().time();
+            const dictionary& controlDict = const_cast<dictionary&>(runTime.controlDict());
+            const scalar& initialValue = controlDict.get<scalar>("maxCo");
+
+            ptr = new uniformDimensionedScalarField
+                (
+                    io,
+                    dimless,
+                    initialValue
+                );
+
+            ptr->store();
+        }
+    #};
+
+	codeExecute
+    #{
+	    const IOobject io
+	    (
+            "customMaxCo",
+            mesh().time().constant(),
+            mesh().thisDb()
+	    );
+
+	    auto& val =
+            io.db().lookupObjectRef<uniformDimensionedScalarField>
+            (
+                io.name()
+            );
+
+	    val.value() = max(0.25, val.value()-0.01);
+
+	    Info<< "Set maxCO to " << val.value() << endl;
+
+        const Time& runTime = mesh().time();
+        dictionary& controlDict = const_cast<dictionary&>(runTime.controlDict());
+        controlDict.set("maxCo", val.value());
+	#};
+
+}
+
+// ************************************************************************* //

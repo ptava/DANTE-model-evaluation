@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+nOutCorr
+{
+	type		    coded;
+    libs            (utilityFunctionObjects);
+	name		    decreaseNcorr;
+    enabled         true;
+    executeControl  timeStep;
+    executeInterval 10;
+    writeControl    none;
+
+    codeExecute
+    #{
+            const Time& runTime = mesh().time();
+            Info << "Setting nCorrectors at time: " << runTime.timeName() << endl;
+
+            // Load fvSolution dictionary
+            IOdictionary fvSolutionDict
+            (
+                IOobject
+                (
+                    "fvSolution",
+                    runTime.system(),
+                    mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+            // Create editable copy of PIMPLE subdict
+            dictionary& pimpleDict = fvSolutionDict.subDict("PIMPLE");
+
+            // Info << "ncorrectors " << pimpleDict.get("nCorrectors") << endl;
+
+            // Example: change nCorrectors based on time
+            scalar currentTime = runTime.time().value();
+            label newNCorrectors = 4;
+
+            if (currentTime > 0.2 && currentTime < 0.7)
+            {
+                newNCorrectors = 3;
+            }
+            else if (currentTime >= 0.7 && currentTime < 1.5)
+            {
+                newNCorrectors = 2;
+            }
+            else if (currentTime >= 1.5)
+            {
+                newNCorrectors = 1;
+            }
+
+            pimpleDict.set("nOuterCorrectors", newNCorrectors);
+
+            // Write back the modified dictionary
+            fvSolutionDict.subDict("PIMPLE") = pimpleDict;
+            fvSolutionDict.regIOobject::write();
+
+            Info << "Updated nCorrectors to: " << newNCorrectors << endl;
+    #};
+}
+
+// ************************************************************************* //

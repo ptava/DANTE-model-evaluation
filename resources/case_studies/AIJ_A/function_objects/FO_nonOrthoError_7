@@ -9,7 +9,7 @@ Description
     Compute error associated with non-orthogonality of mesh
 \*---------------------------------------------------------------------------*/
 
-coded1
+nonOrthoError
 {
     name                calcGrad;
     type                coded;
