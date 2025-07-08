@@ -162,9 +162,6 @@ set_fos() {
     local fo_files
     mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0)
 
-    echo "debug"
-    echo "${fo_files[@]}"
-
     IFS=$'\n' readarray -t sorted_fo_files < <(
       for f in "${fo_files[@]}"; do
         filename=$(basename "$f")
