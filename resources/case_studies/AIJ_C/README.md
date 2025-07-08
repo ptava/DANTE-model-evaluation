@@ -18,12 +18,14 @@ This meshing procedure can be applied to all scenarios, with central building he
 Refinement regions limits and background-mesh-related parameters are defined in `userDict` file, along with the scaling parameter `cells_scaling` (this parameter is the actual characteristic length of cubes of main region of interest.
 
 
+
 |   Dictionary file        | Description                    |
 |--------------------------|--------------------------------|
 | blockMeshDict         | to create the background mesh         |
 | snappyHexMeshDict     | to perform `castellated` procedure (no snap required if `cells_scaling` is set appropriately) |
 | topoSetDict           | to extract next-to-wall cells for mesh smoothing |
 | userDict              | to control grid definition parameters |
+
 
 
 |STL file           | Description                                       |

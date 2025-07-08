@@ -5,7 +5,7 @@ cd "${0%/*}" || exit
 #------------------------------------------------------------------------------
 
 # User parameters
-nProc=16        # Set number of processors for parallel computing
+n_proc=16        # Set number of processors for parallel computing
 scenario="0H"   # Scenario tag (0H, 1H, or 2H)
 scale=0.25      # Set cells number scaling parameter
 delta_t=0.05     # Set acquisition time of post-processing
@@ -21,18 +21,23 @@ local_geomtery="constant/triSurface" # Directory for local geometries
 
 #------------------------------------------------------------------------------
 # Source utility functions
-. ${BIN_DIR}/Util_functions || exit 1; echo "Util_functions not found in ${BIN_DIR}" >&2
-. ${BIN_DIR}/Set_scenario || exit 1; echo "Set_scenario not found in ${BIN_DIR}" >&2
+. ./Util_functions || {
+    echo "Util_functions not found in current folder" >&2
+    exit 1
+}
+. ./Set_scenario || {
+    echo "Set_scenario not found in current folder" >&2
+   exit 1
+}
 
 #------------------------------------------------------------------------------
 # Copy source files
 
-resorces_folders=$(check_resources "${resourcesDir}")
+resources_folders=$(check_resources -r "${local_resources}")
 read -r dicts_resources \
-        geometry_reosurces \
-        bin_resources \
+        geometry_resources \
         properties_resources \
-        functions_resources <<< ${resorces_folders}
+        functions_resources <<< ${resources_folders}
 
 declare -A files_to_copy=(
     ["${dicts_resources}/blockMeshDict"]="${local_dicts}/blockMeshDict"
@@ -76,12 +81,12 @@ protected_fos=(
 set_fos "${local_functions}"
 set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}"
 set_scaling $scale "${local_dicts}/userDict"
-set_parallel $nProc "${local_dicts}/decomposeParDict"
+set_parallel $n_proc "${local_dicts}/decomposeParDict"
 
 #------------------------------------------------------------------------------
 # Create the computation domain
 
-./Allrun.pre ${smoothing}
+./Allrun_pre ${smoothing}
 
 #------------------------------------------------------------------------------
 # Run the simulation and reconstruct the results

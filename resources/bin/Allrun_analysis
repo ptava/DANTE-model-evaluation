@@ -3,11 +3,6 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# TO DO:
-# the usage of improveMeshQuality changes the groups names of the boundaries
-# boundary conditions to be changed accordingly to v2412 and presumibly LRN
-
-
 # settings
 
     # operand setups
@@ -151,7 +146,7 @@ run_setup() {
 # look at github.com/ptava/postprocess4validation.git
 #
 # Outputs:
-#    Writes info results folder
+#    Writes into 'results' folder
 #######################################
 postprocess() {
     quantitative-cli \

@@ -6,7 +6,7 @@
 # • Updates system/controlDict:
 #       endTime        ← <endTime>
 #       writeInterval  ← <endTime>
-# • Updates every Function Object (*.FOs/*):
+# • Updates every Function Object:
 #       timeStart      ← <startTime>
 #       timeEnd        ← <endTime>
 #   …and, unless the FO file is listed in the “protected” arguments…
@@ -23,7 +23,7 @@ set_acquisition_time() {
     local -a protected=("${@:4}")   # remaining args → array of protected files
 
     local control_dict="system/controlDict"
-    local fo_dir="system/FOs"
+    local fo_dir="system/function_objects"
 
     #--- sanity checks ---#
     [[ -f $control_dict ]] || { echo "ERROR: ${control_dict} not found"; exit 1; }
@@ -119,12 +119,12 @@ set_scaling() {
 # • Sets the number of processsors in dictionary
 #
 #################################################################################
-set_scaling() {
+set_parallel() {
     local n_proc="$1"
     local file="$2"
 
     #--- sanity checks
-    if [[ -z "${n_proc}" || -z "${dict}" ]]; then
+    if [[ -z "${n_proc}" || -z "${file}" ]]; then
         echo "Usage: set_parallel <n_proc> <dictionary>" >&2
         exit 1
     fi
@@ -206,7 +206,6 @@ set_fos() {
 #     |
 #     +-- dicts
 #     +-- geometry
-#     +-- bin
 #     +-- properties
 #     +-- function_objects
 #
@@ -243,7 +242,6 @@ check_resources() {
 
     dicts_dir="${resources_dir}/dicts"
     geometry_dir="${resources_dir}/geometry"
-    bin_dir="${resources_dir}/bin"
     properties_dir="${resources_dir}/properties"
     postprocessing_dir="${resources_dir}/function_objects"
 
@@ -258,12 +256,7 @@ check_resources() {
         exit 1
     fi
 
-    if [[ ! -d "${bin_dir}" ]]; then
-        echo "Error: Bin folder '${bin_dir}' does not exist." >&2
-        exit 1
-    fi
-
-    echo ${dicts_dir} ${geometry_dir} ${bin_dir} ${properties_dir} ${postprocessing_dir}
+    echo ${dicts_dir} ${geometry_dir} ${properties_dir} ${postprocessing_dir}
 
 }
 

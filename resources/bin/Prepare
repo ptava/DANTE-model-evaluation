@@ -149,9 +149,9 @@ prepare() {
     local system_folder="${case_folder}/system"
     local resources_folder="${case_folder}/resources"
 
-    mkdir -p "${case_folder}"
     mkdir -p "${constant_folder}"
     mkdir -p "${system_folder}"
+    mkdir -p "${resources_folder}"
 
     # copy executable scripts to case folder
     cp "${BIN_DIR}/Util_functions" "${case_folder}/."
@@ -200,7 +200,7 @@ main() {
     validate_case_name
     echo "Preparing case directory structure for ${case_name} in ${dir}..."
     prepare
-    echo "Completed"
+    echo "+--- Completed"
 }
 
 #--- Execute ---#

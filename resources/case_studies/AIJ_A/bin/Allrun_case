@@ -5,7 +5,7 @@ cd "${0%/*}" || exit
 #------------------------------------------------------------------------------
 
 # User parameters
-nProc=16        # Set number of processors for parallel computing
+n_proc=16        # Set number of processors for parallel computing
 scale=0.25      # Set cells number scaling parameter
 delta_t=0.05     # Set acquisition time of post-processing
 start_time=1.3   # Set time to start averaging the solution (end of transient startup)
@@ -19,15 +19,17 @@ local_functions="${local_dicts}/function_objects" # Directory for local function
 
 #------------------------------------------------------------------------------
 # Source utility functions
-. ${BIN_DIR}/Util_functions || exit 1; echo "Util_functions not found in ${BIN_DIR}" >&2
+. ./Util_functions || {
+    echo "Util_functions not found in current folder" >&2
+    exit 1
+}
 
 #------------------------------------------------------------------------------
 # Copy source files and folders
 
-resources=$(check_resources "${resourcesDir}")
+resources=$(check_resources -r "${local_resources}")
 read -r dicts_resources \
         geometry_reosurces \
-        bin_resources \
         properties_resources \
         functions_resources <<< ${resources}
 
@@ -43,8 +45,8 @@ declare -A files_to_copy=(
     ["${properties_resources}/turbulenceProperties"]="${local_properties}/turbulenceProperties"
 )
 
-for source in "${!filesToCopy[@]}"; do
-    target="${filesToCopy[$source]}"
+for source in "${!files_to_copy[@]}"; do
+    target="${files_to_copy[$source]}"
     copy_file_if_exists "$source" "$target"
 done
 
@@ -69,12 +71,12 @@ protected_fos=(
 set_fos "${local_functions}"
 set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}"
 set_scaling $scale "${local_dicts}/userDict"
-set_parallel $nProc "${local_dicts}/decomposeParDict"
+set_parallel $n_proc "${local_dicts}/decomposeParDict"
 
 #------------------------------------------------------------------------------
 # Create the computation domain
 
-./Allrun.pre ${smoothing}
+./Allrun_pre ${smoothing}
 
 #------------------------------------------------------------------------------
 # Run the simulation and reconstruct the results
