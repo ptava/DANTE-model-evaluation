@@ -52,6 +52,8 @@ maxCo
 
 	codeExecute
     #{
+        const scalar rampDown = 0.01;
+        const scalar minValue = 0.20;
 	    const IOobject io
 	    (
             "customMaxCo",
@@ -65,7 +67,7 @@ maxCo
                 io.name()
             );
 
-	    val.value() = max(0.25, val.value()-0.01);
+	    val.value() = max(minValue, val.value()-rampDown);
 
 	    Info<< "Set maxCO to " << val.value() << endl;
 

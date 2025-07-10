@@ -54,7 +54,7 @@ PIMPLE
 
     // Set correctors
     nNonOrthogonalCorrectors 2;
-    nOuterCorrectors 1;
+    nOuterCorrectors 5;
     nCorrectors      2;
 
     // Control residuals

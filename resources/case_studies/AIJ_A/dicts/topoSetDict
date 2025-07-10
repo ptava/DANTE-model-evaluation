@@ -14,11 +14,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// User-defined parameters
 #include "userDict"
+cells_scaling   $/grid/cells_scaling;
 
 actions
 (
-    //--- Select next-to-walls cells ---//
+    //--- Define next-to-walls cells region ---//
 
     // Cells attached to wall patches
     {
@@ -36,10 +38,12 @@ actions
         type        cellSet;
         action      add;
         set         bl_cells;
-        steps       #calc " min(int($/grid/cells_scaling*12),2) ";
+        steps       #calc " min(int($cells_scaling*12),2) ";
     }
 
-    //--- Select inner region where we do not want to smooth ---//
+    //--- Define outer region where we do not want to smooth ---//
+
+    // Create a box
     {
         name        protected_cells;
         type        cellSet;
@@ -51,6 +55,12 @@ actions
                     ( $/protected/max_x $/protected/max_y $/protected/max_z );
             inside  false;
         }
+    }
+    // Select outside box region
+    {
+        name        protected_cells;
+        type        cellSet;
+        action      invert;
     }
 
     //--- Add cells 'bl_cells' to 'protected_cells' ---//

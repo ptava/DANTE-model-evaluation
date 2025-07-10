@@ -14,6 +14,11 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// User-defined parameters
+#include "userDict"
+building_ratio $/grid/building_ratio;
+cells_scaling $/grid/cells_scaling;
+
 // Grading towards building
 sr_building ((0.93 0.74 0.25) (0.07 0.36 0.30));
 sr_building_front ((0.93 0.74 0.25) (0.07 0.36 0.07));
@@ -37,34 +42,34 @@ sr_wake_building ((0.65 0.8 1.6) (0.35 0.2 2.5));
 
 // Grading on Y
 sr_yLeft 0.5;
-sr_yRight #calc "1/$sr_yLeft";
+sr_yRight #eval { 1/$sr_yLeft };
 sr_yLeft_in 0.7;
-sr_yRight_in #calc "1/$sr_yLeft_in";
+sr_yRight_in #eval { 1/$sr_yLeft_in };
 sr_yLeft_out 0.8;
-sr_yRight_out #calc "1/$sr_yLeft_out";
+sr_yRight_out #eval { 1/$sr_yLeft_out };
 sr_yLeft_up 0.9;
-sr_yRight_up #calc "1/$sr_yLeft_up";
+sr_yRight_up #eval { 1/$sr_yLeft_up };
 
 // Parameters for vertices as a function of building height
-building_height #calc "$/grid/building_ratio*0.08";
-z1_height       #calc "$/grid/building_ratio*0.12";
+building_height #eval { $building_ratio*0.08 };
+z1_height       #eval { $building_ratio*0.12 };
 z2_height       0.66;   
-z_height        #calc "$z1_height+$z2_height";  // grid height changes to maintain 
-                                                // same distance between building
-                                                // roof and top boundary
+z_height        #eval { $z1_height+$z2_height }; // grid height changes to maintain
+                                                 // same distance between building
+                                                 // roof and top boundary
 
 // Cells number for varying scale parameter and building height
-bl_cells        #calc "int( $/grid/cells_scaling*55 )";
-z1              #calc "int( $/grid/building_ratio*$/grid/cells_scaling*40 )";
-z2              #calc "int( $cells_scaling*80 )";
-building        #calc "int( $/grid/cells_scaling*45 )";
-y               #calc "int( $/grid/cells_scaling*65 )";
-x1              #calc "int( $/grid/cells_scaling*50 )";
-x2              #calc "int( $/grid/cells_scaling*125 )";
+bl_cells        #calc " int( $cells_scaling*55 ) ";
+z1              #calc " int( $building_ratio*$cells_scaling*40 ) ";
+z2              #calc " int( $cells_scaling*80 ) ";
+building        #calc " int( $cells_scaling*45 ) ";
+y               #calc " int( $cells_scaling*65 ) ";
+x1              #calc " int( $cells_scaling*50 ) ";
+x2              #calc " int( $cells_scaling*125 ) ";
 
 // O-grid vertices position on xy plane
 xy_distance 0.09;
-radius #calc "sqrt(2*pow($xy_distance,2))";
+radius #calc " sqrt(2*pow($xy_distance,2)) ";
 
 vertices
 (

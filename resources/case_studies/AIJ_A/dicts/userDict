@@ -14,12 +14,12 @@ grid
 
 protected
 {
-    min_x           -0.5;
-    min_y           -0.5;
-    min_z           -0.5;
+    min_x           -0.4;
+    min_y           -0.4;
+    min_z           -0.4;
 
-    max_x           0.5;
-    max_y           0.5;
+    max_x           0.7;
+    max_y           0.4;
     max_z           0.5;
 }
 
