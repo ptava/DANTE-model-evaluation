@@ -17,8 +17,6 @@
 
 # Ignore OpenFOAM run artifacts
 0/
-[1-9]*
-[0-9]*.[0-9]*
 processor*
 polyMesh/
 extended*/
