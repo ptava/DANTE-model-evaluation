@@ -1,5 +1,4 @@
 #!/bin/bash
-
 ###############################################################################
 # set_acquisition_time <Δt> <startTime> <endTime> [protected‑file …]
 #
@@ -20,7 +19,7 @@ set_acquisition_time() {
     local acquisition_dt="$1"       # acquisition delta time
     local start_time="$2"           # start acquisition time
     local end_time="$3"             # end simulation and acquisition time
-    local -a protected=("${@:4}")   # remaining args → array of protected files
+    local -a protected=("${@:4}")   # remaining args as array of protected files
 
     local control_dict="system/controlDict"
     local fo_dir="system/function_objects"
@@ -31,8 +30,8 @@ set_acquisition_time() {
 
     #--- 1. patch controlDict ---#
     sed -Ei "
-        s/(^[[:space:]]*endTime[[:space:]]).*/\1${end_time};/;
-        s/(^[[:space:]]*writeInterval[[:space:]]).*/\1${end_time};/
+        s/(^[[:space:]]*endTime[[:space:]]+).*/\1${end_time};/;
+        s/(^[[:space:]]*writeInterval[[:space:]]+).*/\1${end_time};/
     " "$control_dict"
 
     #--- 2. patch each Function Object file ---#
@@ -40,14 +39,14 @@ set_acquisition_time() {
 
     for fo in "${fo_files[@]}"; do
         sed -Ei "
-            s/(^[[:space:]]*timeStart[[:space:]]).*/\1${start_time};/;
-            s/(^[[:space:]]*timeEnd[[:space:]]).*/\1${end_time};/
+            s/(^[[:space:]]*timeStart[[:space:]]+).*/\1${start_time};/;
+            s/(^[[:space:]]*timeEnd[[:space:]]+).*/\1${end_time};/
         " "$fo"
 
         if [[ ! " ${protected[*]} " =~ " $(basename "$fo") " ]]; then
             sed -Ei "
-                s/(^[[:space:]]*executeInterval[[:space:]]).*/\1${acquisition_dt};/;
-                s/(^[[:space:]]*writeInterval[[:space:]]).*/\1${acquisition_dt};/
+                s/(^[[:space:]]*executeInterval[[:space:]]+).*/\1${acquisition_dt};/;
+                s/(^[[:space:]]*writeInterval[[:space:]]+).*/\1${acquisition_dt};/
             " "$fo"
         fi
     done
@@ -71,7 +70,6 @@ copy_file_if_exists() {
 
     if [[ ! -f $src ]]; then
         echo "Warning: $(basename -- "$src") not found – skipping." >&2
-        exit 1
     fi
 
     local dst_dir
@@ -106,7 +104,11 @@ set_scaling() {
     #--- set scaling factor in each file ---#
     for file in "${files[@]}"; do
         if [[ -f $file ]]; then
-            sed -Ei "s/(cells_scaling[[:space:]]).*/\1$scale;/" "$file"
+            if grep -q "cells_scaling" "$file"; then
+                sed -Ei "s/(cells_scaling[[:space:]]+).*/\1$scale;/" "$file"
+            else
+                echo "Warning: 'cells_scaling' not found in $(basename -- "$file") - skipping." >&2
+            fi
         else
             echo "Warning: $(basename -- "$file") not found – skipping." >&2
         fi
@@ -130,11 +132,11 @@ set_parallel() {
     fi
 
     #--- set number of processors --#
-    sed -Ei "s/(numberOfSubdomains[[:space:]]).*/\1$n_proc;/" "$file"
+    sed -Ei "s/(numberOfSubdomains[[:space:]]+).*/\1$n_proc;/" "$file"
 }
 
 ###############################################################################
-# setFOs <FOsDir>
+# set_fos <FOsDir>
 #
 # • Adds all FOs in the directory to system/controlDict/functions.
 # • FOs are sorted by the number at the end of their filename.
@@ -147,7 +149,7 @@ set_fos() {
 
     #--- sanity checks ---#
     if [[ -z $fo_dir || ! -d $fo_dir ]]; then
-        echo "Usage: setFOs <FOsDir>" >&2
+        echo "Usage: setFOs <FOsDir> and ${fo_dir} must exist" >&2
         exit 1
     fi
 
@@ -171,13 +173,11 @@ set_fos() {
       done | sort | cut -f2-
     )
 
-    echo "${sorted_fo_files[@]}"
-    
     # Build the block to insert
     fo_block="functions {\n"
     for fo in "${sorted_fo_files[@]}"; do
         echo "Adding Function Object: $(basename "$fo")"
-        fo_block+="\t#include \"$(basename "$fo")\"\n"
+        fo_block+="\t#include \"./"$fo"\"\n"
     done
     fo_block+="}\n"
 
@@ -202,6 +202,7 @@ set_fos() {
 #     <path-to-resources>
 #     |
 #     +-- dicts
+#     +-- data
 #     +-- geometry
 #     +-- properties
 #     +-- function_objects
@@ -238,23 +239,47 @@ check_resources() {
     done
 
     dicts_dir="${resources_dir}/dicts"
+    data_dir="${resources_dir}/data"
     geometry_dir="${resources_dir}/geometry"
     properties_dir="${resources_dir}/properties"
-    postprocessing_dir="${resources_dir}/function_objects"
+    functions_dir="${resources_dir}/function_objects"
 
     # Sanity checks
-    if [[ ! -d "${geometry_dir}" ]]; then
-        echo "Error: Geometry folder '${geometry_dir}' does not exist." >&2
-        exit 1
-    fi
+    require_dirs=(
+        "${dicts_dir}"
+        "${data_dir}"
+        "${geometry_dir}"
+        "${properties_dir}"
+        "${functions_dir}"
+    )
+    for dir in "${require_dirs[@]}"; do
+        if [[ ! -d "$dir" ]]; then
+            echo "Error: Required directory '$dir' does not exist." >&2
+            exit 1
+        fi
+    done
 
-    if [[ ! -d "${dicts_dir}" ]]; then
-        echo "Error: Dicts folder '${dicts_dir}' does not exist." >&2
-        exit 1
-    fi
-
-    echo ${dicts_dir} ${geometry_dir} ${properties_dir} ${postprocessing_dir}
+    echo ${dicts_dir} ${data_dir} ${geometry_dir} ${properties_dir} ${functions_dir}
 
 }
 
+###############################################################################
+# check_if_empty <directory>
+#
+# - Checks if the specified directory is empty.
+#
+# Outputs:
+#  - Exits with an error if the directory does not exist or is not empty.
+# ###############################################################################
+check_if_empty() {
+    local dir="$1"
 
+    if [[ ! -d "$dir" ]]; then
+        echo "Error: Directory '$dir' does not exist." >&2
+        exit 1
+    fi
+
+    if [[ ! -z "$(ls -A "$dir")" ]]; then
+        eexit 1
+    fi
+}

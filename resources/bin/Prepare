@@ -12,24 +12,24 @@
 #   <case_name>
 #   ├── boundary_conditions
 #   │   ├── 0.orig                  --> <caseFolder>/
-#   │   └── boundaryData            --> <caseFolder>/constant/
+#   │   └── boundaryData            --> <caseFolder>/constant/data
 #   ├── data
-#   │   └── expData.csv             --> <caseFolder>/resources/
-#   ├── dicts                       --> <caseFolder>/resources/
+#   │   └── expData.csv             --> <caseFolder>/resources/data
+#   ├── dicts                       --> <caseFolder>/resources/dicts
 #   │   ├── controlDict
 #   │   :
 #   │   └── fvSolution
-#   ├── function_objects            --> <caseFolder>/resources/
+#   ├── function_objects            --> <caseFolder>/resources/function_objects
 #   │   ├── FO_example_0
 #   │   ├── FO_example_1
 #   │   :
 #   │   └── FO_example_N
-#   ├── geometry                    --> <caseFolder>/resources/
+#   ├── geometry                    --> <caseFolder>/resources/geometry
 #   │   ├── geometry_0.stl
 #   │   ├── geometry_1.stl
 #   │   :
 #   │   └── geometry_M.stl
-#   └── properties                  --> <caseFolder>/resources/
+#   └── properties                  --> <caseFolder>/resources/properties
 #       ├── transportProperties
 #       :
 #       └── turbulenceProperties
@@ -159,7 +159,6 @@ prepare() {
 
     # copy files from case reference to specific case folders
     cp -r "${case_reference}/boundary_conditions/0.orig" "${case_folder}/."
-    cp -r "${case_reference}/boundary_conditions/boundaryData" "${constant_folder}/."
 
     # copy files from case reference to resources folder
     cp -r "${case_reference}/dicts" "${resources_folder}/."
@@ -167,6 +166,7 @@ prepare() {
     cp -r "${case_reference}/properties" "${resources_folder}/."
     cp -r "${case_reference}/function_objects" "${resources_folder}/."
     cp -r "${case_reference}/data" "${resources_folder}/."
+    cp -r "${case_reference}/boundary_conditions/boundaryData" "${resources_folder}/data/."
 
     echo "+--- Created case folder"
 
