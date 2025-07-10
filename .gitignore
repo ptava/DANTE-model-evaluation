@@ -16,7 +16,6 @@
 *.bcf
 
 # Ignore OpenFOAM run artifacts
-0/
 processor*
 polyMesh/
 extended*/
