@@ -17,6 +17,7 @@ nOutCorr
 
     codeExecute
     #{
+        if (Pstream::master()) {
             const int rampDown = 1;
             const int minValue = 1;
             const int defaultValue = 5;
@@ -28,7 +29,7 @@ nOutCorr
                 IOobject
                 (
                     "fvSolution",
-                    runTime.system(),
+                    runTime.caseSystem(),
                     mesh(),
                     IOobject::MUST_READ,
                     IOobject::AUTO_WRITE
@@ -52,6 +53,7 @@ nOutCorr
             fvSolutionDict.regIOobject::write();
 
             Info << "Updated nOuterCorrectors to: " << newOuterCorr << endl;
+        }
 
     #};
 }

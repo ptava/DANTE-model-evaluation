@@ -57,7 +57,6 @@ nonOrthoError
 
         tmp<volTensorField> gradC = fvc::grad(Cc2);
         const word gradCName(gradC.cref().name());
-        gradC->write();
 
         auto* errorPtr =
             mesh().getObjectPtr<volScalarField>("error");
