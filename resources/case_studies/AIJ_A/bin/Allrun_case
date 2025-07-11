@@ -5,12 +5,12 @@ cd "${0%/*}" || exit
 #------------------------------------------------------------------------------
 
 # User parameters
-n_proc=16      # Set number of processors for parallel computing
-scale=0.25     # Set cells number scaling parameter
-delta_t=0.05   # Set acquisition time of post-processing
-start_time=1.8 # Set time to start averaging the solution (end of transient startup)
-end_time=3.5   # Set time to end the simulation
-smoothing=True # Set to True if you want to smooth the mesh (requires cfmesh)
+n_proc=16       # Set number of processors for parallel computing
+scale=0.25      # Set cells number scaling parameter
+delta_t=0.05    # Set acquisition time of post-processing
+start_time=2.0  # Set time to start averaging the solution (end of transient startup)
+end_time=3.0    # Set time to end the simulation
+smoothing=True  # Set to True if you want to smooth the mesh (requires cfmesh)
 
 # Local folders
 local_resources="resources"                       # Folder with resources
@@ -38,7 +38,7 @@ done
 resources=$(check_resources -r "${local_resources}")
 read -r dicts_resources \
         data_resources \
-        geometry_reosurces \
+        geometry_resources \
         properties_resources \
         functions_resources <<< ${resources}
 

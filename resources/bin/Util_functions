@@ -280,6 +280,6 @@ check_if_empty() {
     fi
 
     if [[ ! -z "$(ls -A "$dir")" ]]; then
-        eexit 1
+        exit 1
     fi
 }

@@ -12,9 +12,9 @@ Description
 
 maxCo
 {
-    type		    coded;
+    type            coded;
     libs            (utilityFunctionObjects);
-    name		    maxCoRampDown;
+    name            maxCoRampDown;
     enabled         true;
     executeControl  timeStep;
     executeInterval 10;
@@ -40,17 +40,17 @@ maxCo
             const scalar& initialValue = controlDict.get<scalar>("maxCo");
 
             ptr = new uniformDimensionedScalarField
-                (
-                    io,
-                    dimless,
-                    initialValue
-                );
+            (
+                io,
+                dimless,
+                initialValue
+            );
 
             ptr->store();
         }
     #};
 
-	codeExecute
+    codeExecute
     #{
         const scalar rampDown = 0.01;
         const scalar minValue = 0.20;

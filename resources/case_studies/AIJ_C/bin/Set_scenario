@@ -12,7 +12,7 @@
 set -euo pipefail
 
 #--- Default --#
-TAG="OH"
+TAG="0H"
 GEOMETRY_FOLDER="constant/triSurface"
 RESOURCE_DIR="resources"
 
