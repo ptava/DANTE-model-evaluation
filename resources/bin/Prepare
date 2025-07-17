@@ -181,8 +181,8 @@ prepare() {
         mkdir -p "${setups_folder}"
         mkdir -p "${resource_folder}"
 
-        # move case folder to setups.orig/common and data to resources
-        mv "${temp_folder}/resources/data" "${resource_folder}/."
+        # move case folder to setups.orig/common and copy data to resources
+        cp -r "${temp_folder}/resources/data" "${resource_folder}/."
         mv "${temp_folder}" "${setups_folder}/common"
 
         # copy executable scripts to analysis folder

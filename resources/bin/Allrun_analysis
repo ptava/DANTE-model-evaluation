@@ -44,8 +44,7 @@ dry_run_setup() {
 
     printf "\n# Create the setup: %s\n" "$setup"
 
-    if [ ! -d "$dirSetup" ]
-    then
+    if [ ! -d "$dirSetup" ]; then
         mkdir -p "$dirSetup"
 
         cp -aRfL "setups.orig/common/." "$dirSetup"
@@ -80,53 +79,43 @@ run_setup() {
 
     printf "\n# Run the setup: %s\n\n" "$setup"
 
-    if [ ! -d "$dirResult" ]
-    then
+    if [ ! -d "$dirResult" ]; then
         cp -Rf "$dirSetup" "$dirResult"
 
-        if [ "$common_mesh" = true ]
-        then
-            if [ -d results/mesh ]
-            then
+        if [ "$common_mesh" = true ]; then
+            if [ -d results/mesh ]; then
                 ## ?? Is not better to link the mesh files instead of doing copies
                 printf "## Copy the common mesh to the setup: %s\n\n" "$setup"
                 cp -Rf results/mesh/polyMesh "$dirResult"/constant/.
             fi
         fi
 
-        if [ "$common_dynamic_code" = true ]
-        then
-            if [ -d results/dynamicCode ]
-            then
+        if [ "$common_dynamic_code" = true ]; then
+            if [ -d results/dynamicCode ]; then
                 printf "## Copy the common dynamic code to the setup: %s\n\n" "$setup"
                 cp -Rf results/dynamicCode "$dirResult"/.
             fi
         fi
 
 
-        if [ "$parallel" = true ]
-        then
-            ( cd "$dirResult" && ./Allrun-case )
+        if [ "$parallel" = true ]; then
+            ( cd "$dirResult" && ./Allrun_case )
         else
             echo "TO DO: to run with single processor change 'Allrun_case' file" >&2
             exit 1
         fi
 
 
-        if [ "$common_mesh" = true ]
-        then
-            if [ ! -d results/mesh ]
-            then
+        if [ "$common_mesh" = true ]; then
+            if [ ! -d results/mesh ]; then
                 printf "\n## Store the mesh of %s as the common mesh\n\n" "$setup"
                 mkdir -p results/mesh
                 cp -Rf "$dirResult"/constant/polyMesh results/mesh/.
             fi
         fi
 
-        if [ "$common_dynamic_code" = true ]
-        then
-            if [ ! -d results/dynamicCode ]
-            then
+        if [ "$common_dynamic_code" = true ]; then
+            if [ ! -d results/dynamicCode ]; then
                 printf "\n## Store the dynamic code of %s as the common dynamic code\n\n" "$setup"
                 cp -Rf "$dirResult"/dynamicCode results/.
             fi
@@ -149,40 +138,48 @@ run_setup() {
 #    Writes into 'results' folder
 #######################################
 postprocess() {
+    local single_simulation=""
+
+    if [ "$1" = true ]; then
+        single_simulation="--single postProcessing"
+    fi
+
     quantitative-cli \
-        --exp-data resources/exp_data.csv \
+        --exp-data resources/data/expData.csv \
         --output-dir results/quantitative \
-        --save-only
+        --save-only \
+        ${single_simulation}
+
     qualitative-cli \
-        --exp-data resources/exp_data.csv \
+        --exp-data resources/data/expData.csv \
         --output-dir results/qualitative \
-        --save-only
+        --save-only \
+        ${single_simulation}
 }
 #------------------------------------------------------------------------------
 
-for setup in $setups
-do
+for setup in $setups; do
     dirSetupOrig="setups.orig/$setup"
 
-    if [ ! -d "$dirSetupOrig" ]
-    then
+    if [ ! -d "$dirSetupOrig" ]; then
         echo "Setup directory: $dirSetupOrig" \
              "could not be found - skipping execution" 1>&2
         continue
     fi
 
-    if [ "$run" = true ]
-    then
+    if [ "$run" = true ]; then
         run_setup "$setup"
+        if notTest "$@"; then
+            postprocess true
+        fi
     else
         dry_run_setup "$setup"
     fi
 done
 
 
-if notTest "$@" && [ "$run" = true ]
-then
-    postprocess()
+if notTest "$@" && [ "$run" = true ]; then
+    postprocess
 fi
 
 

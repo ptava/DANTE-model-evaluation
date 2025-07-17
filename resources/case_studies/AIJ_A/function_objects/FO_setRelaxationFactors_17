@@ -6,67 +6,44 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-relaxationFactor
-{
-	libs            (utilityFunctionObjects);
-	type            coded;
-	name            relaxationFactor;
-	executeControl	timeStep;
-	executeInterval	10;
-	writeControl	none;
+relaxationFactor {
+    libs            (utilityFunctionObjects);
+    type            coded;
+    name            relaxationFactor;
+    executeControl  timeStep;
+    executeInterval 10;
+    writeControl    none;
 
-	codeRead
-	#{
+    codeRead
+    #{
         const double initialValue = 0.6;
-	    const IOobject io
-	    (
-            "customRf",
-            mesh().time().constant(),
-            mesh().thisDb()
-	    );
+        const IOobject io("customRf", mesh().time().constant(), mesh().thisDb());
 
-	    auto* ptr =
-            io.db().getObjectPtr<uniformDimensionedScalarField>(io.name());
+        auto *ptr = io.db().getObjectPtr<uniformDimensionedScalarField>(io.name());
 
-	    if (!ptr)
-	    {
-            Info<< "Registering relaxation factor " << io.name() << endl;
+        if (!ptr) {
+            Info << "Registering relaxation factor " << io.name() << endl;
 
-            ptr = new uniformDimensionedScalarField
-            (
-                io,
-                dimless,
-                initialValue
-            );
+            ptr = new uniformDimensionedScalarField(io, dimless, initialValue);
 
             ptr->store();
-	    }
-	#};
+        }
+    #};
 
-	codeExecute
-	#{
+    codeExecute
+    #{
         const scalar rampUp = 0.01;
         const scalar maxValue = 1.0;
-	    const IOobject io
-	    (
-            "customRf",
-            mesh().time().constant(),
-            mesh().thisDb()
-	    );
+        const IOobject io("customRf", mesh().time().constant(), mesh().thisDb());
 
-	    auto& val =
-            io.db().lookupObjectRef<uniformDimensionedScalarField>
-            (
-                io.name()
-            );
+        auto &val =
+            io.db().lookupObjectRef<uniformDimensionedScalarField>(io.name());
 
-	    // Ramp a bit
-	    val.value() = min(maxValue, val.value()+rampUp);
+        // Ramp a bit
+        val.value() = min(maxValue, val.value() + rampUp);
 
-	    Info<< "Set relaxation factor to " << val.value() << endl;
-	#};
+        Info << "Set relaxation factor to " << val.value() << endl;
+    #};
 }
-
-
 
 // ************************************************************************* //

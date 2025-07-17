@@ -6,24 +6,22 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-sampledPatches
-{
-    type            surfaces;
-    enabled	        yes;
-    libs            (sampling);
+sampledPatches {
+    type                surfaces;
+    enabled             yes;
+    libs                (sampling);
     interpolationScheme cell;
-    surfaceFormat   vtk;
-    fields          (wallShearStress wallShearStreesMean yPlus);
-    region          region0;
-    enabled         true;
-    timeStart       1.3;
-    timeEnd         2.0;
-    executeControl  runTime;
-    executeInterval 0.05;
-    writeControl    runTime;
-    writeInterval   0.05;
-    patches         (roof side1 side2 front back ground);
+    surfaceFormat       vtk;
+    fields              (wallShearStress wallShearStreesMean yPlus);
+    region              region0;
+    enabled             true;
+    timeStart           1.3;
+    timeEnd             2.0;
+    executeControl      runTime;
+    executeInterval     0.05;
+    writeControl        runTime;
+    writeInterval       0.05;
+    patches(roof        side1            side2               front back ground);
 }
-
 
 // ************************************************************************* //

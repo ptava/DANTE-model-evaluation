@@ -49,8 +49,9 @@ solvers
 
 PIMPLE
 {
-    // Use SIMPLEC algorithm
+    // Set algorithm
     consistent	    yes;    
+    turbOnFinalIterOnly no;
 
     // Set correctors
     nNonOrthogonalCorrectors 2;

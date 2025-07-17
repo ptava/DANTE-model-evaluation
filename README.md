@@ -7,12 +7,15 @@ This repository contains the up-to-date model evaluation strategy defined for ci
 - foster collaboration and knowledge sharing.
 
 ## Structure
+
     model-evaluation.git
     ├── docs
     │   └── validation_master_document      # strategy definition, overview,
     │                                       # and test cases results
     ├── modules                             # additional modules for
-    │                                       # model evaluation
+    │   │                                   # model evaluation
+    │   └── integration-cfmesh
+    │                                       
     └── resources
         ├── bin                             # bash executables 
         ├── case_studies                    # available case studies with
@@ -53,10 +56,10 @@ This repository contains the up-to-date model evaluation strategy defined for ci
 ### Pre-processing
 
 #### Grid smoothing
-Grid smoothing is recommended. Grid generation based on the usage of [integration-cfmesh](https://develop.openfoam.com/Community/integration-cfmesh). Add the sub-module to your OpenFOAM installation with from [https://github.com/ptava/integration-cfmesh]:
+Grid smoothing is recommended. Grid generation based on the usage of [integration-cfmesh](https://develop.openfoam.com/Community/integration-cfmesh) since grid smoothing is recommended. After cloning this repository, fetch the module from [https://github.com/ptava/integration-cfmesh] with:
 
 ```bash
-    git submodule init modules/integration-cfmesh
+    git submodule update --init modules/integration-cfmesh
 ```
 
 #### Comparative analysis

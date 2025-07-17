@@ -76,7 +76,7 @@ protected_fos=(
     "FO_yPlus_4"
     "FO_sampleyPlus_5"
     "FO_residuals_6"
-    "FO_fieldAverage_9"
+    "FO_fieldAverage_8"
     "FO_setMaxCo_16"
     "FO_setRelaxationFactors_17"
     "FO_setOuterCorrectors_18"
