@@ -270,7 +270,7 @@ check_resources() {
 #
 # Outputs:
 #  - Exits with an error if the directory does not exist or is not empty.
-# ###############################################################################
+# #############################################################################
 check_if_empty() {
     local dir="$1"
 
@@ -282,4 +282,50 @@ check_if_empty() {
     if [[ ! -z "$(ls -A "$dir")" ]]; then
         exit 1
     fi
+}
+
+###############################################################################
+# postprocess <single-simulation>
+# Postprocess the given setup
+# run external python package for post-processing
+# package name: postProcess4Validation
+# look at github.com/ptava/postprocess4validation.git
+#
+# Outputs:
+#    Writes into 'results' folder
+###############################################################################
+postprocess() {
+    local single_simulation=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -s|--single-case)
+                if [[ -d "$2" ]]; then
+                    path_to_postprocessing="$2"
+                    single_simulation="--single ${path_to_postprocessing}"
+                fi
+                shift 2
+                ;;
+            -*)
+                echo "Unknown option: $1"
+                exit 1
+                ;;
+            *)
+                echo "Unknown parameter: $1"
+                exit 1
+                ;;
+        esac
+    done
+
+    quantitative-cli \
+        --exp-data resources/data/expData.csv \
+        --output-dir results/quantitative \
+        --save-only \
+        ${single_simulation}
+
+    qualitative-cli \
+        --exp-data resources/data/expData.csv \
+        --output-dir results/qualitative \
+        --save-only \
+        ${single_simulation}
 }
