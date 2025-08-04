@@ -1,0 +1,23 @@
+#!/bin/sh
+set -e
+#------------------------------------------------------------------------------
+
+# List of setups
+setups=(
+)
+
+# Flags for common mesh and dynamic code to avoid redundant computations
+# Usefull only if we run each setup sequentially
+common_mesh=false
+common_dynamic_code=false
+
+#------------------------------------------------------------------------------
+
+# Loop through each setup and submit the job
+for setup in "${setups[@]}"; do
+    sbatch \
+        --export=SETUP="${setup}",COMMON_MESH="${common_mesh}",COMMON_DYNAMIC_CODE="${common_dynamic_code}" \
+        submit_setup.sh
+done
+
+#------------------------------------------------------------------------------

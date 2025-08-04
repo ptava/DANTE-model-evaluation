@@ -1,11 +1,14 @@
 #!/bin/bash
 ###############################################################################
-# Prepare <case_name> <directoryName> [--analysis]
+# Prepare  [--analysis] [--slurm] <case_name> <directoryName>
 #
 # • Build OpenFOAM folder for a single URANS simulation or comparative analysis
 #   for a ready-to-run test case (<case_name>).
 #   --> if --analysis then <caseFolder> is <case_name>/<directoryName>
 #   --> else <caseFolder> is <case_name>/<directoryName>/setups.orig/common
+#
+# • Built OpenFOAM folder employs slurm scrpts for running simulations with
+#   --slurm option.
 #
 # • Ready-to-run test cases are located in the resources/case_studies directory
 #   and must be as follows:
@@ -40,10 +43,13 @@ set -euo pipefail
 
 #--- Defaults ---#
 MODE_ANALYSIS=false
+MODE_SLURM=false
 ROOT_DIR=$(git rev-parse --show-toplevel)
 RESOURCES_DIR="${ROOT_DIR}/resources"
 CASE_STUDIES_DIR="${RESOURCES_DIR}/case_studies"
 BIN_DIR="${RESOURCES_DIR}/bin"
+SLURM_DIR="${RESOURCES_DIR}/slurm"
+ALLRUN_ANALYSIS_SCRIPT="Allrun_analysis"
 
 #--- Usage Function ---#
 usage() {
@@ -62,10 +68,11 @@ usage() {
     Arguments:
         case_name           Name of ready-to-run test cases in 
                             '${path}'.
-        directory           Parent directory where the case folder will be created.
+        directory           Parent directory where the case folder is created.
 
     Options:
         -a, --analysis      Enable analysis mode (default: off)
+        -s, --slurm         Use slurm scripts (default: off)
         -h, --help          Show this help message and exit
 EOF
 }
@@ -79,6 +86,14 @@ parse_args() {
                 MODE_ANALYSIS=true
                 shift
                 ;;
+            -s|--slurm)
+                if [[ ${MODE_ANALYSIS} == false ]]; then
+                    echo "Error: --slurm option" >&2
+                    echo "  requires --analysis to be enabled." >&2
+                    exit 1
+                else
+                    MODE_SLURM=true
+                    ALLRUN_ANALYSIS_SCRIPT="Allsubmit_analysis"
             -h|--help)
                 usage
                 exit 0
@@ -86,7 +101,7 @@ parse_args() {
             -*)
                 echo "Unknown option: $1"
                 usage
-                exit 1
+                exit 0
                 ;;
             *)
                 positional+=("$1")
@@ -108,7 +123,7 @@ parse_args() {
 
     # Functions arguments
     case_name="${positional[0]}"
-    dir="${positional[1]}"
+    dir="${positional[0]}"
     case_folder="${case_name}/${dir}"
     case_reference="${CASE_STUDIES_DIR}/${case_name}"
 
@@ -186,8 +201,13 @@ prepare() {
         mv "${temp_folder}" "${setups_folder}/common"
 
         # copy executable scripts to analysis folder
-        cp "${BIN_DIR}/Allrun_analysis" "${case_folder}/."
+        cp "${BIN_DIR}/${ALLRUN_ANALYSIS_SCRIPT}" "${case_folder}/."
         cp "${BIN_DIR}/Allclean_analysis" "${case_folder}/."
+
+        # add slurm scripts if requested
+        if [[ $MODE_SLURM == true ]]; then
+            cp "${SLURM_DIR}/"* "${case_folder}/."
+        fi
 
         echo "+--- Created analysis folder"
     fi
