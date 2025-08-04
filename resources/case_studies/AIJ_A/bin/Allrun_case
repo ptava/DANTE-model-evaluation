@@ -88,15 +88,21 @@ set_scaling $scale "${local_dicts}/userDict"
 set_parallel $n_proc "${local_dicts}/decomposeParDict"
 
 #------------------------------------------------------------------------------
-# Create the computation domain
+# Create the computation domain if has not been created yet
 
-./Allrun_pre ${smoothing}
+if [ ! -d "${local_properties}/polyMesh" ]; then
+    echo "Creating the mesh..."
+    ./Allrun_pre ${smoothing}
+else
+    echo "Mesh already exists, skipping mesh creation."
+fi
 
 #------------------------------------------------------------------------------
 # Run the simulation and reconstruct the results
 
+echo "Running the simulation..."
 runApplication decomposePar
 runParallel $(getApplication)
-runApplication reconstructPar
+echo "Simulation completed."
 
 #------------------------------------------------------------------------------
