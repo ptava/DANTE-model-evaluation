@@ -94,6 +94,9 @@ parse_args() {
                 else
                     MODE_SLURM=true
                     ALLRUN_ANALYSIS_SCRIPT="Allsubmit_analysis"
+                fi
+                shift
+                ;;
             -h|--help)
                 usage
                 exit 0
