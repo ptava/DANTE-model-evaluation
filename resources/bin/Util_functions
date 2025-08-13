@@ -142,9 +142,13 @@ set_parallel() {
 # • FOs are sorted by the number at the end of their filename.
 # • The FOs are included in the controlDict by inserting 'functions'
 #   dictionary at the second-to-last line of the controlDict file.
+# • Function object naming supports the following pattern:
+#      FO_<name>_<number>
+#      where <number> is an integer or a floating point number.
 #
 ###############################################################################
 set_fos() {
+    local fo_name_pattern="^FO_.*_([0-9]+\.?[0-9]*)$"
     local fo_dir="$1"
 
     #--- sanity checks ---#
@@ -160,23 +164,24 @@ set_fos() {
         exit 1
     fi
 
-    #--- add FOs to controlDict ---#
+    #--- add FOs to controlDict in a sorted order ---#
     local fo_files
     mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0)
 
     IFS=$'\n' readarray -t sorted_fo_files < <(
       for f in "${fo_files[@]}"; do
         filename=$(basename "$f")
-        if [[ $filename =~ ^FO_.*_([0-9]+)$ ]]; then
+        if [[ $filename =~ $fo_name_pattern ]]; then
             printf "%05d\t%s\n" "${BASH_REMATCH[1]}" "$f"
         fi
-      done | sort | cut -f2-
+      done | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | cut -f2-
     )
 
     # Build the block to insert
     fo_block="functions {\n"
+    echo "Adding Function Objects:"
     for fo in "${sorted_fo_files[@]}"; do
-        echo "Adding Function Object: $(basename "$fo")"
+        echo -e "\t⇲ $(basename "$fo")"
         fo_block+="\t#include \"./"$fo"\"\n"
     done
     fo_block+="}\n"
@@ -280,7 +285,7 @@ check_if_empty() {
     fi
 
     if [[ ! -z "$(ls -A "$dir")" ]]; then
-        exit 1
+        echo "Warning: Directory '$dir' is not empty." >&2
     fi
 }
 

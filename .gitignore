@@ -18,6 +18,9 @@
 *.upb
 *.bcf
 
+# Ignore Cases OpenFOAM folders
+[A-Z0-9._-]*/
+
 # Ignore OpenFOAM run artifacts
 processor*
 polyMesh/
@@ -27,7 +30,4 @@ dynamicCode/
 log.*
 *.OpenFOAM
 *.foam
-
-# python analysis artifacts
-*.png
 

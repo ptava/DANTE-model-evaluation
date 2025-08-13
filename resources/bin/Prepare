@@ -126,7 +126,7 @@ parse_args() {
 
     # Functions arguments
     case_name="${positional[0]}"
-    dir="${positional[0]}"
+    dir="${positional[1]}"
     case_folder="${case_name}/${dir}"
     case_reference="${CASE_STUDIES_DIR}/${case_name}"
 
