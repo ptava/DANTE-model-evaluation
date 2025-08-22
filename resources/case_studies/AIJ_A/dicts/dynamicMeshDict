@@ -10,46 +10,46 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      controlDict;
+    object      dynamicMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     pimpleFoam;
+dynamicFvMesh       mydynamicRefineFvMesh;
 
-startFrom       startTime;
+mydynamicRefineFvMeshCoeffs
+{
+    refineInterval     4;
 
-startTime       0;
+    maxRefinement      2;
 
-stopAt          endTime;
+    maxCells           700000;
 
-endTime         2.0;
+    field              sasRefineIndicator;
 
-deltaT          0.0005;
+    unrefineLevel      0;
+    
+    lowerRefineLevel   0;
 
-writeControl    runTime;
+    nBufferLayers      1;
 
-writeInterval   2.0;
+    dumpLevel          true;
 
-purgeWrite      0;
+    dumpRefinementInfo true;
 
-writeFormat     ascii;
+    correctFluxes (	
+        ( phi U )
+        ( phi_0 U_0 )
+        ( phi_0_0 U_0_0 )
+        ( ddt0(phi) ddt0(U) )
+    );
 
-writePrecision  6;
+    refineScale
+    {
+        type        table;
+        outOfBounds clamp;
+        values      ((0 0.2) (0.5 0.6) (1.0 1.0));
+    }
 
-writeCompression off;
-
-timeFormat      general;
-
-timePrecision   6;
-
-adjustTimeStep  yes;
-
-maxCo           2.5;
-
-runTimeModifiable yes;
-
-libs (
-    atmosphericModels
-);
+}
 
 // ************************************************************************* //

@@ -6,31 +6,20 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-grid
+sasRefineIndicator
 {
-    cells_scaling 1.0;
-    building_ratio 2;
+    libs             (myfieldFunctionObjects);
+    type             sasRefineIndicator;
+    enabled          true;
+    executeControl   timeStep;
+    executeInterval  1;
+    writeControl     writeTime;
+    regionName       refine_cells;
+    focusRegion      core;
+    transferFunction oddScaler;
+    coreWeight       1000
+    sigma            0.1;
 }
 
-protected
-{
-    min_x           -0.4;
-    min_y           -0.4;
-    min_z           -0.4;
 
-    max_x           0.7;
-    max_y           0.4;
-    max_z           0.5;
-}
-
-refine
-{
-    min_x           -0.2;
-    min_y           -0.3;
-    min_z           -0.4;
-
-    max_x           0.7;
-    max_y           0.3;
-    max_z           0.4;
-
-}
+// ************************************************************************* //

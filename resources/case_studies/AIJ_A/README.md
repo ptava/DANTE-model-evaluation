@@ -16,3 +16,17 @@
     - ramp down of `nOuterCorrectors`: 5 --> 1
     - ramp up inner loops under-relaxation factors: 0.6 --> 1
 
+* Mesh smoothing available based on external repository:
+    - https://github.com/ptava/integration-cfmesh (for `improveMeshQuality` utility)
+
+* Adaptive mesh refinement based on additional external repositories:
+    - https://github.com/ptava/kOmegaSSTSAS (for `mykOmegaSSTSAS` turbulence model)
+    - https://github.com/ptava/dynamicFvMesh (for `mydynamicFvMesh` library)
+    - https://github.com/ptava/functionObjects (for additional function objects)
+
+    ! Set `dumpRefinementInfo` in `dynamicMeshDict` to true to use additional function objects such as `FO_cuttingPlanesRefinement` and `FO_refinementInfo`
+
+    ! Set `refineScale` in `dynamicMeshDict` as a Function1 to smoothly increase the number of refined cells over time
+
+
+

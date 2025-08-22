@@ -5,12 +5,13 @@ cd "${0%/*}" || exit
 #------------------------------------------------------------------------------
 
 # User parameters
-n_proc=16       # Set number of processors for parallel computing
-scale=0.25      # Set cells number scaling parameter
-delta_t=0.05    # Set acquisition time of post-processing
-start_time=2.0  # Set time to start averaging the solution (end of transient startup)
-end_time=3.0    # Set time to end the simulation
-smoothing=True  # Set to True if you want to smooth the mesh (requires cfmesh)
+n_proc=16        # Set number of processors for parallel computing
+scale=0.25       # Set cells number scaling parameter
+delta_t=0.05     # Set acquisition time of post-processing
+start_time=2.0   # Set time to start averaging the solution (end of transient startup)
+end_time=3.0     # Set time to end the simulation
+smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
+refinement=false # Set to True if you want to refine the mesh
 
 # Local folders
 local_resources="resources"                       # Folder with resources
@@ -50,16 +51,23 @@ declare -A files_to_copy=(
     ["${dicts_resources}/fvSchemes"]="${local_dicts}/fvSchemes"
     ["${dicts_resources}/controlDict"]="${local_dicts}/controlDict"
     ["${dicts_resources}/userDict"]="${local_dicts}/userDict"
-    ["${properties_resources}/transportProperties"]="${local_properties}/transportProperties"
-    ["${properties_resources}/turbulenceProperties"]="${local_properties}/turbulenceProperties"
+    ["${properties_resources}/transportProperties"]
+        ="${local_properties}/transportProperties"
+    ["${properties_resources}/turbulenceProperties"]
+        ="${local_properties}/turbulenceProperties"
 )
+
+if [ "${refinement}" = true ]; then
+    files_to_copy["${dicts_resources}/dynamicMeshDict"]
+        ="${local_properties}/dynamicMeshDict"
+fi
 
 for source in "${!files_to_copy[@]}"; do
     target="${files_to_copy[$source]}"
     copy_file_if_exists "$source" "$target"
 done
 
-cp -r ${functions_resources} "${local_dicts}/." || {
+cp -r "${functions_resources}" "${local_dicts}/." || {
     echo "Error copying function objects to ${local_dicts} folder" >&2
     exit 1
 }
@@ -82,17 +90,30 @@ protected_fos=(
     "FO_setOuterCorrectors_18"
 )
 
+if [ "${refinement}" = true ]; then
+    protected_fos+=(
+        "FO_sasRefineIndicator_8.8"
+        "FO_refineIndicatorStats_8.9"
+        "FO_cuttingPlanesRefinement_14.2"
+        "FO_refinementInfo_19"
+    )
+    set_lib "mydynamicFvMesh" "${local_dicts}/controlDict"
+    set_lib "myincompressibleTurbulenceModels" "${local_dicts}/controlDict"
+    set_turbuence_model "mykOmegaSSTSAS" "${local_properties}/turbulenceProperties"
+fi
+
 set_fos "${local_dicts}/function_objects"
 set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}"
 set_scaling $scale "${local_dicts}/userDict"
 set_parallel $n_proc "${local_dicts}/decomposeParDict"
+
 
 #------------------------------------------------------------------------------
 # Create the computation domain if has not been created yet
 
 if [ ! -d "${local_properties}/polyMesh" ]; then
     echo "Creating the mesh..."
-    ./Allrun_pre ${smoothing}
+    ./Allrun_pre "${smoothing}"
 else
     echo "Mesh already exists, skipping mesh creation."
 fi

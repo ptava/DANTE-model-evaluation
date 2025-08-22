@@ -6,31 +6,22 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-grid
+// Note: requires activation of dumpRefinementIndo in dynamicMeshDict
+refinementInfo
 {
-    cells_scaling 1.0;
-    building_ratio 2;
+    libs            ("libmyutilityFunctionObjects.so");
+    type            refinementInfo;
+    enabled         true;
+    executeControl  timeStep;
+    executeInterval 4;
+    refinementParameters
+    (
+        "nTotToRefine"
+        "nTotRefined"
+        "lowerLevel"
+        "upperLevel"
+    );
 }
 
-protected
-{
-    min_x           -0.4;
-    min_y           -0.4;
-    min_z           -0.4;
 
-    max_x           0.7;
-    max_y           0.4;
-    max_z           0.5;
-}
-
-refine
-{
-    min_x           -0.2;
-    min_y           -0.3;
-    min_z           -0.4;
-
-    max_x           0.7;
-    max_y           0.3;
-    max_z           0.4;
-
-}
+// ************************************************************************* //

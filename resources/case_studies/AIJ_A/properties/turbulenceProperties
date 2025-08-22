@@ -19,11 +19,13 @@ simulationType RAS;
 
 RAS
 {
-    RASModel        kOmegaSST;
+    RASModel        kOmegaSSTSAS;
 
     turbulence      on;
 
     printCoeffs     on;
+
+    delta           cubeRootVol;
 }
 
 
