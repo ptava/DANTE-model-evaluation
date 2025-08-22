@@ -172,9 +172,9 @@ set_fos() {
       for f in "${fo_files[@]}"; do
         filename=$(basename "$f")
         if [[ $filename =~ $fo_name_pattern ]]; then
-            printf "%05d\t%s\n" "${BASH_REMATCH[1]}" "$f"
+            printf "%s\t%s\n" "${BASH_REMATCH[1]}" "$f"
         fi
-      done | sort -t. -k 1,1n -k 2,2n -k 3,3n -k 4,4n | cut -f2-
+      done | LC_ALL=C sort -t $'\t' -k1,1V | cut -f2-
     )
 
     # Build the block to insert
@@ -287,6 +287,53 @@ check_if_empty() {
     if [[ ! -z "$(ls -A "$dir")" ]]; then
         echo "Warning: Directory '$dir' is not empty." >&2
     fi
+}
+
+###############################################################################
+# set_lib <libname> <dictionary>
+#
+# • Adds <libname> to the libs (…) block of <dictionary>.
+# • Avoids duplicates.
+# • Works for libs(...)whether on one line or many.
+#
+#
+###############################################################################
+set_lib() {
+    local lib="$1"
+    local file="$2"
+
+    [[ -z "$lib" || -z "$file" ]] && { echo "Usage: set_lib <libname> <file>"; exit 1; }
+    [[ -f "$file" ]] || { echo "Error: '$file' not found."; exit 1; }
+
+    # if already present anywhere in libs(...) block, do nothing
+    if grep -Eq "libs[[:space:]]*\([^)]*\b${lib}\b" "$file"; then
+        echo "'$lib' already in libs."
+        exit 0
+    fi
+
+    # insert before the closing ');'
+    sed -i "s/\(libs[[:space:]]*(.*\)\()[[:space:]]*);/\1\n    $lib\n);/" "$file"
+
+    echo "Added '$lib' to libs in '$file'."
+}
+
+###############################################################################
+# set_turbulence_model <model> <dictFile>
+#
+# • Updates the given dictionary (e.g., constant/turbulenceProperties):
+#
+###############################################################################
+set_turbulence_model() {
+    local new_model="$1"
+    local dict_file="$2"
+
+    if [[ ! -f "$dict_file" ]]; then
+        echo "Error: File '$dict_file' not found"
+        exit 1
+    fi
+
+    # Replace the RASModel line with the new model
+    sed -i -E "s|^( *RASModel[[:space:]]+).*;|\1${new_model};|" "$dict_file"
 }
 
 ###############################################################################
