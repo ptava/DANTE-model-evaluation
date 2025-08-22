@@ -21,7 +21,15 @@ sampledPatches {
     executeInterval     0.05;
     writeControl        runTime;
     writeInterval       0.05;
-    patches(roof        side1            side2               front back ground);
+    patches 
+    (
+        roof
+        side1
+        side2
+        front
+        back
+        ground
+    );
 }
 
 // ************************************************************************* //

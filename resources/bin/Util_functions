@@ -290,31 +290,61 @@ check_if_empty() {
 }
 
 ###############################################################################
-# set_lib <libname> <dictionary>
+# set_lib <token> <dictionary>
 #
-# • Adds <libname> to the libs (…) block of <dictionary>.
-# • Avoids duplicates.
-# • Works for libs(...)whether on one line or many.
-#
+# • Inserts the given token into the libs(...) block of dictionary
+# • Works with inline and multiline libs(...) blocks
+# • If the token already exists, does nothing and prints a message
 #
 ###############################################################################
+
 set_lib() {
-    local lib="$1"
+    local tok="$1"
     local file="$2"
 
-    [[ -z "$lib" || -z "$file" ]] && { echo "Usage: set_lib <libname> <file>"; exit 1; }
-    [[ -f "$file" ]] || { echo "Error: '$file' not found."; exit 1; }
-
-    # if already present anywhere in libs(...) block, do nothing
-    if grep -Eq "libs[[:space:]]*\([^)]*\b${lib}\b" "$file"; then
-        echo "'$lib' already in libs."
-        exit 0
+    if [[ -z "$tok" || -z "$file" || ! -f "$file" || ! -w "$file" ]]; then
+        echo "Usage: set_lib <token> <dictionary> (file must exist and be writable)" >&2
+        return 1
     fi
 
-    # insert before the closing ');'
-    sed -i "s/\(libs[[:space:]]*(.*\)\()[[:space:]]*);/\1\n    $lib\n);/" "$file"
+    # INLINE form: libs ( banana pinto );
+    if grep -qE '^[[:space:]]*libs[[:space:]]*\([^)]*\);' "$file"; then
+        if grep -qE "^[[:space:]]*libs[[:space:]]*\([^)]*\b$tok\b[^)]*\);" \
+            "$file"; then
+            echo "Token '$tok' already present (inline)." >&2
+            return 0
+        fi
+        sed -E -i \
+            "s/^([[:space:]]*libs[[:space:]]*\([^)]*)\);/\1 $tok);/" "$file"
+        echo "Inserting '$tok' into inline libs(...)." >&2
+    fi
 
-    echo "Added '$lib' to libs in '$file'."
+    # MULTILINE form
+    if grep -qE '^[[:space:]]*libs[[:space:]]*\($' "$file"; then
+        if sed -nE "/^[[:space:]]*libs[[:space:]]*\($/,/^[[:space:]]*\);/p" \
+            "$file" | grep -qw "$tok"; then
+            echo "Token '$tok' already present (multiline)." >&2
+            return 0
+        fi
+
+        # detect indentation of first entry, fallback to 2 spaces
+        local indent
+        indent=$(sed -nE \
+            "/^[[:space:]]*libs[[:space:]]*\($/{n;s/^([[:space:]]*).*/\1/p;q}" \
+            "$file")
+        [[ -z "$indent" ]] && indent="  "
+
+        sed -E -i \
+            "/^[[:space:]]*libs[[:space:]]*\($/,/^[[:space:]]*\);/{
+                /^[[:space:]]*\);/ i\\
+${indent}${tok}
+            }" "$file"
+        echo "Inserting '$tok' into multiline libs(...)." >&2
+        return 0
+    fi
+
+    echo "No libs(...) block found in '$file'." >&2
+    return 1
 }
 
 ###############################################################################
