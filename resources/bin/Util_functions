@@ -25,8 +25,8 @@ set_acquisition_time() {
     local fo_dir="system/function_objects"
 
     #--- sanity checks ---#
-    [[ -f $control_dict ]] || { echo "ERROR: ${control_dict} not found"; exit 1; }
-    [[ -d $fo_dir       ]] || { echo "ERROR: ${fo_dir} directory not found"; exit 1; }
+    [[ -f $control_dict ]] || { echo "Error: ${control_dict} not found"; return 1; }
+    [[ -d $fo_dir       ]] || { echo "Error: ${fo_dir} directory not found"; return 1; }
 
     #--- 1. patch controlDict ---#
     sed -Ei "
@@ -65,18 +65,19 @@ copy_file_if_exists() {
 
     if [[ -z $src || -z $dst ]]; then
         echo "Usage: copy_file_if_exists <source> <destination>" >&2
-        exit 1
+        return 1
     fi
 
     if [[ ! -f $src ]]; then
         echo "Warning: $(basename -- "$src") not found – skipping." >&2
+        return 0
     fi
 
     local dst_dir
     dst_dir=$(dirname "$dst")
     if [[ ! -d $dst_dir ]]; then
-        echo "ERROR: could not find $dst_dir" >&2
-        exit 1
+        echo "Error: could not find $dst_dir" >&2
+        return 1
     fi
 
     echo "Copying $src → $dst"
@@ -98,7 +99,7 @@ set_scaling() {
     #--- sanity: need at least one argument ---#
     if [[ -z $scale || ${#files[@]} -eq 0 ]]; then
         echo "Usage: set_scaling <scale> [<file1> <file2> …]" >&2
-        exit 1
+        return 1
     fi
 
     #--- set scaling factor in each file ---#
@@ -128,7 +129,7 @@ set_parallel() {
     #--- sanity checks
     if [[ -z "${n_proc}" || -z "${file}" ]]; then
         echo "Usage: set_parallel <n_proc> <dictionary>" >&2
-        exit 1
+        return 1
     fi
 
     #--- set number of processors --#
@@ -154,14 +155,14 @@ set_fos() {
     #--- sanity checks ---#
     if [[ -z $fo_dir || ! -d $fo_dir ]]; then
         echo "Usage: setFOs <FOsDir> and ${fo_dir} must exist" >&2
-        exit 1
+        return 1
     fi
 
     local control_dict="system/controlDict"
 
     if [[ ! -f $control_dict ]]; then
-        echo "ERROR: ${control_dict} not found in system folder" >&2
-        exit 1
+        echo "Error: ${control_dict} not found in system folder" >&2
+        return 1
     fi
 
     #--- add FOs to controlDict in a sorted order ---#
@@ -228,17 +229,17 @@ check_resources() {
                     shift 2
                 else
                     echo "Error: Resources directory '$2' does not exist." >&2
-                    exit 1
+                    return 1
                 fi
                 ;;
             -*)
                 echo "Unknown option: $1"
                 usage
-                exit 1
+                return 1
                 ;;
             *)
                 echo "Unknown parameter: $1"
-                exit 1
+                return 1
                 ;;
         esac
     done
@@ -260,7 +261,7 @@ check_resources() {
     for dir in "${require_dirs[@]}"; do
         if [[ ! -d "$dir" ]]; then
             echo "Error: Required directory '$dir' does not exist." >&2
-            exit 1
+            return 1
         fi
     done
 
@@ -281,7 +282,7 @@ check_if_empty() {
 
     if [[ ! -d "$dir" ]]; then
         echo "Error: Directory '$dir' does not exist." >&2
-        exit 1
+        return 1
     fi
 
     if [[ ! -z "$(ls -A "$dir")" ]]; then
@@ -359,7 +360,7 @@ set_turbulence_model() {
 
     if [[ ! -f "$dict_file" ]]; then
         echo "Error: File '$dict_file' not found"
-        exit 1
+        return 1
     fi
 
     # Replace the RASModel line with the new model
@@ -390,14 +391,17 @@ postprocess() {
                 ;;
             -*)
                 echo "Unknown option: $1"
-                exit 1
+                return 1
                 ;;
             *)
                 echo "Unknown parameter: $1"
-                exit 1
+                return 1
                 ;;
         esac
     done
+
+    command -v quantitative-cli >/dev/null 2>&1 || { echo "quantitative-cli not found. Please install postProcess4Validation package." >&2; return 127; }
+    command -v qualitative-cli >/dev/null 2>&1 || { echo "qualitative-cli not found. Please install postProcess4Validation package." >&2; return 127; }
 
     quantitative-cli \
         --exp-data resources/data/expData.csv \

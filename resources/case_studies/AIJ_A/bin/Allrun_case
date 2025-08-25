@@ -36,7 +36,10 @@ done
 #------------------------------------------------------------------------------
 # Copy source files and folders
 
-resources=$(check_resources -r "${local_resources}")
+resources=$(check_resources -r "${local_resources}") || {
+    echo "Error checking resources" >&2
+    exit 1
+}
 read -r dicts_resources \
         data_resources \
         geometry_resources \
@@ -61,7 +64,10 @@ fi
 
 for source in "${!files_to_copy[@]}"; do
     target="${files_to_copy[$source]}"
-    copy_file_if_exists "$source" "$target"
+    copy_file_if_exists "$source" "$target" || {
+        echo "Error copying $source to $target" >&2
+        exit 1
+    }
 done
 
 cp -r "${functions_resources}" "${local_dicts}/." || {
@@ -94,15 +100,36 @@ if [ "${refinement}" = true ]; then
         "FO_cuttingPlanesRefinement_14.2"
         "FO_refinementInfo_19"
     )
-    set_lib "mydynamicFvMesh" "${local_dicts}/controlDict"
-    set_lib "myincompressibleTurbulenceModels" "${local_dicts}/controlDict"
-    set_turbulence_model "mykOmegaSSTSAS" "${local_props}/turbulenceProperties"
+    set_lib "mydynamicFvMesh" "${local_dicts}/controlDict" || {
+        echo "Error setting dynamic mesh library" >&2
+        exit 1
+    }
+    set_lib "myincompressibleTurbulenceModels" "${local_dicts}/controlDict" || {
+        echo "Error setting turbulence models library" >&2
+        exit 1
+    }
+    set_turbulence_model "mykOmegaSSTSAS" "${local_props}/turbulenceProperties" || {
+        echo "Error setting turbulence model" >&2
+        exit 1
+    }
 fi
 
-set_fos "${local_dicts}/function_objects"
-set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}"
-set_scaling $scale "${local_dicts}/userDict"
-set_parallel $n_proc "${local_dicts}/decomposeParDict"
+set_fos "${local_dicts}/function_objects" || {
+    echo "Error setting function objects" >&2
+    exit 1
+}
+set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}" || {
+    echo "Error setting acquisition time" >&2
+    exit 1
+}
+set_scaling $scale "${local_dicts}/userDict" || {
+    echo "Error setting cells scaling" >&2
+    exit 1
+}
+set_parallel $n_proc "${local_dicts}/decomposeParDict" || {
+    echo "Error setting number of processors" >&2
+    exit 1
+}
 
 
 #------------------------------------------------------------------------------
@@ -116,7 +143,7 @@ else
 fi
 
 #------------------------------------------------------------------------------
-# Run the simulation and reconstruct the results
+# Run the simulation in parallel
 
 echo "Running the simulation..."
 runApplication decomposePar

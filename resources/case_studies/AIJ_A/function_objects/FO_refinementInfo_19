@@ -18,8 +18,8 @@ refinementInfo
     (
         "nTotToRefine"
         "nTotRefined"
-        "lowerLevel"
-        "upperLevel"
+        "lowerLimit"
+        "upperLimit"
     );
 }
 

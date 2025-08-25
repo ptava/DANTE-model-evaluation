@@ -14,6 +14,7 @@ fi
 # Run applications: create grid
 runApplication blockMesh
 runApplication checkMesh
+runApplication topoSet
     
 # Check if cfMesh is availabel (we'll use improveMeshQuality utility)
 if [ "$smoothing" = "True" ]; then
@@ -24,7 +25,6 @@ if [ "$smoothing" = "True" ]; then
     fi
     
     # Run application: smoothing via cfMesh foam-integration
-    runApplication topoSet  # create cellSet to be excluded from smoothing
     runApplication improveMeshQuality -constrainedCellSet protected_cells
 fi
 
