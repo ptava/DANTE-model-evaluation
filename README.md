@@ -14,7 +14,10 @@ This repository contains the up-to-date model evaluation strategy defined for ci
     │                                       # and test cases results
     ├── modules                             # additional modules for
     │   │                                   # model evaluation
-    │   └── integration-cfmesh
+    │   ├── integration-cfmesh
+    │   ├── kOmegaSSTSAS
+    │   ├── dynamicFvMesh
+    │   └── functionObjects
     │                                       
     └── resources
         ├── bin                             # bash executables 
@@ -89,3 +92,12 @@ Install with:
     git+https://github.com/ptava/postprocess4validation.git@main#egg=postprocess4validation
 ```
 
+### Additional modules
+Additional modules for OpenFOAM are available in the `modules` directory. After cloning this repository, fetch the modules with:
+```bash
+    git submodule update --init modules/dynamicFvMesh
+    git submodule update --init modules/kOmegaSSTSAS
+    git submodule update --init modules/functionObjects
+```
+
+These additional modules are required to run adaptive mesh refinement for kOmegaSSTSAS turbulence model and to enable additional function objects for post-processing associated to refinement procedure.

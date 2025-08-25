@@ -1,3 +1,12 @@
 [submodule "modules/integration-cfmesh"]
 	path = modules/integration-cfmesh
 	url = https://github.com/ptava/integration-cfmesh
+[submodule "modules/kOmegaSSTSAS"]
+	path = modules/kOmegaSSTSAS
+	url = https://github.com/ptava/kOmegaSSTSAS
+[submodule "modules/dynamicFvMesh"]
+	path = modules/dynamicFvMesh
+	url = https://github.com/ptava/dynamicFvMesh
+[submodule "modules/functionObjects"]
+	path = modules/functionObjects
+	url = https://github.com/ptava/functionObjects
