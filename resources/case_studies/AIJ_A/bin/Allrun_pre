@@ -17,15 +17,14 @@ runApplication checkMesh
 runApplication topoSet
     
 # Check if cfMesh is availabel (we'll use improveMeshQuality utility)
-if [ "$smoothing" = "True" ]; then
-    if [ ! -d "$WM_PROJECT_DIR/plugins/cfmesh/utilities/improveMeshQuality" ]
-    then
-        echo "cfMesh plugin not found. Please install cfMesh to use smoothing."
-        echo "Trying to run smoothing anyway..."
+if [ "$smoothing" = "true" ]; then
+    if command -v improveMeshQuality >/dev/null 2>&1; then
+        runApplication improveMeshQuality -constrainedCellSet protected_cells
+    else
+        echo "improveMeshQuality command not found. Please install cfMesh"
+        echo "integration to use smoothing."
+        echo "Skipping smoothing..."
     fi
-    
-    # Run application: smoothing via cfMesh foam-integration
-    runApplication improveMeshQuality -constrainedCellSet protected_cells
 fi
 
 # Renumbering

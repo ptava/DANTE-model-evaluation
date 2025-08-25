@@ -58,7 +58,7 @@ declare -A files_to_copy=(
     ["${props_resources}/turbulenceProperties"]="${local_props}/turbulenceProperties"
 )
 
-if [ "${refinement}" = true ]; then
+if [ "${refinement}" = "true" ]; then
     files_to_copy["${dicts_resources}/dynamicMeshDict"]="${local_props}/dynamicMeshDict"
 fi
 
