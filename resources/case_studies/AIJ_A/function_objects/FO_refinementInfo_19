@@ -14,11 +14,13 @@ refinementInfo
     enabled         true;
     executeControl  timeStep;
     executeInterval 4;
+    writeControl    timeStep;
+    writeInterval   4;
     refinementParameters
     (
         "nTotToRefine"
         "nTotRefined"
-        "nTotToUnrefine"
+        "nTotUnrefined"
         "lowerLimit"
         "upperLimit"
     );

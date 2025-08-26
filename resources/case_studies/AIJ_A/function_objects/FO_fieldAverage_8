@@ -6,7 +6,7 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-fieldAverage1
+fieldAverage
 {
     type            fieldAverage;
     libs            (fieldFunctionObjects);
@@ -21,7 +21,6 @@ fieldAverage1
     executeControl  timeStep;
     executeInterval 1;
     writeControl    writeTime;
-    writeInterval   -1;
 
     fields
     (

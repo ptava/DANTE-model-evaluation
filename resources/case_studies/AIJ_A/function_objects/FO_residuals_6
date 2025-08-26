@@ -22,8 +22,6 @@ solverInfo
     log             true;
     executeControl  timeStep;
     executeInterval 1;
-    writeControl    writeTime;
-    writeInterval   -1;
 }
 
 
