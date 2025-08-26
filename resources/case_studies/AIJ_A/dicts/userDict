@@ -25,12 +25,12 @@ protected
 
 refine
 {
-    min_x           -0.2;
+    min_x           -0.3;
     min_y           -0.3;
     min_z           -0.4;
 
     max_x           0.7;
     max_y           0.3;
-    max_z           0.4;
+    max_z           0.5;
 
 }

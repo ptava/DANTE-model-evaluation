@@ -18,6 +18,7 @@ refinementInfo
     (
         "nTotToRefine"
         "nTotRefined"
+        "nTotToUnrefine"
         "lowerLimit"
         "upperLimit"
     );

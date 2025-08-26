@@ -96,7 +96,6 @@ protected_fos=(
 if [ "${refinement}" = true ]; then
     protected_fos+=(
         "FO_sasRefineIndicator_8.8"
-        "FO_refineIndicatorStats_8.9"
         "FO_cuttingPlanesRefinement_14.2"
         "FO_refinementInfo_19"
     )
