@@ -6,16 +6,16 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-isoSurfaces1
+isoSurfaces2
 {
     type            surfaces;
     enabled	        yes;
     libs            ("libsampling.so");
-    timeStart       1.3;
-    timeEnd         2.0;
+    timeStart       2.7;
+    timeEnd         3.0;
     surfaceFormat   vtk;
-    writeControl    runTime;
-    writeInterval   0.05;
+    writeControl    timeStep;
+    writeInterval   4;
     fields          (nutnu);
     interpolationScheme cellPointFace;
 
