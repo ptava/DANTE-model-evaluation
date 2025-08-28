@@ -1,28 +1,10 @@
 #!/bin/bash
 
 #------------------------------------------------------------------------------
-
-# User parameters
-NODES=1
-PROC_PER_NODE=48    
-MAX_TIME=08:00:00
-ACCOUNT="account_name"
-OF_VERSION="2412"
-
-# Slurm directives
-#SBATCH --job-name=OpenFOAM_${SETUP}
-#SBATCH --account=${ACCOUNT}
-#SBATCH --nodes=${NODES}
-#SBATCH --ntasks-per-node=${PROC_PER_NODE}
-#SBATCH --time=${MAX_TIME}
-#SBATCH --output=OpenFOAM_${SETUP}.out
-#SBATCH --error=OpenFOAM_${SETUP}.err
-#SBATCH --hint=nomultithread
-
-#------------------------------------------------------------------------------
-
-module load profile/advanced
-module load OpenFOAM/${OF_VERSION}
+module load profile/eng
+module load autoload
+module load intel-oneapi-compilers
+module load openfoam+/${OF_VERSION}
 
 cd $SLURM_SUBMIT_DIR
 
