@@ -7,12 +7,18 @@
 #   --> if --analysis then <caseFolder> is <case_name>/<directoryName>
 #   --> else <caseFolder> is <case_name>/<directoryName>/setups.orig/common
 #
-# • Built OpenFOAM folder employs slurm scrpts for running simulations with
-#   --slurm option.
+# • Built OpenFOAM folder includes slurm scripts to run simulations withi slurm
+#   workload manager.
 #
 # • Ready-to-run test cases are located in the resources/case_studies directory
-#   and must be as follows:
+#   and their structure must be as follows:
 #   <case_name>
+#   ├── README.md
+#   ├── bin                         --> <caseFolder>/
+#   │   ├── Allrun_case
+#   │   ├── Allrun_pre
+#   │   ├── Allclean_case
+#   │   └── other scripts
 #   ├── boundary_conditions
 #   │   ├── 0.orig                  --> <caseFolder>/
 #   │   └── boundaryData            --> <caseFolder>/constant/data
