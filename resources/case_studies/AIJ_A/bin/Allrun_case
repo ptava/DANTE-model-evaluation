@@ -84,21 +84,38 @@ cp -r "${data_resources}/boundaryData" "${local_props}/." || {
 # Make changes in files
 
 protected_fos=(
+    "FO_Q_3.1"
     "FO_yPlus_4"
     "FO_sampleyPlus_5"
     "FO_residuals_6"
     "FO_fieldAverage_8"
+    "FO_isoSurfaces_15.1"
     "FO_setMaxCo_16"
     "FO_setRelaxationFactors_17"
     "FO_setOuterCorrectors_18"
 )
 
+refinement_fos=(
+    "FO_sasRefineIndicator_8.8"
+    "FO_cuttingPlanesRefinement_14.2"
+    "FO_cuttingPlanesRefinement_14.3"
+    "FO_refinementInfo_19"
+)
+
+local_functions="${local_dicts}/function_objects"
+
+set_fos "${local_functions}" || {
+    echo "Error setting function objects" >&2
+    exit 1
+}
+
 if [ "${refinement}" = true ]; then
     protected_fos+=(
-        "FO_sasRefineIndicator_8.8"
-        "FO_cuttingPlanesRefinement_14.2"
-        "FO_refinementInfo_19"
+        ${refinement_fos[0]}
+        ${refinement_fos[1]}
+        ${refinement_fos[3]}
     )
+
     set_lib "mydynamicFvMesh" "${local_dicts}/controlDict" || {
         echo "Error setting dynamic mesh library" >&2
         exit 1
@@ -111,12 +128,15 @@ if [ "${refinement}" = true ]; then
         echo "Error setting turbulence model" >&2
         exit 1
     }
+else
+    for fo in "${refinement_fos[@]}"; do
+        set_fo_states "off" "${local_functions}/${fo}" || {
+            echo "Error disabling function object $fo" >&2
+            exit 1
+        }
+    done
 fi
 
-set_fos "${local_dicts}/function_objects" || {
-    echo "Error setting function objects" >&2
-    exit 1
-}
 set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}" || {
     echo "Error setting acquisition time" >&2
     exit 1

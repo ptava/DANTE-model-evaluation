@@ -38,12 +38,11 @@ set_acquisition_time() {
     mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0)
 
     for fo in "${fo_files[@]}"; do
-        sed -Ei "
-            s/(^[[:space:]]*timeStart[[:space:]]+).*/\1${start_time};/;
-            s/(^[[:space:]]*timeEnd[[:space:]]+).*/\1${end_time};/
-        " "$fo"
-
         if [[ ! " ${protected[*]} " =~ " $(basename "$fo") " ]]; then
+            sed -Ei "
+                s/(^[[:space:]]*timeStart[[:space:]]+).*/\1${start_time};/;
+                s/(^[[:space:]]*timeEnd[[:space:]]+).*/\1${end_time};/
+            " "$fo"
             sed -Ei "
                 s/(^[[:space:]]*executeInterval[[:space:]]+).*/\1${acquisition_dt};/;
                 s/(^[[:space:]]*writeInterval[[:space:]]+).*/\1${acquisition_dt};/
@@ -197,6 +196,42 @@ set_fos() {
 
     # Overwrite original controlDict
     mv "$tmp_file" "$control_dict"
+}
+
+###############################################################################
+# set_fo_states <common-state> <path-to-function-object>
+#
+# • Updates 'enabled' flag for all functions defined within the given function
+#   object file.
+# • Uses foamDictionary
+#
+###############################################################################
+set_fo_states() {
+    local enabled="$1"
+    local function_object_file="$2"
+
+    if [[ -z "${enabled}" || -z "${function_object_file}" ]]; then
+        echo "Usage: set_fo_states <on|off|true|false|1|0> " \
+            "<path-to-function-object>" >&2
+        return 2
+    fi
+
+    if [[ ! -f "${function_object_file}" ]]; then
+        echo "Error: File '$function_object_file' not found"
+        return 1
+    fi
+
+    if ! command -v foamDictionary >/dev/null 2>&1; then
+        echo "Error: foamDictionary not found in PATH."
+        return 1
+    fi
+
+    for dictionary in $(foamDictionary -keywords "${function_object_file}"); do
+        foamDictionary -entry ${dictionary}/enabled \
+            -set "${enabled}" \
+            "${function_object_file}" > /dev/null 2>&1
+        echo "Disabling '${dictionary}' in '${function_object_file}'."
+    done
 }
 
 ###############################################################################
