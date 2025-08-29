@@ -2,9 +2,8 @@
 
 #------------------------------------------------------------------------------
 module load profile/eng
-module load autoload
 module load intel-oneapi-compilers
-module load openfoam+/${OF_VERSION}
+module load autoload openfoam+/${OF_VERSION}
 
 cd $SLURM_SUBMIT_DIR
 
@@ -48,8 +47,7 @@ fi
 
 # Run the case making sure the right nprocessors are used
 cd "$dirResults"
-n_proc=$(echo ${NODES} * ${PROC_PER_NODE} | bc) # same as ${SLURM_NTASKS}
-sed -i "s/\(n_proc=\)[0-9]\+/\1${n_proc}/" Allrun_case
+sed -i "s/\(n_proc=\)[0-9]\+/\1${SLURM_NTASKS}/" Allrun_case
 ./Allrun_case
 
 # Store for reuse if not alread present

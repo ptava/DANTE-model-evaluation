@@ -9,7 +9,7 @@ PARTITION="<partition_name>"
 ACCOUNT="<account_name>"
 TIME="24:00:00"
 OF_VERSION="v2312"
-#
+
 # Flags for common mesh and dynamic code to avoid redundant computations
 # Usefull only if we run each setup sequentially
 COMMON_MESH=false
@@ -33,7 +33,7 @@ for setup in "${setups[@]}"; do
         --job-name="OpenFOAM_${setup}" \
         --output="OpenFOAM_${setup}.out" \
         --error="OpenFOAM_${setup}.err" \
-        --export=SETUP="${setup}",COMMON_MESH="${COMMON_MESH}",COMMON_DYNAMIC_CODE="${COMMON_DYNAMIC_CODE}",OF_VERSION="${OF_VERSION} \
+        --export=SETUP="${setup}",COMMON_MESH="${COMMON_MESH}",COMMON_DYNAMIC_CODE="${COMMON_DYNAMIC_CODE}",OF_VERSION="${OF_VERSION}" \
         submit_setup.sh
 done
 
