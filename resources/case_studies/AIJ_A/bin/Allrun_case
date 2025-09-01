@@ -48,12 +48,14 @@ read -r dicts_resources \
 
 declare -A files_to_copy=(
     ["${dicts_resources}/blockMeshDict"]="${local_dicts}/blockMeshDict"
-    ["${dicts_resources}/topoSetDict"]="${local_dicts}/topoSetDict"
+    ["${dicts_resources}/topoSetDict.smoothing"]="${local_dicts}/topoSetDict.smoothing"
+    ["${dicts_resources}/topoSetDict.refinement"]="${local_dicts}/topoSetDict.refinement"
     ["${dicts_resources}/decomposeParDict"]="${local_dicts}/decomposeParDict"
     ["${dicts_resources}/fvSolution"]="${local_dicts}/fvSolution"
     ["${dicts_resources}/fvSchemes"]="${local_dicts}/fvSchemes"
     ["${dicts_resources}/controlDict"]="${local_dicts}/controlDict"
     ["${dicts_resources}/userDict"]="${local_dicts}/userDict"
+    ["${dicts_resources}/meshDict"]="${local_dicts}/meshDict"
     ["${props_resources}/transportProperties"]="${local_props}/transportProperties"
     ["${props_resources}/turbulenceProperties"]="${local_props}/turbulenceProperties"
 )
@@ -165,7 +167,7 @@ fi
 # Run the simulation in parallel
 
 echo "Running the simulation..."
-runApplication decomposePar
+runParallel redistributePar -decompose -overwrite -constant
 runParallel $(getApplication)
 echo "Simulation completed."
 
