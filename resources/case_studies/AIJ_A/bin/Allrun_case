@@ -114,7 +114,7 @@ set_fos "${local_functions}" || {
 if [ "${refinement}" = true ]; then
     protected_fos+=(
         ${refinement_fos[0]}
-        ${refinement_fos[1]}
+        ${refinement_fos[2]}
         ${refinement_fos[3]}
     )
 
