@@ -41,17 +41,18 @@ dry_run_setup() {
     dirOrig="$dirSetupOrig/0.orig"
     dirConstant="$dirSetupOrig/constant"
     dirSystem="$dirSetupOrig/system"
+    dirResources="$dirSetupOrig/resources"
 
     printf "\n# Create the setup: %s\n" "$setup"
 
     if [ ! -d "$dirSetup" ]; then
         mkdir -p "$dirSetup"
-
         cp -aRfL "setups.orig/common/." "$dirSetup"
         cp -afL "$dirSetupOrig"/All* "$dirSetup" 2>/dev/null || :
         [ -d "$dirOrig" ] && cp -aRfL "$dirOrig/." "$dirSetup/0.orig"
         [ -d "$dirConstant" ] && cp -aRfL "$dirConstant/." "$dirSetup/constant"
         [ -d "$dirSystem" ] && cp -aRfL "$dirSystem/." "$dirSetup/system"
+        [ -d "$dirResources" ] && cp -aRfL "$dirResources/." "$dirSetup/resources"
     else
         printf "\n      # Directory %s already exists\n" "$dirSetup"
         printf "      # Skipping the creation of a new setup\n"

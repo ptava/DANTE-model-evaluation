@@ -15,10 +15,10 @@ cd $SLURM_SUBMIT_DIR
 dirSetup="setups/${SETUP}"
 dirSetupOrig="setups.orig/${SETUP}"
 dirResults="results/${SETUP}"
-
 dirOrig="$dirSetupOrig/0.orig"
 dirConstant="$dirSetupOrig/constant"
 dirSystem="$dirSetupOrig/system"
+dirResources="$dirSetupOrig/resources"
 
 # Create setup directory if it does not exist and copy case files
 if [ ! -d "$dirSetup" ]; then
@@ -28,6 +28,7 @@ if [ ! -d "$dirSetup" ]; then
     [ -d "$dirOrig" ] && cp -aRfL "$dirOrig/." "$dirSetup/0.orig"
     [ -d "$dirConstant" ] && cp -aRfL "$dirConstant/." "$dirSetup/constant"
     [ -d "$dirSystem" ] && cp -aRfL "$dirSystem/." "$dirSetup/system"
+    [ -d "$dirResources" ] && cp -aRfL "$dirResources/." "$dirSetup/resources"
 fi
 
 # Create results directory if it does not exist and copy case files
