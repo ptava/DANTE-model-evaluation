@@ -161,6 +161,7 @@ if [ ! -d "${local_props}/polyMesh" ]; then
     ./Allrun_pre "${smoothing}"
 else
     echo "Mesh already exists, skipping mesh creation."
+    cp -r 0.orig 0
 fi
 
 #------------------------------------------------------------------------------
