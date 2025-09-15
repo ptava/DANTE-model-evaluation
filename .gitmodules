@@ -10,3 +10,12 @@
 [submodule "modules/functionObjects"]
 	path = modules/functionObjects
 	url = https://github.com/ptava/functionObjects
+[submodule "modules/fvMeshTopoChangers"]
+	path = modules/fvMeshTopoChangers
+	url = git@github.com:ptava/fvMeshTopoChangers.git
+[submodule "modules/functionObjects-foundation"]
+	path = modules/functionObjects-foundation
+	url = git@github.com:ptava/functionObjects-foundation.git
+[submodule "modules/kOmegaSSTSAS-foundation"]
+	path = modules/kOmegaSSTSAS-foundation
+	url = git@github.com:ptava/kOmegaSSTSAS-foundation.git
