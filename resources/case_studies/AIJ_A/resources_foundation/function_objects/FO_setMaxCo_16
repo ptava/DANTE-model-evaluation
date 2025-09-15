@@ -1,0 +1,89 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+-------------------------------------------------------------------------------
+Description
+    Set the maximum Courant number (maxCo) and ramp it down slightly over time.
+
+\*---------------------------------------------------------------------------*/
+
+maxCo
+{
+    type            coded;
+    libs            ("libutilityFunctionObjects.so");
+    name            maxCoRampDown;
+    enabled         true;
+    executeControl  timeStep;
+    executeInterval 10;
+    writeControl    none;
+    executeAtStart  false;
+
+    rampDown        0.01;
+    minValue        0.20;
+
+    codeInclude
+    #{
+        #include "uniformDimensionedFields.H"
+    #};
+
+    codeData
+    #{
+        scalar rampDown_;
+        scalar minValue_;
+    #};
+
+    codeRead
+    #{
+        rampDown_ = dict.lookupOrDefault<scalar>("rampDown", 0.01);
+        minValue_ = dict.lookupOrDefault<scalar>("minValue", 0.20);
+
+        const IOobject io
+        (
+            "customMaxCo",
+            mesh().time().constant(),
+            mesh().thisDb()
+        );
+
+        auto* ptr =
+            io.db().foundObject<uniformDimensionedScalarField>(io.name())
+            ? &io.db().lookupObjectRef<uniformDimensionedScalarField>(io.name())
+            : nullptr;
+
+        if (!ptr) {
+            Info << "Registering maxCo " << io.name() << endl;
+            const Time& runTime = mesh().time();
+            const IOdictionary& controlDict =
+                const_cast<IOdictionary &>(runTime.controlDict());
+            const scalar& initialValue = controlDict.lookup<scalar>("maxCo");
+
+            auto* ptr = new uniformDimensionedScalarField
+            (
+                io,
+                dimensionedScalar(dimless, initialValue)
+            );
+            ptr->store();
+        }
+    #};
+
+    codeExecute
+    #{
+        const IOobject io("customMaxCo", mesh().time().constant(), mesh().thisDb());
+
+        auto& val =
+            io.db().lookupObjectRef<uniformDimensionedScalarField>(io.name());
+        val.value() = max(minValue_, val.value() - rampDown_);
+
+        const Time& runTime = mesh().time();
+        IOdictionary& controlDict = const_cast<IOdictionary &>(runTime.controlDict());
+        controlDict.set("maxCo", val.value());
+
+        controlDict.regIOobject::write();
+
+        Info << "Updated maxCo to: " << val.value() << endl;
+    #};
+}
+
+// ************************************************************************* //

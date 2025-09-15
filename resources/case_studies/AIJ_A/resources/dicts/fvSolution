@@ -73,15 +73,6 @@ PIMPLE
 		}
 	}
 
-	// outerCorrectorResidualControl
-	// {
-	// 	"(U|omega|k)"
-	// 	{
-	// 		relTol		0;
-	// 		tolerance	1e-05;
-	// 	}
-	// }
-
     // Reference pressure
     pRefCell         0;
     pRefValue        0;

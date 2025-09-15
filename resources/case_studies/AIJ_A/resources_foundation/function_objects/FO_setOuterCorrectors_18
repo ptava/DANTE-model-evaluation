@@ -1,0 +1,78 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+nOutCorr
+{
+    type            coded;
+    libs            ("libutilityFunctionObjects.so");
+    name            decreaseNcorr;
+    enabled         true;
+    executeControl  runTime;
+    executeInterval 0.15;
+    writeControl    none;
+    executeAtStart  false;
+
+    defaultValue    5;
+    minValue        1;
+    rampDown        1;
+
+    codeData
+    #{
+        scalar defaultValue_;
+        scalar minValue_;
+        scalar rampDown_;
+    #};
+
+    codeRead
+    #{
+        defaultValue_ = dict.lookupOrDefault<scalar>("defaultValue", 5);
+        minValue_ = dict.lookupOrDefault<scalar>("maxValue", 1.0);
+        rampDown_ = dict.lookupOrDefault<scalar>("rampUp", 0.01);
+    #};
+
+    codeExecute
+    #{
+        IOdictionary fvSolutionDict
+        (
+            IOobject
+            (
+                    "fvSolution",
+                    mesh().time().system(),
+                    mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+            )
+        );
+
+        if (!fvSolutionDict.found("PIMPLE"))
+        {
+            FatalIOErrorInFunction(fvSolutionDict)
+                << "Missing 'PIMPLE' sub-dictionary in fvSolution." << nl
+                << exit(FatalIOError);
+        }
+        dictionary pimpleDict = fvSolutionDict.subDict("PIMPLE");
+
+        const label& nOuterCorr =
+            pimpleDict.lookupOrDefault("nOuterCorrectors", defaultValue_);
+        label newOuterCorr = max(minValue_, nOuterCorr - rampDown_);
+
+        if(newOuterCorr == nOuterCorr)
+        {
+            Info << "nOuterCorrectors is already at minimum value of: "
+                 << newOuterCorr << endl;
+            return 1;
+        }
+
+        pimpleDict.set("nOuterCorrectors", newOuterCorr);
+        fvSolutionDict.set("PIMPLE", pimpleDict);
+        fvSolutionDict.regIOobject::write();
+
+        Info << "Updated nOuterCorrectors to: " << newOuterCorr << endl;
+    #};
+}
+
+// ************************************************************************* //

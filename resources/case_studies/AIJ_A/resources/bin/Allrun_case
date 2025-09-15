@@ -1,0 +1,175 @@
+#!/bin/bash
+cd "${0%/*}" || exit                        
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions 
+
+#------------------------------------------------------------------------------
+
+# User parameters
+n_proc=16        # Set number of processors for parallel computing
+scale=0.25       # Set cells number scaling parameter
+delta_t=0.05     # Set acquisition time of post-processing
+start_time=2.0   # Set time to start averaging the solution (end of transient startup)
+end_time=3.0     # Set time to end the simulation
+smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
+refinement=false # Set to True if you want to refine the mesh
+
+# Local folders
+local_resources="resources" # Folder with resources
+local_dicts="system"        # Folder for local dictionaries
+local_props="constant"      # Folder for local properties
+
+#------------------------------------------------------------------------------
+# Source utility functions
+
+. ./Util_functions || {
+    echo "Util_functions not found in current folder" >&2
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Check if local directories are empty
+
+for folder in "${local_dicts}" "${local_props}"; do
+    check_if_empty "$folder"
+done
+
+#------------------------------------------------------------------------------
+# Copy source files and folders
+
+resources=$(check_resources -r "${local_resources}") || {
+    echo "Error checking resources" >&2
+    exit 1
+}
+read -r dicts_resources \
+        data_resources \
+        geometry_resources \
+        props_resources \
+        functions_resources <<< ${resources}
+
+declare -A files_to_copy=(
+    ["${dicts_resources}/blockMeshDict"]="${local_dicts}/blockMeshDict"
+    ["${dicts_resources}/topoSetDict.smoothing"]="${local_dicts}/topoSetDict.smoothing"
+    ["${dicts_resources}/topoSetDict.refinement"]="${local_dicts}/topoSetDict.refinement"
+    ["${dicts_resources}/decomposeParDict"]="${local_dicts}/decomposeParDict"
+    ["${dicts_resources}/fvSolution"]="${local_dicts}/fvSolution"
+    ["${dicts_resources}/fvSchemes"]="${local_dicts}/fvSchemes"
+    ["${dicts_resources}/controlDict"]="${local_dicts}/controlDict"
+    ["${dicts_resources}/userDict"]="${local_dicts}/userDict"
+    ["${dicts_resources}/meshDict"]="${local_dicts}/meshDict"
+    ["${props_resources}/transportProperties"]="${local_props}/transportProperties"
+    ["${props_resources}/turbulenceProperties"]="${local_props}/turbulenceProperties"
+)
+
+if [ "${refinement}" = "true" ]; then
+    files_to_copy["${dicts_resources}/dynamicMeshDict"]="${local_props}/dynamicMeshDict"
+fi
+
+for source in "${!files_to_copy[@]}"; do
+    target="${files_to_copy[$source]}"
+    copy_file_if_exists "$source" "$target" || {
+        echo "Error copying $source to $target" >&2
+        exit 1
+    }
+done
+
+cp -r "${functions_resources}" "${local_dicts}/." || {
+    echo "Error copying function objects to ${local_dicts} folder" >&2
+    exit 1
+}
+
+cp -r "${data_resources}/boundaryData" "${local_props}/." || {
+    echo "Error copying boundary data to ${local_props} folder" >&2
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Make changes in files
+
+protected_fos=(
+    "FO_Q_3.1"
+    "FO_yPlus_4"
+    "FO_sampleyPlus_5"
+    "FO_residuals_6"
+    "FO_fieldAverage_8"
+    "FO_isoSurfaces_15.1"
+    "FO_setMaxCo_16"
+    "FO_setRelaxationFactors_17"
+    "FO_setOuterCorrectors_18"
+)
+
+refinement_fos=(
+    "FO_sasRefineIndicator_8.8"
+    "FO_cuttingPlanesRefinement_14.2"
+    "FO_cuttingPlanesRefinement_14.3"
+    "FO_refinementInfo_19"
+)
+
+local_functions="${local_dicts}/function_objects"
+
+set_fos "${local_functions}" "${local_dicts}/controlDict" || {
+    echo "Error setting function objects" >&2
+    exit 1
+}
+
+if [ "${refinement}" = true ]; then
+    protected_fos+=(
+        ${refinement_fos[0]}
+        ${refinement_fos[2]}
+        ${refinement_fos[3]}
+    )
+
+    set_lib "mydynamicFvMesh" "${local_dicts}/controlDict" || {
+        echo "Error setting dynamic mesh library" >&2
+        exit 1
+    }
+    set_lib "myincompressibleTurbulenceModels" "${local_dicts}/controlDict" || {
+        echo "Error setting turbulence models library" >&2
+        exit 1
+    }
+    set_turbulence_model "mykOmegaSSTSAS" "${local_props}/turbulenceProperties" || {
+        echo "Error setting turbulence model" >&2
+        exit 1
+    }
+else
+    for fo in "${refinement_fos[@]}"; do
+        set_fo_states "off" "${local_functions}/${fo}" || {
+            echo "Error disabling function object $fo" >&2
+            exit 1
+        }
+    done
+fi
+
+set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}" || {
+    echo "Error setting acquisition time" >&2
+    exit 1
+}
+set_scaling $scale "${local_dicts}/userDict" || {
+    echo "Error setting cells scaling" >&2
+    exit 1
+}
+set_parallel $n_proc "${local_dicts}/decomposeParDict" || {
+    echo "Error setting number of processors" >&2
+    exit 1
+}
+
+
+#------------------------------------------------------------------------------
+# Create the computation domain if has not been created yet
+
+if [ ! -d "${local_props}/polyMesh" ]; then
+    echo "Creating the mesh..."
+    ./Allrun_pre "${smoothing}"
+else
+    echo "Mesh already exists, skipping mesh creation."
+    cp -r 0.orig 0
+fi
+
+#------------------------------------------------------------------------------
+# Run the simulation in parallel
+
+echo "Running the simulation..."
+runParallel redistributePar -decompose -overwrite -constant
+runParallel $(getApplication)
+echo "Simulation completed."
+
+#------------------------------------------------------------------------------

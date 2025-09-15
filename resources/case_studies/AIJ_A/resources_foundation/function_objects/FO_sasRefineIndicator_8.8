@@ -1,22 +1,26 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  v2406                                 |
+|  \\    /   O peration     | Version:  v2412                                 |
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 |    \\/     M anipulation  |                                                 |
-------------------------------------------------------------------------------
-Description:
-    This file contains the definitions for the ABL profiles coefficients
-    computed by minimizing the error between analytical and experimental values
 \*---------------------------------------------------------------------------*/
 
-Uref			2.745;
-Zref			0.00504;
-flowDir         (1 0 0);       
-zDir            (0 0 1);       
-z0              uniform 0.0000181;
-d               uniform 0.0;
-C1              0.03968;
-C2              0.41589;
+sasRefineIndicator
+{
+    libs             ("libmyfieldFunctionObjects.so");
+    type             sasRefineIndicator;
+    enabled          true;
+    executeControl   timeStep;
+    executeInterval  1;
+    writeControl     writeTime;
+    executeAtStart   false;
+    regionName       refine_cells;
+    focusRegion      core;
+    transferFunction oddScaler;
+    coreWeight       1000;
+    sigma            0.1;
+}
+
 
 // ************************************************************************* //

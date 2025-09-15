@@ -1,0 +1,175 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+relaxationFactor
+{
+    libs            ("libutilityFunctionObjects.so");
+    type            coded;
+    name            relaxationFactor;
+    executeControl  timeStep;
+    executeInterval 10;
+    writeControl    none;
+    executeAtStart  false;
+
+    maxValue        1.0;
+    rampUp          0.01;
+    fields          (p U omega k);
+
+    codeInclude
+    #{
+        #include "uniformDimensionedFields.H"
+    #};
+
+    localCode
+    #{
+        static dictionary findMatchingSubDict
+        (
+            const word& target,
+            const dictionary& rfDict
+        )
+        {
+            if (rfDict.subDict("fields").found(target))
+            {
+                return rfDict.subDict("fields");
+            }
+            else if (rfDict.subDict("equations").found(target))
+            {
+                return rfDict.subDict("equations");
+            }
+            else
+            {
+                FatalIOErrorInFunction(rfDict)
+                    << "No match for " << target << " in fields or "
+                    << "equations sub-dictionary in relaxationFactors"
+                    << exit(FatalIOError);
+            }
+            return rfDict; // to suppress compiler warning
+        };
+    #};
+
+    codeData
+    #{
+        scalar maxValue_;
+        scalar rampUp_;
+        wordList fields_;
+        autoPtr<IOdictionary> fvSolutionDictPtr_;
+    #};
+
+    codeRead
+    #{
+        maxValue_ = dict.lookupOrDefault<scalar>("maxValue", 1.0);
+        rampUp_ = dict.lookupOrDefault<scalar>("rampUp", 0.01);
+        fields_ = dict.lookupOrDefault<wordList>("fields", wordList::null());
+        fvSolutionDictPtr_.reset
+        (
+            new IOdictionary
+            (
+                IOobject
+                (
+                    "fvSolution",
+                    mesh().time().system(),
+                    mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                )
+            )
+        );
+
+        const dictionary& fvSolutionDict = *fvSolutionDictPtr_;
+
+        for (const auto& target : fields_) {
+
+            const IOobject io
+            (
+                "customRf_" + target,
+                mesh().time().constant(),
+                mesh().thisDb()
+            );
+
+            if (!io.db().foundObject<uniformDimensionedScalarField>(io.name()))
+            {
+                Info << "Registering relaxation factor " << io.name() << endl;
+
+                autoPtr<dictionary> rfDictPtr =
+                    fvSolutionDict.found("relaxationFactors")
+                    ? autoPtr<dictionary>
+                    (
+                        new dictionary
+                        (
+                            fvSolutionDict.subDict("relaxationFactors")
+                        )
+                    )
+                    : autoPtr<dictionary>(nullptr);
+
+                if (!rfDictPtr.valid())
+                {
+                    FatalIOErrorInFunction(fvSolutionDict)
+                        << "No relaxationFactors sub-dictionary"
+                        << exit(FatalIOError);
+                }
+
+                const dictionary rfDict = *rfDictPtr;
+                const dictionary matchDict = findMatchingSubDict(target, rfDict);
+
+                Info << "Using sub-dictionary " << matchDict.name()
+                     << " for field " << target << endl;
+
+                const scalar initialValue = matchDict.lookup<scalar>(target);
+                auto* ptr = new uniformDimensionedScalarField
+                (
+                    io,
+                    dimensionedScalar(dimless, initialValue)
+                );
+                ptr->store();
+            }
+        }
+    #};
+    
+    codeExecute
+    #{
+        if (fvSolutionDictPtr_.valid()) fvSolutionDictPtr_->readIfModified();
+        IOdictionary& fvSolutionDict = *fvSolutionDictPtr_;
+
+        dictionary rfDict(fvSolutionDict.subDict("relaxationFactors"));
+
+        for (const auto& target : fields_)
+        {
+            const IOobject io
+            (
+                "customRf_" + target,
+                mesh().time().constant(),
+                mesh().thisDb()
+            );
+
+            // Ramp a bit up the relaxation factor
+            auto& val =
+                io.db().lookupObjectRef<uniformDimensionedScalarField>
+                (
+                    io.name()
+                );
+            val.value() = min(maxValue_, val.value() + rampUp_);
+
+            dictionary matchDict = findMatchingSubDict(target, rfDict);
+
+            matchDict.set(target, val.value());
+            rfDict.set(matchDict.name().name(), matchDict);
+
+            Info
+                << "Set relaxation factor for "  << target 
+                << " to " << val.value() << endl;
+        }
+
+        // Write back updated dictionary
+        fvSolutionDict.set("relaxationFactors", rfDict);
+        fvSolutionDict.regIOobject::write();
+    #};
+}
+
+
+
+// ************************************************************************* //

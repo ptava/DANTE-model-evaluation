@@ -1,0 +1,1213 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+-------------------------------------------------------------------------------
+Description
+    Sample scalar qualntities along lines to be compared with experimental data
+\*---------------------------------------------------------------------------*/
+
+lines
+{
+    type                sets;
+    enabled             yes;
+    libs                ("libsampling.so");
+    interpolationScheme cellPoint;
+    setFormat           raw;
+    fields              (kMean UMeanMag);
+    startTime           1.3;
+    endTime             2.0;
+    executeControl      runTime;
+    executeInterval     0.05;
+    writeControl        runTime;
+    writeInterval       0.05;
+
+    sets
+    (
+		// Lines for plane <Plane XY@0.01>
+		line_-0.06_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.01);
+			end                (-0.06 0.3 0.01);
+			nPoints            500;
+		}
+		line_-0.04_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.04 -0.3 0.01);
+			end                (-0.04 0.3 0.01);
+			nPoints            500;
+		}
+		line_-0.02_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.02 -0.3 0.01);
+			end                (-0.02 0.3 0.01);
+			nPoints            500;
+		}
+		line_0_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.0 -0.3 0.01);
+			end                (0.0 0.3 0.01);
+			nPoints            500;
+		}
+		line_0.04_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.04 -0.3 0.01);
+			end                (0.04 0.3 0.01);
+			nPoints            500;
+		}
+		line_0.06_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.01);
+			end                (0.06 0.3 0.01);
+			nPoints            500;
+		}
+		line_0.1_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.01);
+			end                (0.1 0.3 0.01);
+			nPoints            500;
+		}
+		line_0.16_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.01);
+			end                (0.16 0.3 0.01);
+			nPoints            500;
+		}
+		line_0.26_0.01
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.01);
+			end                (0.26 0.3 0.01);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.04>
+		line_-0.06_0.04
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.04);
+			end                (-0.06 0.3 0.04);
+			nPoints            500;
+		}
+		line_0.06_0.04
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.04);
+			end                (0.06 0.3 0.04);
+			nPoints            500;
+		}
+		line_0.1_0.04
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.04);
+			end                (0.1 0.3 0.04);
+			nPoints            500;
+		}
+		line_0.16_0.04
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.04);
+			end                (0.16 0.3 0.04);
+			nPoints            500;
+		}
+		line_0.26_0.04
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.04);
+			end                (0.26 0.3 0.04);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.08>
+		line_-0.06_0.08
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.08);
+			end                (-0.06 0.3 0.08);
+			nPoints            500;
+		}
+		line_0.06_0.08
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.08);
+			end                (0.06 0.3 0.08);
+			nPoints            500;
+		}
+		line_0.1_0.08
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.08);
+			end                (0.1 0.3 0.08);
+			nPoints            500;
+		}
+		line_0.16_0.08
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.08);
+			end                (0.16 0.3 0.08);
+			nPoints            500;
+		}
+		line_0.26_0.08
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.08);
+			end                (0.26 0.3 0.08);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.12>
+		line_-0.06_0.12
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.12);
+			end                (-0.06 0.3 0.12);
+			nPoints            500;
+		}
+		line_0.06_0.12
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.12);
+			end                (0.06 0.3 0.12);
+			nPoints            500;
+		}
+		line_0.1_0.12
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.12);
+			end                (0.1 0.3 0.12);
+			nPoints            500;
+		}
+		line_0.16_0.12
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.12);
+			end                (0.16 0.3 0.12);
+			nPoints            500;
+		}
+		line_0.26_0.12
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.12);
+			end                (0.26 0.3 0.12);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.14>
+		line_-0.06_0.14
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.14);
+			end                (-0.06 0.3 0.14);
+			nPoints            500;
+		}
+		line_0.06_0.14
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.14);
+			end                (0.06 0.3 0.14);
+			nPoints            500;
+		}
+		line_0.1_0.14
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.14);
+			end                (0.1 0.3 0.14);
+			nPoints            500;
+		}
+		line_0.16_0.14
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.14);
+			end                (0.16 0.3 0.14);
+			nPoints            500;
+		}
+		line_0.26_0.14
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.14);
+			end                (0.26 0.3 0.14);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.16>
+		line_-0.06_0.16
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.16);
+			end                (-0.06 0.3 0.16);
+			nPoints            500;
+		}
+		line_0.06_0.16
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.16);
+			end                (0.06 0.3 0.16);
+			nPoints            500;
+		}
+		line_0.1_0.16
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.16);
+			end                (0.1 0.3 0.16);
+			nPoints            500;
+		}
+		line_0.16_0.16
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.16);
+			end                (0.16 0.3 0.16);
+			nPoints            500;
+		}
+		line_0.26_0.16
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.16);
+			end                (0.26 0.3 0.16);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.17>
+		line_-0.06_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.17);
+			end                (-0.06 0.3 0.17);
+			nPoints            500;
+		}
+		line_-0.04_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.04 -0.3 0.17);
+			end                (-0.04 0.3 0.17);
+			nPoints            500;
+		}
+		line_-0.02_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.02 -0.3 0.17);
+			end                (-0.02 0.3 0.17);
+			nPoints            500;
+		}
+		line_0_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.0 -0.3 0.17);
+			end                (0.0 0.3 0.17);
+			nPoints            500;
+		}
+		line_0.04_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.04 -0.3 0.17);
+			end                (0.04 0.3 0.17);
+			nPoints            500;
+		}
+		line_0.06_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.17);
+			end                (0.06 0.3 0.17);
+			nPoints            500;
+		}
+		line_0.1_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.17);
+			end                (0.1 0.3 0.17);
+			nPoints            500;
+		}
+		line_0.16_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.17);
+			end                (0.16 0.3 0.17);
+			nPoints            500;
+		}
+		line_0.26_0.17
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.17);
+			end                (0.26 0.3 0.17);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.19>
+		line_-0.06_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.19);
+			end                (-0.06 0.3 0.19);
+			nPoints            500;
+		}
+		line_-0.04_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.04 -0.3 0.19);
+			end                (-0.04 0.3 0.19);
+			nPoints            500;
+		}
+		line_-0.02_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.02 -0.3 0.19);
+			end                (-0.02 0.3 0.19);
+			nPoints            500;
+		}
+		line_0_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.0 -0.3 0.19);
+			end                (0.0 0.3 0.19);
+			nPoints            500;
+		}
+		line_0.04_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.04 -0.3 0.19);
+			end                (0.04 0.3 0.19);
+			nPoints            500;
+		}
+		line_0.06_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.19);
+			end                (0.06 0.3 0.19);
+			nPoints            500;
+		}
+		line_0.1_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.19);
+			end                (0.1 0.3 0.19);
+			nPoints            500;
+		}
+		line_0.16_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.19);
+			end                (0.16 0.3 0.19);
+			nPoints            500;
+		}
+		line_0.26_0.19
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.19);
+			end                (0.26 0.3 0.19);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.22>
+		line_-0.06_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.22);
+			end                (-0.06 0.3 0.22);
+			nPoints            500;
+		}
+		line_-0.04_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.04 -0.3 0.22);
+			end                (-0.04 0.3 0.22);
+			nPoints            500;
+		}
+		line_-0.02_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.02 -0.3 0.22);
+			end                (-0.02 0.3 0.22);
+			nPoints            500;
+		}
+		line_0_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.0 -0.3 0.22);
+			end                (0.0 0.3 0.22);
+			nPoints            500;
+		}
+		line_0.04_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.04 -0.3 0.22);
+			end                (0.04 0.3 0.22);
+			nPoints            500;
+		}
+		line_0.06_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.22);
+			end                (0.06 0.3 0.22);
+			nPoints            500;
+		}
+		line_0.1_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.22);
+			end                (0.1 0.3 0.22);
+			nPoints            500;
+		}
+		line_0.16_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.22);
+			end                (0.16 0.3 0.22);
+			nPoints            500;
+		}
+		line_0.26_0.22
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.22);
+			end                (0.26 0.3 0.22);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.28>
+		line_-0.06_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.28);
+			end                (-0.06 0.3 0.28);
+			nPoints            500;
+		}
+		line_-0.04_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.04 -0.3 0.28);
+			end                (-0.04 0.3 0.28);
+			nPoints            500;
+		}
+		line_-0.02_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.02 -0.3 0.28);
+			end                (-0.02 0.3 0.28);
+			nPoints            500;
+		}
+		line_0_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.0 -0.3 0.28);
+			end                (0.0 0.3 0.28);
+			nPoints            500;
+		}
+		line_0.04_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.04 -0.3 0.28);
+			end                (0.04 0.3 0.28);
+			nPoints            500;
+		}
+		line_0.06_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.28);
+			end                (0.06 0.3 0.28);
+			nPoints            500;
+		}
+		line_0.1_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.28);
+			end                (0.1 0.3 0.28);
+			nPoints            500;
+		}
+		line_0.16_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.28);
+			end                (0.16 0.3 0.28);
+			nPoints            500;
+		}
+		line_0.26_0.28
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.28);
+			end                (0.26 0.3 0.28);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XY@0.1>
+		line_-0.06_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.06 -0.3 0.1);
+			end                (-0.06 0.3 0.1);
+			nPoints            500;
+		}
+		line_-0.04_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.04 -0.3 0.1);
+			end                (-0.04 0.3 0.1);
+			nPoints            500;
+		}
+		line_-0.02_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.02 -0.3 0.1);
+			end                (-0.02 0.3 0.1);
+			nPoints            500;
+		}
+		line_0_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.0 -0.3 0.1);
+			end                (0.0 0.3 0.1);
+			nPoints            500;
+		}
+		line_0.04_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.04 -0.3 0.1);
+			end                (0.04 0.3 0.1);
+			nPoints            500;
+		}
+		line_0.06_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.06 -0.3 0.1);
+			end                (0.06 0.3 0.1);
+			nPoints            500;
+		}
+		line_0.1_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.3 0.1);
+			end                (0.1 0.3 0.1);
+			nPoints            500;
+		}
+		line_0.16_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.16 -0.3 0.1);
+			end                (0.16 0.3 0.1);
+			nPoints            500;
+		}
+		line_0.26_0.1
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.26 -0.3 0.1);
+			end                (0.26 0.3 0.1);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@0>
+		line_-0.06_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 0.0 0.0);
+			end                (-0.06 0.0 0.3);
+			nPoints            500;
+		}
+		line_-0.04_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.04 0.0 0.0);
+			end                (-0.04 0.0 0.3);
+			nPoints            500;
+		}
+		line_-0.02_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.02 0.0 0.0);
+			end                (-0.02 0.0 0.3);
+			nPoints            500;
+		}
+		line_0_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.0 0.0 0.0);
+			end                (0.0 0.0 0.3);
+			nPoints            500;
+		}
+		line_0.04_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.04 0.0 0.0);
+			end                (0.04 0.0 0.3);
+			nPoints            500;
+		}
+		line_0.06_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 0.0 0.0);
+			end                (0.06 0.0 0.3);
+			nPoints            500;
+		}
+		line_0.1_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 0.0 0.0);
+			end                (0.1 0.0 0.3);
+			nPoints            500;
+		}
+		line_0.16_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 0.0 0.0);
+			end                (0.16 0.0 0.3);
+			nPoints            500;
+		}
+		line_0.26_0
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 0.0 0.0);
+			end                (0.26 0.0 0.3);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@-0.02>
+		line_-0.06_-0.02
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 -0.02 0.0);
+			end                (-0.06 -0.02 0.3);
+			nPoints            500;
+		}
+		line_0.06_-0.02
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 -0.02 0.0);
+			end                (0.06 -0.02 0.3);
+			nPoints            500;
+		}
+		line_0.1_-0.02
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 -0.02 0.0);
+			end                (0.1 -0.02 0.3);
+			nPoints            500;
+		}
+		line_0.16_-0.02
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 -0.02 0.0);
+			end                (0.16 -0.02 0.3);
+			nPoints            500;
+		}
+		line_0.26_-0.02
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 -0.02 0.0);
+			end                (0.26 -0.02 0.3);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@-0.04>
+		line_-0.06_-0.04
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 -0.04 0.0);
+			end                (-0.06 -0.04 0.3);
+			nPoints            500;
+		}
+		line_0.06_-0.04
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 -0.04 0.0);
+			end                (0.06 -0.04 0.3);
+			nPoints            500;
+		}
+		line_0.1_-0.04
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 -0.04 0.0);
+			end                (0.1 -0.04 0.3);
+			nPoints            500;
+		}
+		line_0.16_-0.04
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 -0.04 0.0);
+			end                (0.16 -0.04 0.3);
+			nPoints            500;
+		}
+		line_0.26_-0.04
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 -0.04 0.0);
+			end                (0.26 -0.04 0.3);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@-0.05>
+		line_-0.06_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 -0.05 0.0);
+			end                (-0.06 -0.05 0.3);
+			nPoints            500;
+		}
+		line_-0.04_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.04 -0.05 0.0);
+			end                (-0.04 -0.05 0.3);
+			nPoints            500;
+		}
+		line_-0.02_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.02 -0.05 0.0);
+			end                (-0.02 -0.05 0.3);
+			nPoints            500;
+		}
+		line_0_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.0 -0.05 0.0);
+			end                (0.0 -0.05 0.3);
+			nPoints            500;
+		}
+		line_0.04_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.04 -0.05 0.0);
+			end                (0.04 -0.05 0.3);
+			nPoints            500;
+		}
+		line_0.06_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 -0.05 0.0);
+			end                (0.06 -0.05 0.3);
+			nPoints            500;
+		}
+		line_0.1_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 -0.05 0.0);
+			end                (0.1 -0.05 0.3);
+			nPoints            500;
+		}
+		line_0.16_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 -0.05 0.0);
+			end                (0.16 -0.05 0.3);
+			nPoints            500;
+		}
+		line_0.26_-0.05
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 -0.05 0.0);
+			end                (0.26 -0.05 0.3);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@-0.07>
+		line_-0.06_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 -0.07 0.0);
+			end                (-0.06 -0.07 0.3);
+			nPoints            500;
+		}
+		line_-0.04_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.04 -0.07 0.0);
+			end                (-0.04 -0.07 0.3);
+			nPoints            500;
+		}
+		line_-0.02_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.02 -0.07 0.0);
+			end                (-0.02 -0.07 0.3);
+			nPoints            500;
+		}
+		line_0_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.0 -0.07 0.0);
+			end                (0.0 -0.07 0.3);
+			nPoints            500;
+		}
+		line_0.04_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.04 -0.07 0.0);
+			end                (0.04 -0.07 0.3);
+			nPoints            500;
+		}
+		line_0.06_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 -0.07 0.0);
+			end                (0.06 -0.07 0.3);
+			nPoints            500;
+		}
+		line_0.1_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 -0.07 0.0);
+			end                (0.1 -0.07 0.3);
+			nPoints            500;
+		}
+		line_0.16_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 -0.07 0.0);
+			end                (0.16 -0.07 0.3);
+			nPoints            500;
+		}
+		line_0.26_-0.07
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 -0.07 0.0);
+			end                (0.26 -0.07 0.3);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@-0.09>
+		line_-0.06_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 -0.09 0.0);
+			end                (-0.06 -0.09 0.3);
+			nPoints            500;
+		}
+		line_-0.04_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.04 -0.09 0.0);
+			end                (-0.04 -0.09 0.3);
+			nPoints            500;
+		}
+		line_-0.02_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.02 -0.09 0.0);
+			end                (-0.02 -0.09 0.3);
+			nPoints            500;
+		}
+		line_0_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.0 -0.09 0.0);
+			end                (0.0 -0.09 0.3);
+			nPoints            500;
+		}
+		line_0.04_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.04 -0.09 0.0);
+			end                (0.04 -0.09 0.3);
+			nPoints            500;
+		}
+		line_0.06_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 -0.09 0.0);
+			end                (0.06 -0.09 0.3);
+			nPoints            500;
+		}
+		line_0.1_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 -0.09 0.0);
+			end                (0.1 -0.09 0.3);
+			nPoints            500;
+		}
+		line_0.16_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 -0.09 0.0);
+			end                (0.16 -0.09 0.3);
+			nPoints            500;
+		}
+		line_0.26_-0.09
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 -0.09 0.0);
+			end                (0.26 -0.09 0.3);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@-0.12>
+		line_-0.06_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 -0.12 0.0);
+			end                (-0.06 -0.12 0.3);
+			nPoints            500;
+		}
+		line_-0.04_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.04 -0.12 0.0);
+			end                (-0.04 -0.12 0.3);
+			nPoints            500;
+		}
+		line_-0.02_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.02 -0.12 0.0);
+			end                (-0.02 -0.12 0.3);
+			nPoints            500;
+		}
+		line_0_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.0 -0.12 0.0);
+			end                (0.0 -0.12 0.3);
+			nPoints            500;
+		}
+		line_0.04_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.04 -0.12 0.0);
+			end                (0.04 -0.12 0.3);
+			nPoints            500;
+		}
+		line_0.06_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 -0.12 0.0);
+			end                (0.06 -0.12 0.3);
+			nPoints            500;
+		}
+		line_0.1_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 -0.12 0.0);
+			end                (0.1 -0.12 0.3);
+			nPoints            500;
+		}
+		line_0.16_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 -0.12 0.0);
+			end                (0.16 -0.12 0.3);
+			nPoints            500;
+		}
+		line_0.26_-0.12
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 -0.12 0.0);
+			end                (0.26 -0.12 0.3);
+			nPoints            500;
+		}
+
+		// Lines for plane <Plane XZ@-0.16>
+		line_-0.06_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.06 -0.16 0.0);
+			end                (-0.06 -0.16 0.3);
+			nPoints            500;
+		}
+		line_-0.04_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.04 -0.16 0.0);
+			end                (-0.04 -0.16 0.3);
+			nPoints            500;
+		}
+		line_-0.02_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (-0.02 -0.16 0.0);
+			end                (-0.02 -0.16 0.3);
+			nPoints            500;
+		}
+		line_0_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.0 -0.16 0.0);
+			end                (0.0 -0.16 0.3);
+			nPoints            500;
+		}
+		line_0.04_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.04 -0.16 0.0);
+			end                (0.04 -0.16 0.3);
+			nPoints            500;
+		}
+		line_0.06_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.06 -0.16 0.0);
+			end                (0.06 -0.16 0.3);
+			nPoints            500;
+		}
+		line_0.1_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.1 -0.16 0.0);
+			end                (0.1 -0.16 0.3);
+			nPoints            500;
+		}
+		line_0.16_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.16 -0.16 0.0);
+			end                (0.16 -0.16 0.3);
+			nPoints            500;
+		}
+		line_0.26_-0.16
+		{
+			type               lineUniform;
+			axis               z;
+			start              (0.26 -0.16 0.0);
+			end                (0.26 -0.16 0.3);
+			nPoints            500;
+		}
+    );
+}
+
+// *********************************************************************** //

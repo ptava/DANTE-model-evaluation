@@ -27,7 +27,7 @@ maxCo {
         auto *ptr = io.db().getObjectPtr<uniformDimensionedScalarField>(io.name());
 
         if (!ptr) {
-            Info << "Registering relaxation factor " << io.name() << endl;
+            Info << "Registering maxCo " << io.name() << endl;
             const Time &runTime = mesh().time();
             const dictionary &controlDict =
                 const_cast<dictionary &>(runTime.controlDict());

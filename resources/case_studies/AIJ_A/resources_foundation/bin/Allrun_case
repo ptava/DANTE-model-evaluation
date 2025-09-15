@@ -54,6 +54,7 @@ declare -A files_to_copy=(
     ["${dicts_resources}/fvSolution"]="${local_dicts}/fvSolution"
     ["${dicts_resources}/fvSchemes"]="${local_dicts}/fvSchemes"
     ["${dicts_resources}/controlDict"]="${local_dicts}/controlDict"
+    ["${dicts_resources}/functions"]="${local_dicts}/functions"
     ["${dicts_resources}/userDict"]="${local_dicts}/userDict"
     ["${dicts_resources}/meshDict"]="${local_dicts}/meshDict"
     ["${props_resources}/transportProperties"]="${local_props}/transportProperties"
@@ -106,7 +107,7 @@ refinement_fos=(
 
 local_functions="${local_dicts}/function_objects"
 
-set_fos "${local_functions}" || {
+set_fos "${local_functions}" "${local_dicts}/functions" || {
     echo "Error setting function objects" >&2
     exit 1
 }
@@ -118,12 +119,16 @@ if [ "${refinement}" = true ]; then
         ${refinement_fos[3]}
     )
 
-    set_lib "mydynamicFvMesh" "${local_dicts}/controlDict" || {
+    set_lib "libmyfvMeshTopoChangers.so" "${local_dicts}/controlDict" || {
         echo "Error setting dynamic mesh library" >&2
         exit 1
     }
-    set_lib "myincompressibleTurbulenceModels" "${local_dicts}/controlDict" || {
+    set_lib "libmyincompressibleMomentumTransportModels.so" "${local_dicts}/controlDict" || {
         echo "Error setting turbulence models library" >&2
+        exit 1
+    }
+    set_lib "libfvMeshDistributors.so" "${local_dicts}/controlDict" || {
+        echo "Error setting mesh distribution library" >&2
         exit 1
     }
     set_turbulence_model "mykOmegaSSTSAS" "${local_props}/turbulenceProperties" || {
@@ -168,7 +173,7 @@ fi
 # Run the simulation in parallel
 
 echo "Running the simulation..."
-runParallel redistributePar -decompose -overwrite -constant
+runApplication decomposePar -force -constant
 runParallel $(getApplication)
 echo "Simulation completed."
 

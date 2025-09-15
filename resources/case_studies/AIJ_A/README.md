@@ -29,4 +29,6 @@
     ! Set `refineScale` in `dynamicMeshDict` as a Function1 to smoothly increase the number of refined cells over time
 
 
+* Prepared for OpenFOAM by ESI-OpenCFD and OpenFOAM Foundation
+
 
