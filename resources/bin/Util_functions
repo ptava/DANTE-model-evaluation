@@ -136,7 +136,7 @@ set_parallel() {
 }
 
 ###############################################################################
-# set_fos <FOsDir>
+# set_fos <FOsDir> <path-to-file>
 #
 # • Adds all FOs in the directory to system/controlDict/functions.
 # • FOs are sorted by the number at the end of their filename.
@@ -150,6 +150,7 @@ set_parallel() {
 set_fos() {
     local fo_name_pattern="^FO_.*_([0-9]+\.?[0-9]*)$"
     local fo_dir="$1"
+    local functions_file="$2"
 
     #--- sanity checks ---#
     if [[ -z $fo_dir || ! -d $fo_dir ]]; then
@@ -157,10 +158,8 @@ set_fos() {
         return 1
     fi
 
-    local control_dict="system/controlDict"
-
-    if [[ ! -f $control_dict ]]; then
-        echo "Error: ${control_dict} not found in system folder" >&2
+    if [[ ! -f $functions_file ]]; then
+        echo "Error: ${functions_file} not found in system folder" >&2
         return 1
     fi
 
@@ -178,24 +177,29 @@ set_fos() {
     )
 
     # Build the block to insert
-    fo_block="functions {\n"
+    fo_block=""
     echo "Adding Function Objects:"
+
     for fo in "${sorted_fo_files[@]}"; do
         echo -e "\t⇲ $(basename "$fo")"
         fo_block+="\t#include \"./"$fo"\"\n"
     done
-    fo_block+="}\n"
+    
+    if [[ $(basename "${functions_file}") == "controlDict" ]]; then
+        fo_block="functions {\n${fo_block}}"
+        fo_block+="}\n"
+    fi
 
     # Insert the block before the last line of controlDict
     tmp_file=$(mktemp)
-    total_lines=$(wc -l < "$control_dict")
+    total_lines=$(wc -l < "$functions_file")
     insert_line=$((total_lines - 1))
-    head -n "$insert_line" "$control_dict" > "$tmp_file"
+    head -n "$insert_line" "$functions_file" > "$tmp_file"
     echo -e "$fo_block" >> "$tmp_file"
-    tail -n 1 "$control_dict" >> "$tmp_file"
+    tail -n 1 "$functions_file" >> "$tmp_file"
 
     # Overwrite original controlDict
-    mv "$tmp_file" "$control_dict"
+    mv "$tmp_file" "$functions_file"
 }
 
 ###############################################################################
@@ -351,7 +355,7 @@ set_lib() {
             return 0
         fi
         sed -E -i \
-            "s/^([[:space:]]*libs[[:space:]]*\([^)]*)\);/\1 $tok);/" "$file"
+            "s/^([[:space:]]*libs[[:space:]]*\([^)]*)\);/\1 \"$tok\");/" "$file"
         echo "Inserting '$tok' into inline libs(...)."
     fi
 
@@ -373,7 +377,7 @@ set_lib() {
         sed -E -i \
             "/^[[:space:]]*libs[[:space:]]*\($/,/^[[:space:]]*\);/{
                 /^[[:space:]]*\);/ i\\
-${indent}${tok}
+${indent}\"${tok}\"
             }" "$file"
         echo "Inserting '$tok' into multiline libs(...)."
         return 0

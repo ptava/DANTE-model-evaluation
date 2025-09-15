@@ -12,7 +12,7 @@
 #
 # • Ready-to-run test cases are located in the resources/case_studies directory
 #   and their structure must be as follows:
-#   <case_name>
+#   <case_name>/<resources-folder>
 #   ├── README.md
 #   ├── bin                         --> <caseFolder>/
 #   │   ├── Allrun_case
@@ -55,7 +55,10 @@ RESOURCES_DIR="${ROOT_DIR}/resources"
 CASE_STUDIES_DIR="${RESOURCES_DIR}/case_studies"
 BIN_DIR="${RESOURCES_DIR}/bin"
 SLURM_DIR="${RESOURCES_DIR}/slurm"
+
+CASE_RESOURCES="resources"
 ALLRUN_ANALYSIS_SCRIPT="Allrun_analysis"
+ZERO_FOLDER="0.orig"
 
 #--- Usage Function ---#
 usage() {
@@ -79,6 +82,10 @@ usage() {
     Options:
         -a, --analysis      Enable analysis mode (default: off)
         -s, --slurm         Use slurm scripts (default: off)
+        -t, --theoretical   Use theoretical boundary conditions instead of
+                            experimental (default: experimental)
+        -r, --resources     Change case resources directory (default:
+                            <case_name>/resources)
         -h, --help          Show this help message and exit
 EOF
 }
@@ -102,6 +109,18 @@ parse_args() {
                     ALLRUN_ANALYSIS_SCRIPT="Allsubmit_analysis"
                 fi
                 shift
+                ;;
+            -t|--theoretical)
+                ZERO_FOLDER+=".theoretical"
+                shift
+                ;;
+            -r|--resources)
+                if [[ -z "$2" ]]; then
+                    echo "Error: --resources option requires an argument." >&2
+                    exit 1
+                fi
+                CASE_RESOURCES+="_$2"
+                shift 2
                 ;;
             -h|--help)
                 usage
@@ -168,6 +187,14 @@ validate_case_name() {
 prepare() {
     #--- create main case folder ---#
 
+    # reference folder with sanity check
+    local reference="${case_reference}/${CASE_RESOURCES}"
+
+    if [[ ! -d ${reference} ]]; then
+        echo "Error: Reference folder '${reference}' does not exist." >&2
+        exit 1
+    fi
+
     # make subdirectories
     local constant_folder="${case_folder}/constant"
     local system_folder="${case_folder}/system"
@@ -179,18 +206,18 @@ prepare() {
 
     # copy executable scripts to case folder
     cp "${BIN_DIR}/Util_functions" "${case_folder}/."
-    cp "${case_reference}/bin/"* "${case_folder}/."
+    cp "${reference}/bin/"* "${case_folder}/."
 
     # copy files from case reference to specific case folders
-    cp -r "${case_reference}/boundary_conditions/0.orig" "${case_folder}/."
+    cp -r "${reference}/boundary_conditions/${ZERO_FOLDER}" "${case_folder}/0.orig"
 
     # copy files from case reference to resources folder
-    cp -r "${case_reference}/dicts" "${resources_folder}/."
-    cp -r "${case_reference}/geometry" "${resources_folder}/."
-    cp -r "${case_reference}/properties" "${resources_folder}/."
-    cp -r "${case_reference}/function_objects" "${resources_folder}/."
-    cp -r "${case_reference}/data" "${resources_folder}/."
-    cp -r "${case_reference}/boundary_conditions/boundaryData" "${resources_folder}/data/."
+    cp -r "${reference}/dicts" "${resources_folder}/."
+    cp -r "${reference}/geometry" "${resources_folder}/."
+    cp -r "${reference}/properties" "${resources_folder}/."
+    cp -r "${reference}/function_objects" "${resources_folder}/."
+    cp -r "${reference}/data" "${resources_folder}/."
+    cp -r "${reference}/boundary_conditions/boundaryData" "${resources_folder}/data/."
 
     echo "+--- Created case folder"
 
