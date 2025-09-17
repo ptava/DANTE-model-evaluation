@@ -20,33 +20,38 @@ nOutCorr
     minValue        1;
     rampDown        1;
 
+    startTime       0;
+    endTime         #calc "${startTime} + ${executeInterval} * ${defaultValue}";
+
     codeData
     #{
-        scalar defaultValue_;
-        scalar minValue_;
-        scalar rampDown_;
+        label defaultValue_;
+        label minValue_;
+        label rampDown_;
+        autoPtr<IOdictionary> fvSolutionDictPtr_;
     #};
 
     codeRead
     #{
         defaultValue_ = dict.lookupOrDefault<scalar>("defaultValue", 5);
-        minValue_ = dict.lookupOrDefault<scalar>("maxValue", 1.0);
-        rampDown_ = dict.lookupOrDefault<scalar>("rampUp", 0.01);
-    #};
-
-    codeExecute
-    #{
-        IOdictionary fvSolutionDict
+        minValue_ = dict.lookupOrDefault<label>("minValue", 1);
+        rampDown_ = dict.lookupOrDefault<label>("rampDown", 1);
+        fvSolutionDictPtr_.reset
         (
-            IOobject
+            new IOdictionary
             (
+                IOobject
+                (
                     "fvSolution",
                     mesh().time().system(),
                     mesh(),
                     IOobject::MUST_READ,
                     IOobject::AUTO_WRITE
+                )
             )
         );
+
+        const dictionary& fvSolutionDict = *fvSolutionDictPtr_;
 
         if (!fvSolutionDict.found("PIMPLE"))
         {
@@ -54,6 +59,13 @@ nOutCorr
                 << "Missing 'PIMPLE' sub-dictionary in fvSolution." << nl
                 << exit(FatalIOError);
         }
+    #};
+
+    codeExecute
+    #{
+        if (fvSolutionDictPtr_.valid()) fvSolutionDictPtr_->regIOobject::read();
+
+        IOdictionary& fvSolutionDict = *fvSolutionDictPtr_;
         dictionary pimpleDict = fvSolutionDict.subDict("PIMPLE");
 
         const label& nOuterCorr =

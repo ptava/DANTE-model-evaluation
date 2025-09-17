@@ -6,8 +6,8 @@
 #       endTime        ← <endTime>
 #       writeInterval  ← <endTime>
 # • Updates every Function Object:
-#       timeStart      ← <startTime>
-#       timeEnd        ← <endTime>
+#       timeStart|startTime     ← <startTime>
+#       timeEnd|endTime         ← <endTime>
 #   …and, unless the FO file is listed in the “protected” arguments…
 #       executeInterval ← <Δt>
 #       writeInterval   ← <Δt>
@@ -40,8 +40,8 @@ set_acquisition_time() {
     for fo in "${fo_files[@]}"; do
         if [[ ! " ${protected[*]} " =~ " $(basename "$fo") " ]]; then
             sed -Ei "
-                s/(^[[:space:]]*timeStart[[:space:]]+).*/\1${start_time};/;
-                s/(^[[:space:]]*timeEnd[[:space:]]+).*/\1${end_time};/
+                s/(^[[:space:]]*(timeStart|startTime)[[:space:]]+).*/\1${start_time};/;
+                s/(^[[:space:]]*(timeEnd|startTime)[[:space:]]+).*/\1${end_time};/
             " "$fo"
             sed -Ei "
                 s/(^[[:space:]]*executeInterval[[:space:]]+).*/\1${acquisition_dt};/;

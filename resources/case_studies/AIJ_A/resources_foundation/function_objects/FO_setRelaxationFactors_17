@@ -23,6 +23,7 @@ relaxationFactor
     codeInclude
     #{
         #include "uniformDimensionedFields.H"
+        #include "IOdictionary.H"
     #};
 
     localCode
@@ -58,6 +59,7 @@ relaxationFactor
         scalar rampUp_;
         wordList fields_;
         autoPtr<IOdictionary> fvSolutionDictPtr_;
+        bool active_ = true;
     #};
 
     codeRead
@@ -132,10 +134,14 @@ relaxationFactor
     
     codeExecute
     #{
-        if (fvSolutionDictPtr_.valid()) fvSolutionDictPtr_->readIfModified();
-        IOdictionary& fvSolutionDict = *fvSolutionDictPtr_;
+        if (!active_) return 0;
 
+        if (fvSolutionDictPtr_.valid()) fvSolutionDictPtr_->regIOobject::read();
+
+        IOdictionary& fvSolutionDict = *fvSolutionDictPtr_;
         dictionary rfDict(fvSolutionDict.subDict("relaxationFactors"));
+
+        bool haveTheyReachedMax = true;
 
         for (const auto& target : fields_)
         {
@@ -162,11 +168,23 @@ relaxationFactor
             Info
                 << "Set relaxation factor for "  << target 
                 << " to " << val.value() << endl;
+
+            haveTheyReachedMax = haveTheyReachedMax && (val.value() >= maxValue_);
         }
 
         // Write back updated dictionary
         fvSolutionDict.set("relaxationFactors", rfDict);
         fvSolutionDict.regIOobject::write();
+
+        // If all have reached maxValue_, deactivate this function object
+        if (haveTheyReachedMax)
+        {
+            Info << "All relaxation factors have reached maxValue of "
+                 << maxValue_ << ", "
+                 << "deactivating this function object." << endl;
+
+            active_ = false;
+        }
     #};
 }
 

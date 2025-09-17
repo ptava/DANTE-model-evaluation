@@ -12,7 +12,7 @@ refinementY1
     type                surfaces;
     libs                ("libsampling.so");
     surfaceFormat       vtk;
-    fields              ( cellError expectedCellError sasRefineIndicator );
+    fields              ( cellError sasRefineIndicator );
     startTime           1.0;
     endTime             2.0;
     writeControl        runTime;
@@ -39,7 +39,7 @@ refinementZ1
     type               surfaces;
     libs               ("libsampling.so");
     surfaceFormat      vtk;
-    fields             ( cellError expectedCellError sasRefineIndicator );
+    fields             ( cellError sasRefineIndicator );
     startTime          1.0;
     endTime            2.0;
     writeControl       runTime;
