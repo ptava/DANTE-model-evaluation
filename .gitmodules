@@ -2,20 +2,23 @@
 	path = modules/integration-cfmesh
 	url = https://github.com/ptava/integration-cfmesh
 [submodule "modules/kOmegaSSTSAS"]
-	path = modules/kOmegaSSTSAS
+	path = modules/esi/kOmegaSSTSAS
 	url = https://github.com/ptava/kOmegaSSTSAS
 [submodule "modules/dynamicFvMesh"]
-	path = modules/dynamicFvMesh
+	path = modules/esi/dynamicFvMesh
 	url = https://github.com/ptava/dynamicFvMesh
 [submodule "modules/functionObjects"]
-	path = modules/functionObjects
+	path = modules/esi/functionObjects
 	url = https://github.com/ptava/functionObjects
 [submodule "modules/fvMeshTopoChangers"]
-	path = modules/fvMeshTopoChangers
+	path = modules/foundation/fvMeshTopoChangers
 	url = https://github.com/ptava/fvMeshTopoChangers.git
 [submodule "modules/functionObjects-foundation"]
-	path = modules/functionObjects-foundation
+	path = modules/foundation/functionObjects
 	url = https://github.com/ptava/functionObjects-foundation.git
 [submodule "modules/kOmegaSSTSAS-foundation"]
-	path = modules/kOmegaSSTSAS-foundation
+	path = modules/foundation/kOmegaSSTSAS
 	url = https://github.com/ptava/kOmegaSSTSAS-foundation.git
+[submodule "modules/finiteVolume-foundation"]
+	path = modules/foundation/finiteVolume
+	url = https://github.com/ptava/finiteVolume-foundation.git
