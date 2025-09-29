@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------
 module load profile/eng
 module load intel-oneapi-compilers
-module load autoload openfoam+/${OF_VERSION}
+module load autoload ${OF_MODULE}
 
 cd $SLURM_SUBMIT_DIR
 
