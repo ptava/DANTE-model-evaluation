@@ -1,6 +1,8 @@
 # Notes
 
-![geometry](https://github.com/ptava/DANTE_model-evaluation/docs/validation-master-document/imgs/aij_a_geometry?raw=true)
+<p align="center">
+    <img src="../../../docs/validation-master-document/imgs/aij_A_geometry.png" width="50%" height="50%">
+</p>
 
 * Scale-Adaptive unsteady RANS
 
@@ -12,8 +14,14 @@
     - `cells_scaling`: scaling factor for the number of cells in the x, y, and z directions
     - `building_ratio`: ratio of the building height to the building width (default is 2 which corresponds to the reference experiment); the grid maintains the same distance between building and top boundary
 
-![grid](https://github.com/ptava/DANTE_model-evaluation/docs/validation-master-document/imgs/aij_a_grid?raw=true)
-![smoothing](https://github.com/ptava/DANTE_model-evaluation/docs/validation-master-document/imgs/aij_a_smoothing?raw=true)
+<p align="center">
+    <img src="../../../docs/validation-master-document/imgs/aij_A_grid.png" width="50%" height="50%">
+</p>
+
+<p align="center">
+    <img src="../../../docs/validation-master-document/imgs/aij_A_smoothing.png" width="50%" height="50%">
+</p>
+
 
 * Enhanced solving stability with:
     - ramp up of inflow boundary condition (U, k, omega): 1  --> 100 *%* of velocity magnitude
