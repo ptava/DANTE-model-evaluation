@@ -14,10 +14,17 @@ This repository contains the up-to-date model evaluation strategy defined for ci
     │                                       # and test cases results
     ├── modules                             # additional modules for
     │   │                                   # model evaluation
-    │   ├── integration-cfmesh
-    │   ├── kOmegaSSTSAS
-    │   ├── dynamicFvMesh
-    │   └── functionObjects
+    │   ├── esi (v2412)
+    │   │   ├── kOmegaSSTSAS
+    │   │   ├── dynamicFvMesh
+    │   │   └── functionObjects
+    │   │
+    │   ├── foundation (OpenFOAM13)
+    │   │   ├── kOmegaSSTSAS
+    │   │   ├── fvMeshTopoChangers
+    │   │   ├── finiteVolume
+    │   │   └── functionObjects
+    │   └── integration-cfmesh
     │                                       
     └── resources
         ├── bin                             # bash executables 
@@ -70,6 +77,8 @@ To enable quick set-up of OpenFOAM comparative analysis for a prepared case stud
 
 ```bash
     ./resources/bin/Prepare <case_name> <folder_name>
+    ./resources/bin/Prepare -a <case_name> <folder_name>
+    ./resources/bin/Prepare -a -s -r 'foundation' <case_name> <folder_name>
 ```
 
 #### Function objects
@@ -95,9 +104,7 @@ Install with:
 ### Additional modules
 Additional modules for OpenFOAM are available in the `modules` directory. After cloning this repository, fetch the modules with:
 ```bash
-    git submodule update --init modules/dynamicFvMesh
-    git submodule update --init modules/kOmegaSSTSAS
-    git submodule update --init modules/functionObjects
+    git submodule update --init --recursive
 ```
 
-These additional modules are required to run adaptive mesh refinement for kOmegaSSTSAS turbulence model and to enable additional function objects for post-processing associated to refinement procedure.
+Except for the `integration-cfmesh` module, which is required for grid generation, the other modules are optional and can be used as needed. These additional modules are required to run adaptive mesh refinement for kOmegaSSTSAS turbulence model and to enable additional function objects for post-processing associated to refinement procedure.
