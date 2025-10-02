@@ -1,5 +1,9 @@
 # Notes
 
+<p align="center">
+    <img src="../../../docs/validation-master-document/imgs/aij_C_geometry.png" width="50%" height="50%">
+</p>
+
 * Scale-Adaptive unsteady RANS
 
 * Inflow conditions are experimental; user can specify OF boundary conditions implemented in the `libatmosphericModels` library with required parameters in `./ABLConditions`.
