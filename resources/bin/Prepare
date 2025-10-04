@@ -47,6 +47,11 @@
 #--- Safeguard ---#
 set -euo pipefail
 
+# Small helpers
+die() { echo "Error: $*" >&2; exit 1; }
+req_dir() { [[ -d "$1" ]] || die "'$1' does not exist."; }
+req_file() { [[ -f "$1" ]] || die "'$1' not found."; }
+
 #--- Defaults ---#
 MODE_ANALYSIS=false
 MODE_SLURM=false
@@ -189,11 +194,16 @@ prepare() {
 
     # reference folder with sanity check
     local reference="${case_reference}/${CASE_RESOURCES}"
+    req_dir "${reference}"
 
-    if [[ ! -d ${reference} ]]; then
-        echo "Error: Reference folder '${reference}' does not exist." >&2
-        exit 1
-    fi
+    # ensure required reference subfolders esist
+    req_dir "${reference}/boundary_conditions/${ZERO_FOLDER}"
+    req_dir "${reference}/function_objects"
+    req_dir "${reference}/properties"
+    req_dir "${reference}/geometry"
+    req_dir "${reference}/dicts"
+    req_dir "${reference}/data"
+    req_dir "${reference}/bin"
 
     # make subdirectories
     local constant_folder="${case_folder}/constant"
@@ -205,6 +215,8 @@ prepare() {
     mkdir -p "${resources_folder}"
 
     # copy executable scripts to case folder
+    req_dir "${BIN_DIR}"
+    req_file "${BIN_DIR}/Util_functions"
     cp "${BIN_DIR}/Util_functions" "${case_folder}/."
     cp "${reference}/bin/"* "${case_folder}/."
 
@@ -237,11 +249,14 @@ prepare() {
         mv "${temp_folder}" "${setups_folder}/common"
 
         # copy executable scripts to analysis folder
+        req_file "${BIN_DIR}/${ALLRUN_ANALYSIS_SCRIPT}"
+        req_file "${BIN_DIR}/Allclean_analysis"
         cp "${BIN_DIR}/${ALLRUN_ANALYSIS_SCRIPT}" "${case_folder}/."
         cp "${BIN_DIR}/Allclean_analysis" "${case_folder}/."
 
         # add slurm scripts if requested
         if [[ $MODE_SLURM == true ]]; then
+            req_dir "${SLURM_DIR}"
             cp "${SLURM_DIR}/"* "${case_folder}/."
         fi
 
