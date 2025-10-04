@@ -1,0 +1,23 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+Q2
+{
+    type            Q;
+    libs            (fieldFunctionObjects);
+    enabled         true;
+    log             true;
+    timeStart       2.7;
+    timeEnd         3.0;
+    executeControl  timeStep;
+    executeInterval 4;
+    writeControl    none;
+}
+
+
+// ************************************************************************* //

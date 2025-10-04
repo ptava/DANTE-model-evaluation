@@ -1,0 +1,49 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+relaxationFactor {
+    libs            (utilityFunctionObjects);
+    type            coded;
+    name            relaxationFactor;
+    executeControl  runTime;
+    executeInterval 0.015;
+    writeControl    none;
+
+    codeRead
+    #{
+        const double initialValue = 0.6;
+        const IOobject io("customRf", mesh().time().constant(), mesh().thisDb());
+
+        auto *ptr = io.db().getObjectPtr<uniformDimensionedScalarField>(io.name());
+
+        if (!ptr) {
+            Info << "Registering relaxation factor " << io.name() << endl;
+
+            ptr = new uniformDimensionedScalarField(io, dimless, initialValue);
+
+            ptr->store();
+        }
+    #};
+
+    codeExecute
+    #{
+        const scalar rampUp = 0.01;
+        const scalar maxValue = 1.0;
+        const IOobject io("customRf", mesh().time().constant(), mesh().thisDb());
+
+        auto &val =
+            io.db().lookupObjectRef<uniformDimensionedScalarField>(io.name());
+
+        // Ramp a bit
+        val.value() = min(maxValue, val.value() + rampUp);
+
+        Info << "Set relaxation factor to " << val.value() << endl;
+    #};
+}
+
+// ************************************************************************* //

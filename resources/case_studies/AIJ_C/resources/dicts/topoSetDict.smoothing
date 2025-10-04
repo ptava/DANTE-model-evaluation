@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// User-defined parameters
+#include "userDict"
+cells_scaling   $/grid/cells_scaling;
+
+actions
+(
+    //--- Define next-to-walls cells region ---//
+
+    // Cells attached to wall patches
+    {
+        name    bl_cells;
+        type    cellSet;
+        action  new;
+        source  patchToCell;
+        patches ( ground building );
+    }
+
+    // Add cells neighbours to input cellSet
+    {
+        name        bl_cells;
+        source      haloToCell;
+        type        cellSet;
+        action      add;
+        set         bl_cells;
+        steps       #calc " min(int(1600*($cells_scaling^2)-440*$cells_scaling+20),2) "; // [2, 20]
+    }
+
+    //--- Define outer region where we do not want to smooth ---//
+
+    // Create a box
+    {
+        name        protected_cells;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( $/protected/min_x $/protected/min_y $/protected/min_z )
+                    ( $/protected/max_x $/protected/max_y $/protected/max_z );
+            inside  false;
+        }
+    }
+    // Select outside box region
+    {
+        name        protected_cells;
+        type        cellSet;
+        action      invert;
+    }
+
+    //--- Add cells 'bl_cells' to 'protected_cells' ---//
+    {
+        name        protected_cells;
+        type        cellSet;
+        action      add;
+        source      cellToCell;
+        set         bl_cells;
+    }
+
+);
+
+// ************************************************************************* //

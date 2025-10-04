@@ -14,53 +14,47 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// User-defined parameters
 #include "userDict"
 
 actions
 (
 
-    //--- Select next-to-walls cells ---//
+    //--- Define region for refinement ---//
 
-    // Cells attached to wall patches
+    // Create a box
     {
-        name    bl_cells;
-        type    cellSet;
-        action  new;
-        source  patchToCell;
-        patches ( ground building );
-    }
-
-    // Add cells neighbours to input cellSet
-    {
-        name        bl_cells;
-        source      haloToCell;
-        type        cellSet;
-        action      add;
-        set         bl_cells;
-        steps       #calc " min(int(1600*($/background/cells_scaling^2)-440*$/background/cells_scaling+20),2) "; // [2, 20]
-    }
-
-    //--- Select inner region where we do not want to smooth ---//
-    {
-        name        protected_cells;
+        name        refine_cells;
         type        cellSet;
         action      new;
         source      boxToCell;
         sourceInfo
         {
-            box     ( -1.5 -1.5 -1.5 ) ( 1.5 1.5 1.5 );
-            inside  false;
+            box     ( $/refine/min_x $/refine/min_y $/refine/min_z )
+                    ( $/refine/max_x $/refine/max_y $/refine/max_z );
+            inside  true;
         }
     }
 
-    //--- Add cells 'bl_cells' to 'protected_cells' ---//
+    // Remove 'bl_cells' from 'refine_cells' set
     {
-        name        protected_cells;
+        name        refine_cells;
         type        cellSet;
-        action      add;
+        action      subtract;
         source      cellToCell;
         set         bl_cells;
     }
+
+    // from cellSet to cellZone
+    {
+        name        refine_cells;
+        type        cellZoneSet;
+        action      new;
+        source      setToCellZone;
+        set         refine_cells;
+        zone        refine_cells;
+    }
+
 );
 
 // ************************************************************************* //

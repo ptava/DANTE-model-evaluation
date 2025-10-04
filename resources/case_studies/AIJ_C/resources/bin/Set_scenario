@@ -15,9 +15,10 @@ set -euo pipefail
 TAG="0H"
 GEOMETRY_FOLDER="constant/triSurface"
 RESOURCE_DIR="resources"
+STL_DIR="${RESOURCE_DIR}/geometry"
 
 #--- Source utility functions ---#
-. ${BIN_DIR}/Util_functions || exit 1; echo "Util_functions not found in ${BIN_DIR}" >&2
+. ./Util_functions || exit 1; echo "Util_functions not found" >&2
 
 #--- Usage Function ---#
 usage() {
@@ -127,4 +128,3 @@ main() {
 
 #--- Execute ---#
 main "$@"
-

@@ -217,5 +217,13 @@ protected
     max_z           0.5;
 }
 
+refine
+{
+    min_x           -0.7;
+    min_y           -0.7;
+    min_z           -0.7;
 
-
+    max_x           0.7;
+    max_y           0.7;
+    max_z           0.7;
+}

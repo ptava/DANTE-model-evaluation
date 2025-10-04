@@ -1,0 +1,50 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+nOutCorr {
+    type            coded;
+    libs            (utilityFunctionObjects);
+    name            decreaseNcorr;
+    enabled         true;
+    executeControl  runTime;
+    executeInterval 0.15;
+    writeControl    none;
+
+    codeExecute
+    #{
+        const int rampDown = 1;
+        const int minValue = 1;
+        const int defaultValue = 5;
+        const Time &runTime = mesh().time();
+
+        // Load fvSolution dictionary
+        IOdictionary fvSolutionDict(IOobject("fvSolution", runTime.caseSystem(),
+                                             mesh(), IOobject::MUST_READ,
+                                             IOobject::AUTO_WRITE));
+
+        // Create editable copy of PIMPLE subdict
+        dictionary &pimpleDict = fvSolutionDict.subDict("PIMPLE");
+
+        if (Pstream::master()) {
+            // Change nCorrectors based on time
+            const label &nOuterCorr =
+                pimpleDict.lookupOrDefault("nOuterCorrectors", defaultValue);
+            label newOuterCorr = max(minValue, nOuterCorr - rampDown);
+
+            pimpleDict.set("nOuterCorrectors", newOuterCorr);
+
+            // Write back the modified dictionary
+            fvSolutionDict.subDict("PIMPLE") = pimpleDict;
+            fvSolutionDict.regIOobject::write();
+
+            Info << "Updated nOuterCorrectors to: " << newOuterCorr << endl;
+        }
+
+    #};
+}
+
+// ************************************************************************* //
