@@ -23,6 +23,11 @@ nOutCorr
     startTime       0;
     endTime         #calc "${startTime} + ${executeInterval} * ${defaultValue}";
 
+    codeInclude
+    #{
+        #include "IOdictionary.H"
+    #};
+
     codeData
     #{
         label defaultValue_;

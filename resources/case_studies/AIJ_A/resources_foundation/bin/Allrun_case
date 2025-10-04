@@ -119,6 +119,10 @@ if [ "${refinement}" = true ]; then
         ${refinement_fos[3]}
     )
 
+    set_lib "libmyfiniteVolume.so" "${local_dicts}/controlDict" || {
+        echo "Error setting finite volume library" >&2
+        exit 1
+    }
     set_lib "libmyfvMeshTopoChangers.so" "${local_dicts}/controlDict" || {
         echo "Error setting dynamic mesh library" >&2
         exit 1

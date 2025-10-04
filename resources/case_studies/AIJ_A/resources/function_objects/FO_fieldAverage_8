@@ -24,6 +24,12 @@ fieldAverage
 
     fields
     (
+        p
+        {
+            mean         on;
+            prime2Mean   on;
+            base         time;
+        }
         U
         {
             mean         on;

@@ -10,8 +10,8 @@ relaxationFactor {
     libs            (utilityFunctionObjects);
     type            coded;
     name            relaxationFactor;
-    executeControl  timeStep;
-    executeInterval 10;
+    executeControl  runTime;
+    executeInterval 0.015;
     writeControl    none;
 
     codeRead
