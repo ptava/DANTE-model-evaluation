@@ -41,7 +41,7 @@ set_acquisition_time() {
         if [[ ! " ${protected[*]} " =~ " $(basename "$fo") " ]]; then
             sed -Ei "
                 s/(^[[:space:]]*(timeStart|startTime)[[:space:]]+).*/\1${start_time};/;
-                s/(^[[:space:]]*(timeEnd|startTime)[[:space:]]+).*/\1${end_time};/
+                s/(^[[:space:]]*(timeEnd|endTime)[[:space:]]+).*/\1${end_time};/
             " "$fo"
             sed -Ei "
                 s/(^[[:space:]]*executeInterval[[:space:]]+).*/\1${acquisition_dt};/;
