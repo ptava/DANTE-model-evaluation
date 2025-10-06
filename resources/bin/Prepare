@@ -21,9 +21,10 @@
 #   │   └── other scripts
 #   ├── boundary_conditions
 #   │   ├── 0.orig                  --> <caseFolder>/
-#   │   └── boundaryData            --> <caseFolder>/constant/data
+#   │   ├── 0.orig.theoretical      --> <caseFolder>/
+#   │   └── boundaryData*           --> <caseFolder>/resources/data
 #   ├── data
-#   │   └── expData.csv             --> <caseFolder>/resources/data
+#   │   └── expData*.csv            --> <caseFolder>/resources/data
 #   ├── dicts                       --> <caseFolder>/resources/dicts
 #   │   ├── controlDict
 #   │   :
@@ -229,7 +230,7 @@ prepare() {
     cp -r "${reference}/properties" "${resources_folder}/."
     cp -r "${reference}/function_objects" "${resources_folder}/."
     cp -r "${reference}/data" "${resources_folder}/."
-    cp -r "${reference}/boundary_conditions/boundaryData" "${resources_folder}/data/."
+    cp -r "${reference}/boundary_conditions/boundaryData"* "${resources_folder}/data/."
 
     echo "+--- Created case folder"
 
