@@ -187,7 +187,6 @@ set_fos() {
     
     if [[ $(basename "${functions_file}") == "controlDict" ]]; then
         fo_block="functions {\n${fo_block}}"
-        fo_block+="}\n"
     fi
 
     # Insert the block before the last line of controlDict
