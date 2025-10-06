@@ -3,7 +3,14 @@ cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
 
-# settings
+# Source utility functions
+. ./setups.orig/common/Util_functions || {
+    echo "Util_functions not found in current folder" >&2
+    exit 1
+}
+#------------------------------------------------------------------------------
+
+# Settings
 
     # operand setups
     setups=(
@@ -104,7 +111,7 @@ run_setup() {
             echo "TO DO: to run with single processor change 'Allrun_case' file" >&2
             exit 1
         fi
-l
+
         if [ "$common_mesh" = true ]; then
             if [ ! -d results/mesh ]; then
                 printf "\n## Store the mesh of %s as the common mesh\n\n" "$setup"
