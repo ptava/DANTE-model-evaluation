@@ -9,35 +9,33 @@
 // Check yPlus value on ground wall
 groundyPlus
 {
-    type            surfaceFieldValue;
-    libs            ("libfieldFunctionObjects.so");
-    fields          (yPlus);
-    writeFields     false;
-    log             false;
-    surfaceFormat   none;
-    regionType      patch;
-    name            ground;
-    operation       max;
-    writeControl    timeStep;
-    executeAtStart  false;
-    writeInterval   10;
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    surfaceFormat  none;
+    patch          ground;
+    operation      max;
+    writeControl   timeStep;
+    executeAtStart false;
+    writeInterval  10;
 }
 
 // Check yPlus value on building walls
 buildingyPlus
 {
-    type            surfaceFieldValue;
-    libs            ("libfieldFunctionObjects.so");
-    fields          (yPlus);
-    writeFields     false;
-    log             false;
-    surfaceFormat   none;
-    regionType      patch;
-    name            building;
-    operation       max;
-    writeControl    timeStep;
-    executeAtStart  false;
-    writeInterval   10;
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    surfaceFormat  none;
+    patch          building;
+    operation      max;
+    writeControl   timeStep;
+    executeAtStart false;
+    writeInterval  10;
 }
 
 // ************************************************************************* //
