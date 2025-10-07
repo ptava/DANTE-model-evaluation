@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 cd "${0%/*}" || exit                                # Run from this directory
 . ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
 #------------------------------------------------------------------------------
@@ -16,13 +16,15 @@ runApplication blockMesh
 runApplication checkMesh
 runApplication -s smoothing topoSet -dict system/topoSetDict.smoothing
     
-# Check if cfMesh is availabel (we'll use improveMeshQuality utility)
+# Check cfMesh availability (we'll use improveMeshQuality utility)
 if [ "$smoothing" = "true" ]; then
     if command -v myimproveMeshQuality >/dev/null 2>&1; then
-        runApplication preparePar
-        runParallel myimproveMeshQuality -constrainedCellSet protected_cells
-        runApplication -s smoothed checkMesh \
+        runApplication decomposePar
+        runParallel myimproveMeshQuality \
+            -constrainedCellSet protected_cells
+        runParallel -s smoothed checkMesh \
             -allTopology -allGeometry -constant
+        runApplication reconstructParMesh -constant
     else
         echo "improveMeshQuality command not found. Please install cfMesh"
         echo "integration to use smoothing."
