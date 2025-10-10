@@ -38,7 +38,7 @@ actions
         type        cellSet;
         action      add;
         set         bl_cells;
-        steps       #calc " min(int($cells_scaling*12),2) ";
+        steps       #calc " max(int($cells_scaling*12),2) ";
     }
 
     //--- Define outer region where we do not want to smooth ---//
