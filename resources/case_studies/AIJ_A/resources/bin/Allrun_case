@@ -18,6 +18,9 @@ local_resources="resources" # Folder with resources
 local_dicts="system"        # Folder for local dictionaries
 local_props="constant"      # Folder for local properties
 
+local_functions="${local_dicts}/function_objects" # Directory for local function objects
+local_geometry="${local_props}/geometry" # Directory for local geometries
+
 #------------------------------------------------------------------------------
 # Source utility functions
 
@@ -72,8 +75,13 @@ for source in "${!files_to_copy[@]}"; do
     }
 done
 
-cp -r "${functions_resources}" "${local_dicts}/." || {
+cp -r "${functions_resources}" "${local_functions}" || {
     echo "Error copying function objects to ${local_dicts} folder" >&2
+    exit 1
+}
+
+cp -r "${geometry_resources}"  "${local_geometry}" || {
+    echo "Error copying geometry to ${local_geometry} folder" >&2
     exit 1
 }
 
@@ -102,8 +110,6 @@ refinement_fos=(
     "FO_cuttingPlanesRefinement_14.3"
     "FO_refinementInfo_19"
 )
-
-local_functions="${local_dicts}/function_objects"
 
 set_fos "${local_functions}" "${local_dicts}/controlDict" || {
     echo "Error setting function objects" >&2
