@@ -7,6 +7,7 @@ cd "${0%/*}" || exit
 # User parameters
 n_proc=16        # Set number of processors for parallel computing
 scenario="0H"    # Scenario tag (0H, 1H, or 2H)
+direction="0deg" # Flow direction tag (0deg, 22deg, 45deg)
 scale=0.25       # Set cells number scaling parameter
 delta_t=0.05     # Set acquisition time of post-processing
 start_time=1.3   # Set time to start averaging the solution (end of transient startup)
@@ -20,7 +21,7 @@ local_dicts="system"        # Directory for local dictionaries
 local_props="constant"      # Directory for local properties
 
 local_functions="${local_dicts}/function_objects" # Directory for local function objects
-local_geomtery="${local_props}/triSurface" # Directory for local geometries
+local_geometry="${local_props}/geometry" # Directory for local geometries
 
 #------------------------------------------------------------------------------
 # Source utility functions
@@ -37,7 +38,7 @@ local_geomtery="${local_props}/triSurface" # Directory for local geometries
 #------------------------------------------------------------------------------
 # Copy source files
 
-resources=$(check_resources -r "${local_resources}")
+resources=$(check_resources -r "${local_resources}") || {
     echo "Error checking resources" >&2
     exit 1
 }
@@ -48,9 +49,8 @@ read -r dicts_resources \
         functions_resources <<< ${resources}
 
 declare -A files_to_copy=(
-    ["${dicts_resources}/blockMeshDict"]="${local_dicts}/blockMeshDict"
-    ["${dicts_resources}/topoSetDict.smoothing"]="${local_dicts}/topoSetDict"
-    ["${dicts_resources}/topoSetDict.refinement"]="${local_dicts}/topoSetDict"
+    ["${dicts_resources}/topoSetDict.smoothing"]="${local_dicts}/topoSetDict.smoothing"
+    ["${dicts_resources}/topoSetDict.refinement"]="${local_dicts}/topoSetDict.refinement"
     ["${dicts_resources}/decomposeParDict"]="${local_dicts}/decomposeParDict"
     ["${dicts_resources}/fvSolution"]="${local_dicts}/fvSolution"
     ["${dicts_resources}/fvSchemes"]="${local_dicts}/fvSchemes"
@@ -78,15 +78,21 @@ cp -r ${functions_resources} ${local_functions} || {
     exit 1
 }
 
-cp -r "${data_resources}/boundaryData" "${local_props}/." || {
-    echo "Error copying boundary data to ${local_props} folder" >&2
+cp -r ${geometry_resources} ${local_geometry} || {
+    echo "Error copying geometry resources to ${local_geometry}" >&2
     exit 1
 }
 
-Set_scenario \
-    --tag ${scenario} \
-    --folder ${geometry_resources} \
-    --resources ${local_resources}
+set_scenario \
+    --geom-tag ${scenario} \
+    --dir-tag ${direction} \
+    --folder ${local_geometry} \
+    --dicts-resources ${dicts_resources} \
+    --stl-resources ${geometry_resources} \
+    --data-resources ${data_resources} || {
+    echo "Error setting scenario" >&2
+    exit 1
+}
 
 #------------------------------------------------------------------------------
 # Make changes in files
@@ -96,7 +102,6 @@ protected_fos=(
     "FO_yPlus_4"
     "FO_sampleyPlus_5"
     "FO_residuals_6"
-    "FO_fieldAverage_8"
     "FO_isoSurfaces_15.1"
     "FO_setMaxCo_16"
     "FO_setRelaxationFactors_17"

@@ -16,7 +16,7 @@ FoamFile
 
 // User-defined parameters
 #include "userDict"
-cells_scaling   $/grid/cells_scaling;
+cells_scaling   $/background/cells_scaling;
 
 actions
 (
@@ -38,7 +38,7 @@ actions
         type        cellSet;
         action      add;
         set         bl_cells;
-        steps       #calc " min(int(1600*($cells_scaling^2)-440*$cells_scaling+20),2) "; // [2, 20]
+        steps       #calc " max(int(1600*(pow($cells_scaling,2))-440*$cells_scaling+20),2) "; // [2, 20]
     }
 
     //--- Define outer region where we do not want to smooth ---//

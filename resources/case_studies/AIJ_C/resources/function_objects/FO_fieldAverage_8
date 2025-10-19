@@ -19,7 +19,6 @@ fieldAverage
     timeStart       1.3;
     timeEnd         2.0;
     executeControl  timeStep;
-    executeInterval 1;
     writeControl    writeTime;
 
     fields

@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "include/userDict"
+#include "userDict"
 
 castellatedMesh on;
 snap            off;
@@ -25,7 +25,7 @@ geometry
     BASE.stl
     {
         type triSurfaceMesh;
-        name BASE;
+        name buildings;
     }
 
     R1
@@ -93,10 +93,9 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        BASE
+        buildings
         {
             level (3 3);
-            name buildings;
             patchInfo
             {
                 type wall;

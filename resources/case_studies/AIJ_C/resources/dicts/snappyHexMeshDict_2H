@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "include/userDict"
+#include "userDict"
 
 castellatedMesh on;
 snap            off;

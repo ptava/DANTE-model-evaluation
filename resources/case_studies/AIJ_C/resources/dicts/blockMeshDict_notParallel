@@ -102,12 +102,14 @@ boundary
         faces
         (
             (1 2 6 5)
+            (3 7 6 2)
         );
     }
 
     top
     {
-        type patch;
+        type symmetry; // Approx: no influence of "top" to building influence region 
+        inGroups 1(symmetry);
         faces
         (
             (4 5 6 7)
@@ -126,24 +128,14 @@ boundary
      
     lateral1
     {
-        type symmetry;
-        inGroups 1("symmetry");
+        type symmetry; // Approx: no influence of "top" to building influence region 
+        inGroups 1(symmetry);
         faces
         (
             (1 5 4 0)
         );
     }
      
-    lateral2
-    {
-        type syummetry;
-        inGroups ("symmetry");
-        faces
-        (
-            (3 7 6 2)
-        );
-    }
-
 );
 
 
