@@ -1,0 +1,21 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+deltaPlus1
+{
+    #include        "templates/FO_deltaPlusTemplate"
+    patches         ( side1 side2 );
+    directions
+    {
+        x           (1 0 0);     // streamwise
+        z           (0 0 1);     // spanwise
+    }
+    wssField        wallShearStress;
+}
+
+// ************************************************************************* //

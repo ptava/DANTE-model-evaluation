@@ -1,0 +1,250 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+ =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+type            coded;
+libs            ("libutilityFunctionObjects.so");
+writeControl    writeTime;
+timeStart       1.3;
+timeEnd         2.0;
+executeControl  runTime;
+executeInterval 0.05;
+writeControl    writeTime;
+name            deltaPlus;
+
+localCode
+#{
+    template<class Type>
+    Type* getOrCreateField
+    (
+        const word& fieldName,
+        const fvMesh& mesh
+    )
+    {
+        Type* fieldPtr =
+            mesh.getObjectPtr<Type>(fieldName);
+
+        if (!fieldPtr)
+        {
+            fieldPtr = new Type
+            (
+                IOobject
+                (
+                    fieldName,
+                    mesh.time().timeName(),
+                    mesh.thisDb(),
+                    IOobject::NO_READ,
+                    IOobject::AUTO_WRITE
+                ),
+                mesh,
+                dimless
+            );
+            regIOobject::store(fieldPtr);
+        }
+        return fieldPtr;
+    }
+
+    volVectorField readField
+    (
+        const word& fieldName,
+        const fvMesh& mesh
+    )
+    {
+        if (mesh.foundObject<volVectorField>(fieldName))
+        {
+            return mesh.lookupObject<volVectorField>(fieldName);
+        }
+
+        IOobject io
+        (
+            fieldName,
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        );
+
+        volVectorField field(io, mesh);
+
+        return field;
+    }
+#};
+
+codeInclude
+#{
+    #include "turbulenceModel.H"
+#};
+
+codeOptions
+#{
+    -I$(LIB_SRC)/TurbulenceModels/turbulenceModels/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/incompressible/lnInclude \
+    -I$(LIB_SRC)/TurbulenceModels/compressible/lnInclude
+#};
+
+codeLibs
+#{
+#};
+
+
+codeData
+#{
+    word foName_;
+    word wssName_;
+    wordList patchNames_;
+    dictionary dirDict_;
+    wordList directions_;
+    scalar nu_;
+    List<vector> allowedDirVectors_;
+#};
+
+codeRead
+#{
+    dict.lookup("name") >> foName_;
+    allowedDirVectors_.append(vector(1,0,0));
+    allowedDirVectors_.append(vector(0,1,0));
+    allowedDirVectors_.append(vector(0,0,1));
+
+    dict.lookup("wssField") >> wssName_;
+    patchNames_ = dict.lookup("patches");
+    dirDict_ = dict.subDict("directions");
+    directions_ = dirDict_.toc();
+#};
+    
+codeExecute
+#{
+    if (!mesh().foundObject<turbulenceModel>(turbulenceModel::propertiesName))
+    {
+        FatalErrorInFunction
+            << "No turbulenceModel object found" << abort(FatalError);
+    }
+
+    const turbulenceModel& model =
+        mesh().lookupObject<turbulenceModel>(turbulenceModel::propertiesName);
+
+    const volVectorField& wss = readField(wssName_, mesh());
+
+    const polyBoundaryMesh& pbm = mesh().boundaryMesh();
+    DynamicList<label> patchIDs;
+    for(const auto& patchi : patchNames_)
+    {
+        const label pid = pbm.findPatchID(patchi);
+        if (pid < 0)
+        {
+            WarningInFunction
+                << "Patch '" << patchi << "' not found. Skipping."
+                << nl << endl;
+        }
+        else
+        {
+            patchIDs.append(pid);
+        }
+    }
+    if (patchIDs.empty())
+    {
+        WarningInFunction << "No valid patches. Nothing to do." << nl << endl;
+        return false;
+    }
+
+    for (const auto& dnI : directions_)
+    {
+        const vector dVec(dirDict_.lookup(dnI));
+
+        if (mag(dVec) < SMALL)
+        {
+            WarningInFunction
+                << "Direction '" << dnI << "' "
+                << "has zero magnitude."
+                << endl;
+            return false;
+        }
+
+        const vector dHat = dVec/mag(dVec);
+
+        if (!allowedDirVectors_.contains(dHat))
+        {
+            WarningInFunction
+                << "Direction '" << dnI << "' "
+                << "is not supported."
+                << endl;
+            return false;
+        }
+
+
+        for (const auto& pId : patchIDs)
+        {
+            const word patchName = pbm[pId].name();
+            const word fldName = foName_ + patchName + dnI;
+
+            volScalarField* deltaPlusPtr =
+                getOrCreateField<volScalarField>(fldName, mesh());
+            volScalarField& deltaPlus = *deltaPlusPtr;
+
+            const fvPatch& fvp = mesh().boundary()[pId];
+            scalarField& pf = deltaPlus.boundaryFieldRef()[pId];
+
+            const label startFace = fvp.patch().start();
+            const faceList& faces = mesh().faces();
+            const pointField& pts = mesh().points();
+
+            // Unit normals (area-normal / |area|)
+            const vectorField nHat = fvp.nf();
+
+            // wall shear on this patch
+            const vectorField& wssP = wss.boundaryField()[pId];
+
+            // viscosity on this patch
+            tmp<scalarField> tNu = model.nu(pId);
+            const scalarField& nu = tNu();
+
+            // Loop faces
+            forAll(pf, fi)
+            {
+                const label fId = startFace + fi;
+                const face& f = faces[fId];
+
+                // Project user direction into face plane
+                const vector nh = nHat[fi];
+                vector t = dHat - (dHat & nh)*nh;
+                const vector tHat = t/mag(t);
+
+                // Compute length of face in specified direction
+                scalar smin = VGREAT;
+                scalar smax = -VGREAT;
+                forAll(f, pi)
+                {
+                    const point& P = pts[f[pi]];
+                    const scalar s = (vector(P) & tHat);
+                    smin = Foam::min(smin, s);
+                    smax = Foam::max(smax, s);
+                }
+                const scalar deltaS = smax - smin;
+
+                // friction velocity from wall shear stress magnitude
+                const scalar tauw = Foam::mag(wssP[fi]);
+                const scalar uTau = tauw > 0.0 ? sqrt(tauw) : 0.0;
+
+                // ∆+ = ∆ * uTau / nu
+                pf[fi] = (nu[fi] > SMALL) ? deltaS * (uTau/nu[fi]) : 0.0;
+            }
+
+            // Simple stats to log
+            const scalar minv = gMin(pf);
+            const scalar maxv = gMax(pf);
+            const scalar meanv = gAverage(pf);
+
+            Info<< "deltaPlus(" << dnI << ") on patch '"
+                << fvp.name() << "': " << "min=" << minv
+                << " max=" << maxv << " mean=" << meanv
+                << endl;
+
+            // write in time folder
+            deltaPlusPtr->write();
+        }
+    }
+#};
+// ************************************************************************* //
