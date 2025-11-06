@@ -1,0 +1,670 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+mergeType       points;
+
+// User-defined parameters
+#include        "userDict"
+
+// Computed coordinates
+building_z      $.grid.coordinates.building_height;
+building_xy     $.grid.coordinates.building_xy;
+ogrid_z         $.grid.coordinates.ogrid_z;
+ogrid_xy        $.grid.coordinates.ogrid_xy;
+z_min           $.grid.coordinates.z_min;
+z_max           $.grid.coordinates.z_max;
+y_min           $.grid.coordinates.y_min;
+y_max           $.grid.coordinates.y_max;
+x_min           $.grid.coordinates.x_min;
+x_max           $.grid.coordinates.x_max;
+xy_distance_mid $.grid.coordinates.xy_distance_mid;
+xy_distance_top $.grid.coordinates.xy_distance_top;
+ogrid_radius    $.grid.coordinates.ogrid_radius;
+
+// Additional geometry to better shape grids on top of building roof
+geometry
+{
+    head
+    {
+        type   triSurfaceMesh;
+        file   "head.stl";
+    }
+}
+
+vertices
+(
+      ( $x_min            $y_min            $z_min      )
+      ( -$ogrid_xy        $y_min            $z_min      )
+      ( -$ogrid_xy        -$ogrid_xy        $z_min      )
+      ( $x_min            -$ogrid_xy        $z_min      )
+      ( $x_min            $y_min            $ogrid_z    )
+      ( -$ogrid_xy        $y_min            $ogrid_z    )
+      ( -$ogrid_xy        -$ogrid_xy        $ogrid_z    )
+      ( $x_min            -$ogrid_xy        $ogrid_z    )
+      ( $ogrid_xy         $y_min            $z_min      )
+      ( $ogrid_xy         -$ogrid_xy        $z_min      )
+      ( $ogrid_xy         $y_min            $ogrid_z    )
+      ( $ogrid_xy         -$ogrid_xy        $ogrid_z    )
+      ( $x_max            $y_min            $z_min      )
+      ( $x_max            -$ogrid_xy        $z_min      )
+      ( $x_max            $y_min            $ogrid_z    )
+      ( $x_max            -$ogrid_xy        $ogrid_z    )
+      ( -$ogrid_xy        $ogrid_xy         $z_min      )
+      ( $x_min            $ogrid_xy         $z_min      )
+      ( -$ogrid_xy        $ogrid_xy         $ogrid_z    )
+      ( $x_min            $ogrid_xy         $ogrid_z    )
+      ( $x_max            $ogrid_xy         $z_min      )
+      ( $ogrid_xy         $ogrid_xy         $z_min      )
+      ( $x_max            $ogrid_xy         $ogrid_z    )
+      ( $ogrid_xy         $ogrid_xy         $ogrid_z    )
+      ( -$ogrid_xy        $y_max            $z_min      )
+      ( $x_min            $y_max            $z_min      )
+      ( -$ogrid_xy        $y_max            $ogrid_z    )
+      ( $x_min            $y_max            $ogrid_z    )
+      ( $ogrid_xy         $y_max            $z_min      )
+      ( $ogrid_xy         $y_max            $ogrid_z    )
+      ( $x_max            $y_max            $z_min      )
+      ( $x_max            $y_max            $ogrid_z    )
+      ( $x_min            $y_min            $z_max      )
+      ( -$xy_distance_mid $y_min            $z_max      )
+      ( -$xy_distance_top -$xy_distance_top $z_max      )
+      ( $x_min            -$xy_distance_top $z_max      )
+      ( $xy_distance_mid  $y_min            $z_max      )
+      ( $xy_distance_top  -$xy_distance_top $z_max      )
+      ( $x_max            $y_min            $z_max      )
+      ( $x_max            -$xy_distance_top $z_max      )
+      ( -$xy_distance_top $xy_distance_top  $z_max      )
+      ( $x_min            $xy_distance_top  $z_max      )
+      ( $x_max            $xy_distance_top  $z_max      )
+      ( $xy_distance_top  $xy_distance_top  $z_max      )
+      ( -$xy_distance_mid $y_max            $z_max      )
+      ( $x_min            $y_max            $z_max      )
+      ( $xy_distance_mid  $y_max            $z_max      )
+      ( $x_max            $y_max            $z_max      )
+      ( -$building_xy     -$building_xy     $z_min      )
+      ( $building_xy      -$building_xy     $z_min      )
+      ( $building_xy      $building_xy      $z_min      )
+      ( -$building_xy     $building_xy      $z_min      )
+      ( -$building_xy     -$building_xy     $building_z )
+      ( $building_xy      -$building_xy     $building_z )
+      ( $building_xy      $building_xy      $building_z )
+      ( -$building_xy     $building_xy      $building_z )
+);
+
+// Generating MASTER blocks cells numbers and grading
+tags_master            $.grid.discretization.master.tags;
+mid_points_master      $.grid.discretization.master.mid_points;
+start_sizes_master     $.grid.discretization.master.start_sizes;
+mid_sizes_master       $.grid.discretization.master.mid_sizes;
+end_sizes_master       $.grid.discretization.master.end_sizes;
+cell_exp_ratios_master $.grid.discretization.master.cell_exp_ratios;
+
+#codeStream
+{
+    codeOptions
+    #{
+        -I"$FOAM_CASE/system/helpers"
+    #};
+    codeInclude
+    #{
+        #include "discretization.H"
+    #};
+    code
+    #{
+        using namespace Foam;
+
+        // Lookup info
+        List<word> tags( IStringStream("${tags_master}")() );
+        List<scalar> midPoints( IStringStream("${mid_points_master}")() );
+        List<scalar> startSizes( IStringStream("${start_sizes_master}")() );
+        List<scalar> midSizes( IStringStream("${mid_sizes_master}")() );
+        List<scalar> endSizes( IStringStream("${end_sizes_master}")() );
+        List<scalar> expRatios( IStringStream("${cell_exp_ratios_master}")() );
+
+        // Define edges lengths
+        pointField vertices( IStringStream("${vertices}")() );
+        List<scalar> edgeLengths = {
+            mag( vertices[21] - vertices[23] ), // Z0
+            mag( vertices[23] - vertices[43] ), // Z1
+            mag( vertices[23] - vertices[54] ), // B1
+            mag( vertices[23] - vertices[18] ), // B2
+            mag( vertices[7]  - vertices[6]  ), // X0
+            mag( vertices[23] - vertices[22] ), // X1
+            mag( vertices[5]  - vertices[6]  ), // Y0
+            mag( vertices[18] - vertices[26] )  // Y1
+        };
+
+        if (
+            tags.size() != startSizes.size()    ||
+            tags.size() != endSizes.size()      ||
+            tags.size() != midPoints.size()     ||
+            tags.size() != midSizes.size()      ||
+            tags.size() != edgeLengths.size()
+        )
+        {
+            FatalErrorIn("blockMeshDict::codeStream::code")
+                << "tags, startSizes, endSizes and midPoints must have the same size"
+                << exit(FatalError);
+        }
+        for ( label i=0; i<tags.size(); i++ )
+        {
+            if (midPoints[i] != 0.0)
+            {
+                scalar length_0 = midPoints[i] * edgeLengths[i];
+                auto [nCells_0, totExpRatio_0] = planEdge(
+                    length_0,
+                    startSizes[i],
+                    midSizes[i],
+                    expRatios[i]
+                );
+                vector grading_0( length_0, nCells_0 , totExpRatio_0 );
+                scalar common_ratio_0 = cellToCellExpRatio(
+                    nCells_0,
+                    totExpRatio_0
+                );
+                scalar compare_with_user = effectiveExpRatio(
+                    common_ratio_0,
+                    startSizes[i],
+                    midSizes[i]
+                );
+                checkCommonRatio(compare_with_user, expRatios[i], tags[i]);
+
+                scalar length_1 = edgeLengths[i] - length_0;
+                auto [nCells_1, totExpRatio_1] = planEdge(
+                    length_1,
+                    midSizes[i],
+                    endSizes[i],
+                    expRatios[i]
+                );
+                vector grading_1( length_1, nCells_1 , totExpRatio_1 );
+                scalar common_ratio_1 = cellToCellExpRatio(
+                    nCells_1,
+                    totExpRatio_1
+                );
+                checkCommonRatio(common_ratio_1, expRatios[i], tags[i]);
+
+                int totalCells = nCells_0 + nCells_1;
+                List<vector> gradingList{ grading_0, grading_1 };
+                printBlockInfo(os, tags[i], totalCells, gradingList);
+            }
+            else
+            {
+                auto [nCells, totExpRatio] = planEdge(
+                    edgeLengths[i],
+                    startSizes[i],
+                    endSizes[i],
+                    expRatios[i]
+                );
+                printBlockInfo(os, tags[i], nCells, totExpRatio);
+                scalar common_ratio = cellToCellExpRatio(
+                    nCells,
+                    totExpRatio
+                );
+                scalar compare_with_user = effectiveExpRatio(
+                    common_ratio,
+                    startSizes[i],
+                    endSizes[i]
+                );
+                checkCommonRatio(compare_with_user, expRatios[i], tags[i]);
+            }
+        }
+    #};
+}
+
+// Adjust some grading of SLAVES blocks
+// if midpoint != 0.0, multigrading is applied distributing cells_number accordingly
+tags_slave            $.grid.discretization.slave.tags;
+start_sizes_slave     $.grid.discretization.slave.start_sizes;
+end_sizes_slave       $.grid.discretization.slave.end_sizes;
+cell_exp_ratios_slave $.grid.discretization.slave.cell_exp_ratios;
+mid_points_slave      $.grid.discretization.slave.mid_points;
+cells_distribution    $.grid.discretization.slave.cells_distr;
+cells_number          ( ${ncB1}     ${ncZ0}     ${ncB2} ); // forced ncells
+
+#codeStream
+{
+    codeOptions
+    #{
+        -I"$FOAM_CASE/system/helpers"
+    #};
+    codeInclude
+    #{
+        #include "discretization.H"
+    #};
+    code
+    #{
+        using namespace Foam;
+
+        // Lookup info
+        List<word> tags( IStringStream("${tags_slave}")() );
+        List<scalar> startSizes( IStringStream("${start_sizes_slave}")() );
+        List<scalar> endSizes( IStringStream("${end_sizes_slave}")() );
+        List<scalar> midPoints( IStringStream("${mid_points_slave}")() );
+        List<scalar> expRatios( IStringStream("${cell_exp_ratios_slave}")() );
+        List<scalar> cellsDistributions( IStringStream("${cells_distribution}")() );
+        List<scalar> cellsNumbers( IStringStream("${cells_number}")() );
+
+        pointField vertices( IStringStream("${vertices}")() );
+        List<scalar> edgeLengths = {
+            mag( vertices[54] - vertices[55] ), // B0
+            mag( vertices[54] - vertices[50] ), // B3
+            mag( vertices[23] - vertices[18] )  // B4 (adjusting B2)
+        };
+
+        if (
+            tags.size() != startSizes.size()    ||
+            tags.size() != endSizes.size()      ||
+            tags.size() != midPoints.size()
+        )
+        {
+            FatalErrorIn("blockMeshDict::codeStream::code")
+                << "tags, startSizes, endSizes and midPoints must have the same size"
+                << exit(FatalError);
+        }
+
+        for ( label i=0; i<tags.size(); i++ )
+        {
+            if ( midPoints[i] != 0.0 )
+            {
+                scalar length_0 = midPoints[i] * edgeLengths[i];
+                scalar nCells_0 = cellsDistributions[i] * cellsNumbers[i];
+                scalar totExpRatio_0 = endToStartExpRatio(
+                    nCells_0,
+                    expRatios[i]
+                );
+                vector grading_0( length_0, nCells_0 , totExpRatio_0 );
+
+                scalar length_1 = edgeLengths[i] - length_0;
+                scalar nCells_1 = cellsNumbers[i] - nCells_0;
+                scalar totExpRatio_1  = endToStartExpRatio(
+                    nCells_1,
+                    expRatios[i]
+                );
+                vector grading_1( length_1, nCells_1 , 1.0/totExpRatio_1 );
+
+                int totalCells = nCells_0 + nCells_1;
+                List<vector> gradingList{ grading_0, grading_1 };
+                printBlockInfo(os, tags[i], totalCells, gradingList);
+            }
+            else
+            {
+                scalar totExpRatio  = endToStartExpRatio(
+                    cellsNumbers[i],
+                    expRatios[i]
+                );
+                printBlockInfo(os, tags[i], cellsNumbers[i], totExpRatio);
+            }
+        }
+    #};
+}
+
+edges
+(
+    arc 9  21 ( $ogrid_radius  0              0        )
+    arc 11 23 ( $ogrid_radius  0              $ogrid_z )
+    arc 2  16 ( -$ogrid_radius 0              0        )
+    arc 6  18 ( -$ogrid_radius 0              $ogrid_z )
+    arc 2  9  ( 0              -$ogrid_radius 0        )
+    arc 6  11 ( 0              -$ogrid_radius $ogrid_z )
+    arc 21 16 ( 0              $ogrid_radius  0        )
+    arc 23 18 ( 0              $ogrid_radius  $ogrid_z )
+);
+
+blocks
+(
+	// Block 0
+	hex (0 1 2 3 4 5 6 7)($ncX0 $ncY0 $ncZ0) 
+	edgeGrading (
+	       $gX0 $gX0 $gX0 $gX0
+	       $gY0 $gY0 $gY0 $gY0
+	       $gZ0 $gZ0 $gZ0 $gZ0
+	   )
+
+	// Block 1
+	hex (1 8 9 2 5 10 11 6)($ncB2 $ncY0 $ncZ0) 
+	edgeGrading (
+	       1    $gB4 $gB4 1
+	       $gY0 $gY0 $gY0 $gY0
+	       $gZ0 $gZ0 $gZ0 $gZ0
+	   )
+
+	// Block 2
+	hex (8 12 13 9 10 14 15 11)($ncX1 $ncY0 $ncZ0) 
+	edgeGrading (
+	       $gX1 $gX1 $gX1 $gX1
+	       $gY0 $gY0 $gY0 $gY0
+	       $gZ0 $gZ0 $gZ0 $gZ0
+	   )
+
+	// Block 3
+	hex (3 2 16 17 7 6 18 19)($ncX0 $ncB2 $ncZ0) 
+	edgeGrading (
+	       $gX0 $gX0 $gX0 $gX0
+	       1    $gB2 $gB2 1
+	       $gZ0 $gZ0 $gZ0 $gZ0
+	   )
+
+	// Block 4
+	hex (9 13 20 21 11 15 22 23)($ncX1 $ncB2 $ncZ0)
+	edgeGrading (
+        $gX1 $gX1 $gX1 $gX1
+        $gB4 1    1    $gB4
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
+
+	// Block 5
+	hex (17 16 24 25 19 18 26 27)($ncX0 $ncY1 $ncZ0) 
+	edgeGrading (
+        $gX0 $gX0 $gX0 $gX0
+        $gY1 $gY1 $gY1 $gY1
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
+
+	// Block 6
+	hex (16 21 28 24 18 23 29 26)($ncB2 $ncY1 $ncZ0) 
+	edgeGrading (
+        $gB4 1    1    $gB4
+        $gY1 $gY1 $gY1 $gY1
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
+
+	// Block 7
+	hex (21 20 30 28 23 22 31 29)($ncX1 $ncY1 $ncZ0) 
+	edgeGrading (
+        $gX1 $gX1 $gX1 $gX1
+        $gY1 $gY1 $gY1 $gY1
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
+
+	// Block 8
+	hex (4 5 6 7 32 33 34 35)($ncX0 $ncY0 $ncZ1)
+    edgeGrading (
+        $gX0 $gX0 $gX0 $gX0
+        $gY0 $gY0 $gY0 $gY0
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+	// Block 9
+	hex (5 10 11 6 33 36 37 34)($ncB2 $ncY0 $ncZ1) 
+    edgeGrading (
+        1    $gB4 1    1
+        $gY0 $gY0 $gY0 $gY0
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+	// Block 10
+	hex (10 14 15 11 36 38 39 37)($ncX1 $ncY0 $ncZ1) 
+	edgeGrading (
+        $gX1 $gX1 $gX1 $gX1
+        $gY0 $gY0 $gY0 $gY0
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+	// Block 11
+    hex (7 6 18 19 35 34 40 41)($ncX0 $ncB2 $ncZ1) 
+    edgeGrading (
+        $gX0 $gX0 $gX0 $gX0
+        1    $gB2 1    1
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+	// Block 12
+	hex (11 15 22 23 37 39 42 43)($ncX1 $ncB2 $ncZ1)
+    edgeGrading (
+        $gX1 $gX1 $gX1 $gX1
+        $gB4 1    1    1
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+	// Block 13
+	hex (19 18 26 27 41 40 44 45)($ncX0 $ncY1 $ncZ1) 
+	edgeGrading (
+        $gX0 $gX0 $gX0 $gX0
+        $gY1 $gY1 $gY1 $gY1
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+    // Block 14
+    hex (18 23 29 26 40 43 46 44)($ncB2 $ncY1 $ncZ1) 
+    edgeGrading (
+        $gB4 1    1    1
+        $gY1 $gY1 $gY1 $gY1
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+	// Block 15
+	hex (23 22 31 29 43 42 47 46)($ncX1 $ncY1 $ncZ1) 
+	   edgeGrading (
+	       $gX1 $gX1 $gX1 $gX1
+	       $gY1 $gY1 $gY1 $gY1
+	       $gZ1 $gZ1 $gZ1 $gZ1
+	   )
+
+    // Block 16
+    hex (6 11 23 18 34 37 43 40)($ncB2 $ncB2 $ncZ1) 
+    edgeGrading (
+        $gB4 $gB4 1    1
+        $gB2 $gB4 1    1
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
+
+    // Block 17
+    hex (9 49 48 2 11 53 52 6)($ncB1 $ncB2 $ncZ0) 
+    edgeGrading (
+        $gB1 $gB1 $gB1 $gB1 
+        $gB4 $gB0 $gB0 $gB4
+        $gZ0 $gB3 $gB3 $gZ0
+    )
+
+	// Block 18
+	hex (16 2 48 51 18 6 52 55)($ncB2 $ncB1 $ncZ0) 
+	edgeGrading (
+        $gB2 $gB0 $gB0 $gB2 
+        $gB1 $gB1 $gB1 $gB1 
+        $gZ0 $gZ0 $gB3 $gB3
+	)
+
+	// Block 19
+	hex (21 50 49 9 23 54 53 11)($ncB1 $ncB2 $ncZ0) 
+	edgeGrading (
+        $gB1 $gB1 $gB1 $gB1 
+        $gB4 $gB0 $gB0 $gB4
+        $gZ0 $gB3 $gB3 $gZ0
+    )
+
+	   // Block 20
+    hex (21 16 51 50 23 18 55 54)($ncB2 $ncB1 $ncZ0) 
+    edgeGrading (
+       $gB4 $gB0 $gB0 $gB4
+       $gB1 $gB1 $gB1 $gB1
+       $gZ0 $gZ0 $gB3 $gB3
+	)
+
+	// Block 21
+	hex (23 11 6 18 54 53 52 55)($ncB2 $ncB2 $ncB1) 
+	edgeGrading (
+	       $gB4 $gB2 $gB0 $gB0 
+	       $gB4 $gB4 $gB0 $gB0
+	       $gB1 $gB1 $gB1 $gB1
+	)
+);
+
+
+boundary
+(
+    inlet
+    {
+        type patch;
+        faces
+        (
+             (0 4 7 3)
+             (4 32 35 7)
+             (7 35 41 19)
+             (19 41 45 27)
+             (17 19 27 25)
+             (3 7 19 17)
+        );
+    }
+
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (12 14 15 13)
+            (14 38 39 15)
+            (15 39 42 22)
+            (22 42 47 31)
+            (20 22 31 30)
+            (13 15 22 20)
+        );
+    }
+
+    top
+    {
+        type symmetry; // Approx: no influence of "top" to building influence region 
+        inGroups 1(symmetry);
+        faces
+        (
+            (32 33 34 35)
+            (33 36 37 34)
+            (36 38 39 37)
+            (37 39 42 43)
+            (43 42 47 46)
+            (40 43 46 44)
+            (41 40 44 45)
+            (35 34 40 41)
+            (34 37 43 40)
+        );
+    }
+
+    ground
+    {
+        type wall;
+        inGroups	1(walls);	
+        faces
+        (
+            (0 1 2 3)
+            (1 8 9 2)
+            (8 12 13 9)
+            (9 13 20 21)
+            (21 20 30 28)
+            (16 21 28 24)
+            (17 16 24 25)
+            (3 2 16 17)
+            (2 48 51 16)
+            (2 9 49 48)
+            (9 21 50 49)
+            (16 51 50 21)
+        );
+    }
+
+
+    lateral1
+    {
+        type symmetry; // Approx: no influence of "lateral" to building influence region 
+        inGroups 1(symmetry);
+        faces
+        (
+            (0 1 5 4)
+            (1 8 10 5)
+            (8 12 14 10)
+            (4 5 33 32)
+            (5 10 36 33)
+            (10 14 38 36)
+        );
+    }
+
+    lateral2
+    {
+        type symmetry; // Approx: no influence of "lateral" to building influence region 
+        inGroups 1(symmetry);
+        faces
+            (
+                (25 27 26 24)
+                (24 26 29 28)
+                (29 31 30 28)
+                (27 45 44 26)
+                (26 44 46 29)
+                (29 46 47 31)
+            );
+    }
+
+    side1
+    {
+        type wall;
+        inGroups	1(building);	
+        faces
+        (
+            (48 52 53 49)
+        );
+    }
+
+    side2
+    {
+        type wall;
+        inGroups	1(building);	
+        faces
+        (
+            (50 54 55 51)	 
+        );
+    }
+
+    front
+    {
+        type wall;
+        inGroups	1(building);	
+        faces
+        (
+            (48 51 55 52)
+        );
+    }
+
+    back
+    {
+        type wall;
+        inGroups	1(building);	
+        faces
+        (
+            (49 53 54 50)
+        );
+    }
+
+    roof
+    {
+        type wall;
+        inGroups	1(building);	
+        faces
+        (
+            (52 55 54 53)
+        );
+    }
+);
+
+faceMatch
+(
+);
+
+faces
+(
+    project (23 11 6 18) head // improve grid above building roof
+);
+
+defaultPatches
+{ 
+    type wall;
+}
+
+// ************************************************************************* //
