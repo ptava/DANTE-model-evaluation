@@ -14,11 +14,11 @@ fi
 # Run applications: create grid
 runApplication blockMesh
 runApplication checkMesh
-runApplication -s smoothing topoSet -dict system/topoSetDict.smoothing
     
 # Check cfMesh availability (we'll use improveMeshQuality utility)
 if [ "$smoothing" = "true" ]; then
     if command -v myimproveMeshQuality >/dev/null 2>&1; then
+        runApplication -s smoothing topoSet -dict system/topoSetDict.smoothing
         runApplication myimproveMeshQuality \
             -constrainedCellSet protected_cells
         runApplication -s smoothed checkMesh \
@@ -33,6 +33,7 @@ fi
 # improveMeshQuality does not preserve cellZones
 # workaround with different dictionary or re-run.
 # leave this to point out the utility reuired fix
+runApplication -s smoothing.again topoSet -dict system/topoSetDict.smoothing
 runApplication -s refinement topoSet -dict system/topoSetDict.refinement
 
 # Renumbering

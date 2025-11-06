@@ -174,7 +174,7 @@ cell_exp_ratios_master $.grid.discretization.master.cell_exp_ratios;
                     nCells_0,
                     totExpRatio_0
                 );
-                scalar compare_with_user = effectiveExpRatio(
+                scalar compare_with_user_0 = effectiveExpRatio(
                     common_ratio_0,
                     startSizes[i],
                     midSizes[i]
@@ -193,7 +193,12 @@ cell_exp_ratios_master $.grid.discretization.master.cell_exp_ratios;
                     nCells_1,
                     totExpRatio_1
                 );
-                checkCommonRatio(common_ratio_1, expRatios[i], tags[i]);
+                scalar compare_with_user_1 = effectiveExpRatio(
+                    common_ratio_1,
+                    midSizes[i],
+                    endSizes[i]
+                );
+                checkCommonRatio(compare_with_user_1, expRatios[i], tags[i]);
 
                 int totalCells = nCells_0 + nCells_1;
                 List<vector> gradingList{ grading_0, grading_1 };
