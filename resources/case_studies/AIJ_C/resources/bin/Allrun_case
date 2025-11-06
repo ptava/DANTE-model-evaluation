@@ -5,15 +5,15 @@ cd "${0%/*}" || exit
 #------------------------------------------------------------------------------
 
 # User parameters
-n_proc=16        # Set number of processors for parallel computing
-scenario="0H"    # Scenario tag (0H, 1H, or 2H)
-direction="0deg" # Flow direction tag (0deg, 22deg, 45deg)
-scale=0.25       # Set cells number scaling parameter
-delta_t=0.05     # Set acquisition time of post-processing
-start_time=1.3   # Set time to start averaging the solution (end of transient startup)
-end_time=2.0     # Set time to end the simulation
-smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
-refinement=false # Set to True if you want to refine the mesh
+n_proc=16         # Set number of processors for parallel computing
+scenario="H2"     # Scenario tag (H0, H1, or H2)
+direction="45deg" # Flow direction tag (0deg, 22deg, 45deg)
+scale=0.05        # Set cells number scaling parameter
+delta_t=0.05      # Set acquisition time of post-processing
+start_time=1.3    # Set time to start averaging the solution (end of transient startup)
+end_time=2.0      # Set time to end the simulation
+smoothing=false   # Set to True if you want to smooth the mesh (requires cfmesh)
+refinement=false  # Set to True if you want to refine the mesh
 
 # Local folders
 local_resources="resources" # Directory with resources
@@ -21,7 +21,7 @@ local_dicts="system"        # Directory for local dictionaries
 local_props="constant"      # Directory for local properties
 
 local_functions="${local_dicts}/function_objects" # Directory for local function objects
-local_geometry="${local_props}/geometry" # Directory for local geometries
+local_geometry="${local_props}/triSurface" # Directory for local geometries
 
 #------------------------------------------------------------------------------
 # Source utility functions
@@ -148,7 +148,7 @@ else
     done
 fi
 
-set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}" || {
+set_acquisition_time $delta_t $start_time $end_time $local_functions "${protected_fos[@]}" || {
     echo "Error setting acquisition time" >&2
     exit 1
 }
@@ -170,13 +170,13 @@ if [ ! -d "${local_props}/polyMesh" ]; then
     ./Allrun_pre "${smoothing}"
 else
     echo "Mesh already exists, skipping mesh creation."
-    cp -r 0.orig 0
 fi
 
 #------------------------------------------------------------------------------
 # Run the simulation in parallel
 
 echo "Running the simulation..."
+cp -r 0.orig 0
 runParallel redistributePar -decompose -overwrite -constant
 runParallel $(getApplication)
 echo "Simulation completed."

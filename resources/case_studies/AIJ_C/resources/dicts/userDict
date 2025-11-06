@@ -8,11 +8,11 @@
 
 scenario
 {
-    geometry    "0H";       // Options:
+    geometry        "2H";       // Options:
                             // "0H" - includes "BASE.stl"
                             // "1H" - includes "BASE.stl" and "1H.stl"
                             // "2H" - includes "BASE.stl" and "2H.stl"
-    flowDirection   "0deg"; // Options:
+    flowDirection   "45deg"; // Options:
                             // " 0deg"   - flow in +x direction
                             // " 22deg"  - flow in +x and +y directions
                             // " 45deg"  - flow in +x and +y directions
@@ -30,18 +30,18 @@ refinement
         min_y   -0.9;
         max_y   1.4;
         min_z   0.0;
-        max_z   0.75;
+        max_z   0.9;
     }
 
     // refinement around the building block
     r2
     {
-        min_x   -0.7;
-        max_x   0.7;
-        min_y   -0.7;
-        max_y   0.7;
+        min_x   -0.9;
+        max_x   0.9;
+        min_y   -0.9;
+        max_y   0.9;
         min_z   0.0;
-        max_z   0.6;
+        max_z   0.75;
     }
 
     // refinement inside the building block
@@ -52,24 +52,24 @@ refinement
         min_y   -0.2;
         max_y   0.2;
         min_z   0.0;
-        max_z   0.5;
+        max_z   0.6;
     }
-
 }
 
 
 background
 {
     // Length of cubic cells in "uniform" region
+    // be careful about this because we're doing only castellation with snappy
     cells_scaling   0.05;
 
     // Domain limit
     min_x   -1.4;
-    max_x   2.6;
+    max_x   3.0;
     min_y   -1.4;
-    max_y   2.6;
+    max_y   3.0;
     min_z   0;
-    max_z   1.2;
+    max_z   2.8; 
 
     // Lengths
     length_x   #eval{ ${max_x} - ${min_x} };

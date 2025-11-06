@@ -5,15 +5,15 @@
 # - To be used in already prepared case folder.
 # - Define the case geometry/triSurface folder with stl files
 # - Copy scenario-related dictionaries
-# - <tag> cab be one of the following: 0H, 1H, 2H
+# - <tag> cab be one of the following: H0, H1, H2
 #
 ###############################################################################
 
 #--- Default --#
-TAG="0H"
+TAG="H2"
 DIR="45deg"
 HEIGHT=0.2
-GEOMETRY_FOLDER="constant/triSurface"
+GEOMETRY_FOLDER="constant/geometry"
 DICTS_DIR="resources/dicts"
 STL_DIR="resources/geometry"
 DATA_DIR="resources/data"
@@ -32,9 +32,9 @@ usage() {
     Prepare case based on scenario selected by <tag>.
 
     Options:
-        -g, --geom-tag <tag> Prepare case for the specified geometry scenario tag (0H, 1H, or 2H)
-        -d, --dir-tag <tag> Prepare case for the specific flow direction tag (0deg, 22deg, 45deg=
-        -f, --folder <path-to-geometry-folder> Specify the folder to store stl files (default: constant/triSurface)
+        -g, --geom-tag <tag> Prepare case for the specified geometry scenario tag (H0, H1 or H2)
+        -d, --dir-tag <tag> Prepare case for the specific flow direction tag (0deg, 22deg, 45deg)
+        -f, --folder <path-to-geometry-folder> Specify the folder to store stl files (default: constant/geometry)
         --dicts-resources <path-to-dicts-folder> Specify the folder containing scenario-related dictionaries (default: resources/dicts)
         --stl-resources <path-to-stl-folder> Specify the folder containing stl files (default: resources/geometry)
         --data-resources <path-to-data-folder> Specify the folder containing initial and boundary conditions (default: resources/data)
@@ -108,20 +108,20 @@ set_geometries() {
     copy_file_if_exists "${STL_DIR}/BASE.stl" "${GEOMETRY_FOLDER}/."
 
     case "${TAG}" in
-        0H)
+        H0)
             echo "+--- Base stl file included"
             ;;
-        1H)
-            copy_file_if_exists "${STL_DIR}/1H.stl" "${GEOMETRY_FOLDER}/."
-            echo "+--- 1H stl file included"
+        H1)
+            copy_file_if_exists "${STL_DIR}/H1.stl" "${GEOMETRY_FOLDER}/."
+            echo "+--- H1 stl file included"
             ;;
-        2H)
-            copy_file_if_exists "${STL_DIR}/2H.stl" "${GEOMETRY_FOLDER}/."
+        H2)
+            copy_file_if_exists "${STL_DIR}/H2.stl" "${GEOMETRY_FOLDER}/."
             HEIGHT=0.4
-            echo "+--- 2H stl file included"
+            echo "+--- H2 stl file included"
             ;;
         *)
-            echo "Error: Unknown scenario tag '${TAG}'. Supported tags are 0H, 1H, and 2H." >&2
+            echo "Error: Unknown scenario tag '${TAG}'. Supported tags are H0, H1, and H2." >&2
             return 1
     esac
 
@@ -160,7 +160,7 @@ change_domain() {
             blockMeshDict_source="${DICTS_DIR}/blockMeshDict_parallel"
             copy_file_if_exists "${blockMeshDict_source}" "${blockMeshDict_target}"
 
-            foamDictionary -entry background/max_x -set 3.0 "${USER_DICT}"
+            foamDictionary -entry background/max_x -set 3.4 "${USER_DICT}"
             foamDictionary -entry background/max_y -set 1.4 "${USER_DICT}"
             foamDictionary -entry refinement/r1/max_y -set 0.9 "${USER_DICT}"
 
@@ -170,8 +170,8 @@ change_domain() {
             blockMeshDict_source="${DICTS_DIR}/blockMeshDict_notParallel"
             copy_file_if_exists "${blockMeshDict_source}" "${blockMeshDict_target}"
 
-            foamDictionary -entry background/max_x -set 2.8 "${USER_DICT}"
-            foamDictionary -entry background/max_y -set 2.6 "${USER_DICT}"
+            foamDictionary -entry background/max_x -set 3.2 "${USER_DICT}"
+            foamDictionary -entry background/max_y -set 2.8 "${USER_DICT}"
             foamDictionary -entry refinement/r1/max_y -set 1.2 "${USER_DICT}"
 
             echo "+--- Computational domain set for 22deg inflow direction"

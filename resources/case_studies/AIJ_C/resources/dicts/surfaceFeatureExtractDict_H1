@@ -19,7 +19,7 @@ BASE.stl
     #includeEtc "caseDicts/surface/surfaceFeatureExtractDict.cfg"
 }
 
-2H.stl
+H1.stl
 {
     #includeEtc "caseDicts/surface/surfaceFeatureExtractDict.cfg"
 }
