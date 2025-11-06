@@ -50,6 +50,7 @@ fi
 cd "$dirResults"
 sed -i "s/\(n_proc=\)[0-9]\+/\1${SLURM_NTASKS}/" Allrun_case
 ./Allrun_case
+cd ../..
 
 # Store for reuse if not alread present
 if [ "${COMMON_MESH}" = "true" ] && [ ! -d results/mesh ]; then
@@ -60,8 +61,8 @@ fi
 
 if [ "${COMMON_DYNAMIC_CODE}" = "true" ] && [ ! -d results/dynamicCode ]; then
     echo "Storing common dynamic code in results/dynamicCode"
-    mkdir -p results/common_dynamic_code
-    cp -Rf "$dirResults/system" results/dynamicCode/.
+    mkdir -p results/dynamicCode
+    cp -Rf "$dirResults/dynamicCode" results/.
 fi
 
 #------------------------------------------------------------------------------

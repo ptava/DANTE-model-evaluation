@@ -147,7 +147,7 @@ else
     done
 fi
 
-set_acquisition_time $delta_t $start_time $end_time "${protected_fos[@]}" || {
+set_acquisition_time $delta_t $start_time $end_time $local_functions "${protected_fos[@]}" || {
     echo "Error setting acquisition time" >&2
     exit 1
 }

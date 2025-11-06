@@ -29,20 +29,18 @@ nOutCorr {
         // Create editable copy of PIMPLE subdict
         dictionary &pimpleDict = fvSolutionDict.subDict("PIMPLE");
 
-        if (Pstream::master()) {
-            // Change nCorrectors based on time
-            const label &nOuterCorr =
-                pimpleDict.lookupOrDefault("nOuterCorrectors", defaultValue);
-            label newOuterCorr = max(minValue, nOuterCorr - rampDown);
+        // Change nCorrectors based on time
+        const label &nOuterCorr =
+            pimpleDict.lookupOrDefault("nOuterCorrectors", defaultValue);
+        label newOuterCorr = max(minValue, nOuterCorr - rampDown);
 
-            pimpleDict.set("nOuterCorrectors", newOuterCorr);
+        pimpleDict.set("nOuterCorrectors", newOuterCorr);
 
-            // Write back the modified dictionary
-            fvSolutionDict.subDict("PIMPLE") = pimpleDict;
-            fvSolutionDict.regIOobject::write();
+        // Write back the modified dictionary
+        fvSolutionDict.subDict("PIMPLE") = pimpleDict;
+        fvSolutionDict.regIOobject::write();
 
-            Info << "Updated nOuterCorrectors to: " << newOuterCorr << endl;
-        }
+        Info << "Updated nOuterCorrectors to: " << newOuterCorr << endl;
 
     #};
 }

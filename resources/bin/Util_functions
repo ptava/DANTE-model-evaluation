@@ -1,6 +1,7 @@
 #!/bin/bash
 ###############################################################################
-# set_acquisition_time <Δt> <startTime> <endTime> [protected‑file …]
+# set_acquisition_time 
+#   <Δt> <startTime> <endTime> path/to/foDir [protected‑file ...]
 #
 # • Updates system/controlDict:
 #       endTime        ← <endTime>
@@ -19,7 +20,8 @@ set_acquisition_time() {
     local acquisition_dt="$1"       # acquisition delta time
     local start_time="$2"           # start acquisition time
     local end_time="$3"             # end simulation and acquisition time
-    local -a protected=("${@:4}")   # remaining args as array of protected files
+    local fo_dir="$4"               # function objects directory
+    local -a protected=("${@:5}")   # remaining args as array of protected files
 
     local control_dict="system/controlDict"
     local fo_dir="system/function_objects"
@@ -165,7 +167,7 @@ set_fos() {
 
     #--- add FOs to controlDict in a sorted order ---#
     local fo_files
-    mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0)
+    mapfile -d '' -t fo_files < <(find "$fo_dir" -type f -print0 -maxdepth 1)
 
     IFS=$'\n' readarray -t sorted_fo_files < <(
       for f in "${fo_files[@]}"; do
