@@ -103,6 +103,32 @@ vertices
       ( -$building_xy     $building_xy      $building_z )
 );
 
+faces
+(
+    project (23 11 6 18) head // improve grid above building roof
+);
+
+edges
+(
+    arc 9  21 ( $ogrid_radius  0              0        )
+    arc 2  9  ( 0              -$ogrid_radius 0        )
+    arc 2  16 ( -$ogrid_radius 0              0        )
+    arc 21 16 ( 0              $ogrid_radius  0        )
+
+    // Increasing mesh resolution I get inconsistency with projected faces on
+    // 'head' STL even if it has been constructed with those vertices and arcs
+    // -> substitute with edges projected vertically onto 'head'
+
+    // arc 6  11 ( 0              -$ogrid_radius $ogrid_z )
+    // arc 11 23 ( $ogrid_radius  0              $ogrid_z )
+    // arc 6  18 ( -$ogrid_radius 0              $ogrid_z )
+    // arc 23 18 ( 0              $ogrid_radius  $ogrid_z )
+    project 11 23 (head)
+    project 23 18 (head)
+    project 6 11 (head)
+    project 6 18 (head)
+);
+
 // Generating MASTER blocks cells numbers and grading
 tags_master            $.grid.discretization.master.tags;
 mid_points_master      $.grid.discretization.master.mid_points;
@@ -113,14 +139,22 @@ cell_exp_ratios_master $.grid.discretization.master.cell_exp_ratios;
 
 #codeStream
 {
-    codeOptions
-    #{
-        -I"$FOAM_CASE/system/helpers"
-    #};
     codeInclude
     #{
         #include "discretization.H"
     #};
+
+    codeOptions
+    #{
+        -I"$FOAM_CASE/system/helpers"
+    #};
+
+    codeLibs
+    #{
+        -lsurfMesh \
+        -lmeshTools
+    #};
+
     code
     #{
         using namespace Foam;
@@ -139,12 +173,13 @@ cell_exp_ratios_master $.grid.discretization.master.cell_exp_ratios;
             mag( vertices[21] - vertices[23] ), // Z0
             mag( vertices[23] - vertices[43] ), // Z1
             mag( vertices[23] - vertices[54] ), // B1
-            mag( vertices[23] - vertices[18] ), // B2
+            mag( vertices[54] - vertices[55] ), // B0
             mag( vertices[7]  - vertices[6]  ), // X0
             mag( vertices[23] - vertices[22] ), // X1
             mag( vertices[5]  - vertices[6]  ), // Y0
             mag( vertices[18] - vertices[26] )  // Y1
         };
+
 
         if (
             tags.size() != startSizes.size()    ||
@@ -179,28 +214,39 @@ cell_exp_ratios_master $.grid.discretization.master.cell_exp_ratios;
                     startSizes[i],
                     midSizes[i]
                 );
-                checkCommonRatio(compare_with_user, expRatios[i], tags[i]);
+                checkCommonRatio(compare_with_user_0, expRatios[i], tags[i]);
 
-                scalar length_1 = edgeLengths[i] - length_0;
-                auto [nCells_1, totExpRatio_1] = planEdge(
-                    length_1,
-                    midSizes[i],
-                    endSizes[i],
-                    expRatios[i]
-                );
-                vector grading_1( length_1, nCells_1 , totExpRatio_1 );
-                scalar common_ratio_1 = cellToCellExpRatio(
-                    nCells_1,
-                    totExpRatio_1
-                );
-                scalar compare_with_user_1 = effectiveExpRatio(
-                    common_ratio_1,
-                    midSizes[i],
-                    endSizes[i]
-                );
-                checkCommonRatio(compare_with_user_1, expRatios[i], tags[i]);
+                int totalCells;
+                vector grading_1;
 
-                int totalCells = nCells_0 + nCells_1;
+                if (midPoints[i] == 0.5) // guarantee symmetry
+                {
+                    scalar invTotExpRatio_0 = 1.0 / totExpRatio_0;
+                    grading_1 = vector( length_0, nCells_0 , invTotExpRatio_0 );
+                    totalCells = 2 * nCells_0;
+                }
+                else
+                {
+                    scalar length_1 = edgeLengths[i] - length_0;
+                    auto [nCells_1, totExpRatio_1] = planEdge(
+                        length_1,
+                        midSizes[i],
+                        endSizes[i],
+                        expRatios[i]
+                    );
+                    grading_1 = vector( length_1, nCells_1 , totExpRatio_1 );
+                    scalar common_ratio_1 = cellToCellExpRatio(
+                        nCells_1,
+                        totExpRatio_1
+                    );
+                    scalar compare_with_user_1 = effectiveExpRatio(
+                        common_ratio_1,
+                        midSizes[i],
+                        endSizes[i]
+                    );
+                    checkCommonRatio(compare_with_user_1, expRatios[i], tags[i]);
+                    totalCells = nCells_0 + nCells_1;
+                }
                 List<vector> gradingList{ grading_0, grading_1 };
                 printBlockInfo(os, tags[i], totalCells, gradingList);
             }
@@ -229,25 +275,29 @@ cell_exp_ratios_master $.grid.discretization.master.cell_exp_ratios;
 }
 
 // Adjust some grading of SLAVES blocks
-// if midpoint != 0.0, multigrading is applied distributing cells_number accordingly
+// Multigrading applied in order to guarantee symmetric edge 
 tags_slave            $.grid.discretization.slave.tags;
 start_sizes_slave     $.grid.discretization.slave.start_sizes;
-end_sizes_slave       $.grid.discretization.slave.end_sizes;
 cell_exp_ratios_slave $.grid.discretization.slave.cell_exp_ratios;
-mid_points_slave      $.grid.discretization.slave.mid_points;
-cells_distribution    $.grid.discretization.slave.cells_distr;
-cells_number          ( ${ncB1}     ${ncZ0}     ${ncB2} ); // forced ncells
+mid_sizes_slave       $.grid.discretization.slave.mid_sizes;
+cells_number          ( ${ncB0}     ${ncZ0} ); // forced ncells
 
 #codeStream
 {
-    codeOptions
-    #{
-        -I"$FOAM_CASE/system/helpers"
-    #};
     codeInclude
     #{
         #include "discretization.H"
+        #include "triSurface.H"
+        #include "triSurfaceSearch.H"
     #};
+
+    codeOptions
+    #{
+        -I"$FOAM_CASE/system/helpers" \
+        -I"$(LIB_SRC)/surfMesh/lnInclude" \
+        -I"$(LIB_SRC)/meshTools/lnInclude"
+    #};
+
     code
     #{
         using namespace Foam;
@@ -255,117 +305,136 @@ cells_number          ( ${ncB1}     ${ncZ0}     ${ncB2} ); // forced ncells
         // Lookup info
         List<word> tags( IStringStream("${tags_slave}")() );
         List<scalar> startSizes( IStringStream("${start_sizes_slave}")() );
-        List<scalar> endSizes( IStringStream("${end_sizes_slave}")() );
-        List<scalar> midPoints( IStringStream("${mid_points_slave}")() );
+        List<scalar> midSizes( IStringStream("${mid_sizes_slave}")() );
         List<scalar> expRatios( IStringStream("${cell_exp_ratios_slave}")() );
-        List<scalar> cellsDistributions( IStringStream("${cells_distribution}")() );
         List<scalar> cellsNumbers( IStringStream("${cells_number}")() );
 
         pointField vertices( IStringStream("${vertices}")() );
         List<scalar> edgeLengths = {
-            mag( vertices[54] - vertices[55] ), // B0
-            mag( vertices[54] - vertices[50] ), // B3
-            mag( vertices[23] - vertices[18] )  // B4 (adjusting B2)
+            mag( vertices[23] - vertices[18] ), // B2 -> ! not a straight edge
+            mag( vertices[54] - vertices[50] ) // B3
         };
+
+        // Reproduce projection step to get accurate edge length along STL
+        // Overwrite edgeLengths[0] (B2)
+        const fileName stl("constant/geometry/head.stl");
+        const label nSamp = 800;
+
+        triSurface surf(stl);
+        triSurfaceSearch sSurf(surf);
+
+        pointField samples(nSamp+1);
+        for (label i=0; i<=nSamp; ++i)
+        {
+            const scalar t = scalar(i)/scalar(nSamp);
+            samples[i] = (1.0 - t)*vertices[23] + t*vertices[18];
+        }
+
+        scalarField r2(samples.size(), GREAT);
+        List<pointIndexHit> hits;
+        sSurf.findNearest(samples, r2, hits);
+
+        scalar L = 0.0;
+        point prev = hits[0].hitPoint();
+        for (label i=1; i<hits.size(); ++i)
+        {
+            const point q = hits[i].hitPoint();
+            L += mag(q - prev);
+            prev = q;
+        }
+        edgeLengths[0] = L;
 
         if (
             tags.size() != startSizes.size()    ||
-            tags.size() != endSizes.size()      ||
-            tags.size() != midPoints.size()
+            tags.size() != midSizes.size()      ||
+            tags.size() != cellsNumbers.size()
         )
         {
             FatalErrorIn("blockMeshDict::codeStream::code")
-                << "tags, startSizes, endSizes and midPoints must have the same size"
+                << "tags, startSizes, endSizes and midSizes must have the same size"
                 << exit(FatalError);
         }
 
         for ( label i=0; i<tags.size(); i++ )
         {
-            if ( midPoints[i] != 0.0 )
-            {
-                scalar length_0 = midPoints[i] * edgeLengths[i];
-                scalar nCells_0 = cellsDistributions[i] * cellsNumbers[i];
-                scalar totExpRatio_0 = endToStartExpRatio(
-                    nCells_0,
-                    expRatios[i]
-                );
-                vector grading_0( length_0, nCells_0 , totExpRatio_0 );
+            scalar halfLength = edgeLengths[i]/2.0;
+            int halfCells = cellsNumbers[i]/2.0;
+            scalar real_exp_ratio = solve_r_from_L_d0_N(
+                halfLength,
+                startSizes[i],
+                halfCells
+            );
+            scalar totExpRatio = endToStartExpRatio(
+                halfCells,
+                real_exp_ratio
+            );
+            scalar compare_with_user = effectiveExpRatio(
+                real_exp_ratio,
+                totExpRatio
+            );
+            checkCommonRatio(compare_with_user, expRatios[i], tags[i]);
+            vector grading_0( halfLength, halfCells , totExpRatio );
 
-                scalar length_1 = edgeLengths[i] - length_0;
-                scalar nCells_1 = cellsNumbers[i] - nCells_0;
-                scalar totExpRatio_1  = endToStartExpRatio(
-                    nCells_1,
-                    expRatios[i]
-                );
-                vector grading_1( length_1, nCells_1 , 1.0/totExpRatio_1 );
+            scalar invTotExpRatio = 1.0 / totExpRatio;
+            vector grading_1( halfLength, halfCells , invTotExpRatio );
 
-                int totalCells = nCells_0 + nCells_1;
-                List<vector> gradingList{ grading_0, grading_1 };
-                printBlockInfo(os, tags[i], totalCells, gradingList);
-            }
-            else
-            {
-                scalar totExpRatio  = endToStartExpRatio(
-                    cellsNumbers[i],
-                    expRatios[i]
-                );
-                printBlockInfo(os, tags[i], cellsNumbers[i], totExpRatio);
-            }
+            List<vector> gradingList{ grading_0, grading_1 };
+            printBlockInfo(os, tags[i], cellsNumbers[i], gradingList);
+
+            scalar mid_size = lastCellSize(
+                startSizes[i],
+                real_exp_ratio,
+                halfCells
+            );
+
+            // Check how much we're far from the user defined midSize
+            WarningInFunction
+                << "Edge with tag " << tags[i] << " has mid cell with different "
+                << " size than user defined [" << mid_size << " - "
+                << midSizes[i] << "]" << nl << endl;
         }
     #};
 }
-
-edges
-(
-    arc 9  21 ( $ogrid_radius  0              0        )
-    arc 11 23 ( $ogrid_radius  0              $ogrid_z )
-    arc 2  16 ( -$ogrid_radius 0              0        )
-    arc 6  18 ( -$ogrid_radius 0              $ogrid_z )
-    arc 2  9  ( 0              -$ogrid_radius 0        )
-    arc 6  11 ( 0              -$ogrid_radius $ogrid_z )
-    arc 21 16 ( 0              $ogrid_radius  0        )
-    arc 23 18 ( 0              $ogrid_radius  $ogrid_z )
-);
 
 blocks
 (
 	// Block 0
 	hex (0 1 2 3 4 5 6 7)($ncX0 $ncY0 $ncZ0) 
 	edgeGrading (
-	       $gX0 $gX0 $gX0 $gX0
-	       $gY0 $gY0 $gY0 $gY0
-	       $gZ0 $gZ0 $gZ0 $gZ0
-	   )
+        $gX0 $gX0 $gX0 $gX0
+        $gY0 $gY0 $gY0 $gY0
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
 
 	// Block 1
 	hex (1 8 9 2 5 10 11 6)($ncB2 $ncY0 $ncZ0) 
 	edgeGrading (
-	       1    $gB4 $gB4 1
-	       $gY0 $gY0 $gY0 $gY0
-	       $gZ0 $gZ0 $gZ0 $gZ0
-	   )
+        $gB2 $gB2 $gB2 $gB2
+        $gY0 $gY0 $gY0 $gY0
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
 
 	// Block 2
 	hex (8 12 13 9 10 14 15 11)($ncX1 $ncY0 $ncZ0) 
 	edgeGrading (
-	       $gX1 $gX1 $gX1 $gX1
-	       $gY0 $gY0 $gY0 $gY0
-	       $gZ0 $gZ0 $gZ0 $gZ0
-	   )
+        $gX1 $gX1 $gX1 $gX1
+        $gY0 $gY0 $gY0 $gY0
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
 
 	// Block 3
 	hex (3 2 16 17 7 6 18 19)($ncX0 $ncB2 $ncZ0) 
 	edgeGrading (
-	       $gX0 $gX0 $gX0 $gX0
-	       1    $gB2 $gB2 1
-	       $gZ0 $gZ0 $gZ0 $gZ0
-	   )
+        $gX0 $gX0 $gX0 $gX0
+        $gB2 $gB2 $gB2 $gB2
+        $gZ0 $gZ0 $gZ0 $gZ0
+    )
 
 	// Block 4
 	hex (9 13 20 21 11 15 22 23)($ncX1 $ncB2 $ncZ0)
 	edgeGrading (
         $gX1 $gX1 $gX1 $gX1
-        $gB4 1    1    $gB4
+        $gB2 $gB2 $gB2 $gB2
         $gZ0 $gZ0 $gZ0 $gZ0
     )
 
@@ -380,7 +449,7 @@ blocks
 	// Block 6
 	hex (16 21 28 24 18 23 29 26)($ncB2 $ncY1 $ncZ0) 
 	edgeGrading (
-        $gB4 1    1    $gB4
+        $gB2 $gB2 $gB2 $gB2
         $gY1 $gY1 $gY1 $gY1
         $gZ0 $gZ0 $gZ0 $gZ0
     )
@@ -404,7 +473,7 @@ blocks
 	// Block 9
 	hex (5 10 11 6 33 36 37 34)($ncB2 $ncY0 $ncZ1) 
     edgeGrading (
-        1    $gB4 1    1
+        $gB2 $gB2 1    1
         $gY0 $gY0 $gY0 $gY0
         $gZ1 $gZ1 $gZ1 $gZ1
     )
@@ -421,7 +490,7 @@ blocks
     hex (7 6 18 19 35 34 40 41)($ncX0 $ncB2 $ncZ1) 
     edgeGrading (
         $gX0 $gX0 $gX0 $gX0
-        1    $gB2 1    1
+        $gB2 $gB2 1    1
         $gZ1 $gZ1 $gZ1 $gZ1
     )
 
@@ -429,7 +498,7 @@ blocks
 	hex (11 15 22 23 37 39 42 43)($ncX1 $ncB2 $ncZ1)
     edgeGrading (
         $gX1 $gX1 $gX1 $gX1
-        $gB4 1    1    1
+        $gB2 $gB2 1    1
         $gZ1 $gZ1 $gZ1 $gZ1
     )
 
@@ -439,29 +508,29 @@ blocks
         $gX0 $gX0 $gX0 $gX0
         $gY1 $gY1 $gY1 $gY1
         $gZ1 $gZ1 $gZ1 $gZ1
-    )
+	   )
 
     // Block 14
     hex (18 23 29 26 40 43 46 44)($ncB2 $ncY1 $ncZ1) 
     edgeGrading (
-        $gB4 1    1    1
+        $gB2 $gB2 1    1
         $gY1 $gY1 $gY1 $gY1
         $gZ1 $gZ1 $gZ1 $gZ1
     )
 
 	// Block 15
 	hex (23 22 31 29 43 42 47 46)($ncX1 $ncY1 $ncZ1) 
-	   edgeGrading (
-	       $gX1 $gX1 $gX1 $gX1
-	       $gY1 $gY1 $gY1 $gY1
-	       $gZ1 $gZ1 $gZ1 $gZ1
-	   )
+    edgeGrading (
+        $gX1 $gX1 $gX1 $gX1
+        $gY1 $gY1 $gY1 $gY1
+        $gZ1 $gZ1 $gZ1 $gZ1
+    )
 
     // Block 16
     hex (6 11 23 18 34 37 43 40)($ncB2 $ncB2 $ncZ1) 
     edgeGrading (
-        $gB4 $gB4 1    1
-        $gB2 $gB4 1    1
+        $gB2 $gB2 1    1
+        $gB2 $gB2 1    1
         $gZ1 $gZ1 $gZ1 $gZ1
     )
 
@@ -469,7 +538,7 @@ blocks
     hex (9 49 48 2 11 53 52 6)($ncB1 $ncB2 $ncZ0) 
     edgeGrading (
         $gB1 $gB1 $gB1 $gB1 
-        $gB4 $gB0 $gB0 $gB4
+        $gB2 $gB0 $gB0 $gB2
         $gZ0 $gB3 $gB3 $gZ0
     )
 
@@ -485,24 +554,24 @@ blocks
 	hex (21 50 49 9 23 54 53 11)($ncB1 $ncB2 $ncZ0) 
 	edgeGrading (
         $gB1 $gB1 $gB1 $gB1 
-        $gB4 $gB0 $gB0 $gB4
+        $gB2 $gB0 $gB0 $gB2
         $gZ0 $gB3 $gB3 $gZ0
     )
 
-	   // Block 20
+    // Block 20
     hex (21 16 51 50 23 18 55 54)($ncB2 $ncB1 $ncZ0) 
     edgeGrading (
-       $gB4 $gB0 $gB0 $gB4
-       $gB1 $gB1 $gB1 $gB1
-       $gZ0 $gZ0 $gB3 $gB3
+        $gB2 $gB0 $gB0 $gB2
+        $gB1 $gB1 $gB1 $gB1
+        $gZ0 $gZ0 $gB3 $gB3
 	)
 
 	// Block 21
 	hex (23 11 6 18 54 53 52 55)($ncB2 $ncB2 $ncB1) 
 	edgeGrading (
-	       $gB4 $gB2 $gB0 $gB0 
-	       $gB4 $gB4 $gB0 $gB0
-	       $gB1 $gB1 $gB1 $gB1
+        $gB2 $gB2 $gB0 $gB0 
+        $gB2 $gB2 $gB0 $gB0
+        $gB1 $gB1 $gB1 $gB1
 	)
 );
 
@@ -660,11 +729,6 @@ boundary
 
 faceMatch
 (
-);
-
-faces
-(
-    project (23 11 6 18) head // improve grid above building roof
 );
 
 defaultPatches

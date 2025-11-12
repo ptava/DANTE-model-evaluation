@@ -20,17 +20,19 @@ grid
         multiplier_z     7.0;
         multiplier_y     6.0;
         multiplier_x_in  3.0;
-        multiplier_x_out 10.0;
+        multiplier_x_out 9.0;
     }
 
     control
     {
-        // Grid blocks number of cells
-        cells_scaling    1.0;
-        cell_size_0      #calc " ${cells_scaling} * 0.0002";
-        cell_size_1      #calc " ${cells_scaling} * 0.002 ";
-        cell_size_2      #calc " ${cells_scaling} * 0.008 ";
-        cell_size_3      #calc " ${cells_scaling} * 0.025 ";
+        // Grid blocks number of cnewtonells
+        cells_scaling    3.5;
+        cell_size_0      #calc " ${cells_scaling} * 0.0001";
+        cell_size_1      #calc " ${cells_scaling} * 0.0007 ";
+        cell_size_2      #calc " ${cells_scaling} * 0.0010 ";
+        cell_size_3      #calc " ${cells_scaling} * 0.0020 ";
+        cell_size_4      #calc " ${cells_scaling} * 0.0040 ";
+        cell_size_5      #calc " ${cells_scaling} * 0.0060 ";
 
         // O-grid extent
         xyz_distance     $..building.ref_size;
@@ -74,7 +76,7 @@ grid
         // 'Z0': grading on vertical edges of the baseblock
         // 'Z1': grading on vertical edges of the topblock
         // 'B1': grading o-grid towards the building
-        // 'B2': grading on o-grid outer top edges
+        // 'B0': grading on xy building edges
         // 'X0': grading on x inlet
         // 'X1': grading on x outlet
         // 'Y0': grading on y left inlet
@@ -86,7 +88,7 @@ grid
                 Z0
                 Z1
                 B1
-                B2
+                B0
                 X0
                 X1
                 Y0
@@ -95,83 +97,81 @@ grid
             start_sizes
             (
                 $...control.cell_size_0
-                $...control.cell_size_2
-                $...control.cell_size_2
-                $...control.cell_size_2
                 $...control.cell_size_3
-                $...control.cell_size_2
                 $...control.cell_size_3
-                $...control.cell_size_2
+                $...control.cell_size_0
+                $...control.cell_size_4
+                $...control.cell_size_3
+                $...control.cell_size_4
+                $...control.cell_size_3
             );
             mid_sizes
             (
                 $...control.cell_size_1
-                0
+                $...control.cell_size_4
+                $...control.cell_size_1
                 $...control.cell_size_1
                 0
-                0
-                0
+                $...control.cell_size_4
                 0
                 0
             );
             mid_points
             (
-                0.25
-                0.0
+                0.20
+                0.55
                 0.90
+                0.50
                 0.0
-                0.0
-                0.0
+                0.70
                 0.0
                 0.0
             );
             end_sizes
             (
-                $...control.cell_size_2
                 $...control.cell_size_3
+                $...control.cell_size_5
                 $...control.cell_size_0
-                $...control.cell_size_2
-                $...control.cell_size_2
+                $...control.cell_size_0
                 $...control.cell_size_3
-                $...control.cell_size_2
+                $...control.cell_size_5
                 $...control.cell_size_3
+                $...control.cell_size_4
             );
             cell_exp_ratios
             (
-                1.05
-                1.15
-                1.05
-                1.00
-                1.05
-                1.10
-                1.10
-                1.10
+                5.0
+                5.0
+                5.0
+                5.0
+                5.0
+                5.0
+                5.0
+                5.0
             );
         }
 
         // To adjust SLAVE blocks grading - strecth towards 'mid_point'
-        // 'B0': grading on roof and base edges of the building
+        // - start size and end size are the same
+        // - cells number inherited from MASTER blocks
+        // 'B2': grading on xy edges towards the building
         // 'B3': grading on vertical edges of the building
-        // 'B4': changes B2 grading on o-grid left/right/back top edges
         slave
         {
-            tags            ( B0  B3   B4   );
-            cell_exp_ratios ( 1.1 1.05 1.06 );
-            mid_points      ( 0.5 0.5  0.5  );
-            cells_distr     ( 0.5 0.65 0.5  );
+            tags            ( B2  B3 );
+            cell_exp_ratios ( 3 3 );
             start_sizes     ( 
+                $...control.cell_size_3
                 $...control.cell_size_0
-                $...control.cell_size_0
-                $...control.cell_size_1
             );
-            end_sizes       (
-                $...control.cell_size_0
-                $...control.cell_size_0
-                $...control.cell_size_1
+            mid_sizes       (
+                $...control.cell_size_2
+                $...control.cell_size_2
             );
         }
     }
 }
+
 
 //--- Smoothing-related parameters ---//
 protected
