@@ -17,7 +17,8 @@ grid
 
     surrounding
     {
-        multiplier_z     7.0;
+        // Multipliers to define the domain size based on building height
+        multiplier_z     7.0;   // Use 5.625 to match other grid
         multiplier_y     6.0;
         multiplier_x_in  3.0;
         multiplier_x_out 9.0;
@@ -25,14 +26,34 @@ grid
 
     control
     {
-        // Grid blocks number of cnewtonells
-        cells_scaling    3.5;
-        cell_size_0      #calc " ${cells_scaling} * 0.0001";
-        cell_size_1      #calc " ${cells_scaling} * 0.0007 ";
-        cell_size_2      #calc " ${cells_scaling} * 0.0010 ";
-        cell_size_3      #calc " ${cells_scaling} * 0.0020 ";
-        cell_size_4      #calc " ${cells_scaling} * 0.0040 ";
-        cell_size_5      #calc " ${cells_scaling} * 0.0060 ";
+        // Overall cells count based on cells size in specific regions and
+        // scaling factor named 'cells_scaling'.
+        // - cells_scaling:
+        //      ⇲ cells_scaling = 1.0 -> nCells ~= 65M
+        //      ⇲ cells_scaling = 1.5 -> nCells ~= 20M
+        //      ⇲ cells_scaling = 2.0 -> nCells ~= 9M
+        //      ⇲ cells_scaling = 3.0 -> nCells ~= 3M
+        // - cells_size_0: 
+        //      ⇲ boundary layer first cell height
+        //      ⇲ isotropic cell size near building corners
+        // - cells_size_1:
+        //      ⇲ height of cell at the top of the boundary layer
+        // - cells_size_2:
+        //      ⇲ control size in the centers of building faces
+        // - cells_size_3:
+        //      ⇲ isotropic cell size in the vicinity of the building
+        // - cells_size_4:
+        //      ⇲ cell size in the far field (inlet/sides)
+        // - cells_size_5:
+        //      ⇲ cell size in the far field (top/outlet)
+
+        cells_scaling    1.0;
+        cell_size_0      #calc " ${cells_scaling} * 0.0001";    
+        cell_size_1      #calc " ${cells_scaling} * 0.0014 ";
+        cell_size_2      #calc " ${cells_scaling} * 0.0020 ";
+        cell_size_3      #calc " ${cells_scaling} * 0.0040 ";
+        cell_size_4      #calc " ${cells_scaling} * 0.0080 ";
+        cell_size_5      #calc " ${cells_scaling} * 0.0120 ";
 
         // O-grid extent
         xyz_distance     $..building.ref_size;
@@ -151,7 +172,8 @@ grid
             );
         }
 
-        // To adjust SLAVE blocks grading - strecth towards 'mid_point'
+        // To adjust SLAVE blocks grading:
+        // - guarantee start size strecthing cells size towards edge mid-point
         // - start size and end size are the same
         // - cells number inherited from MASTER blocks
         // 'B2': grading on xy edges towards the building
@@ -176,23 +198,42 @@ grid
 //--- Smoothing-related parameters ---//
 protected
 {
-    min_x           -0.4;
-    min_y           -0.4;
-    min_z           -0.4;
+    extent_x_in		0.6;
+    extent_x_out	0.4;
+    extent_y		0.6;
+    extent_z		0.5;
+    grid_min_x      $..grid.coordinates.x_min;
+    grid_max_x      $..grid.coordinates.x_max;
+    grid_min_y      $..grid.coordinates.y_min;
+    grid_max_y      $..grid.coordinates.y_max;
+    grid_min_z      $..grid.coordinates.z_min;
+    grid_max_z      $..grid.coordinates.z_max;
 
-    max_x           0.7;
-    max_y           0.4;
-    max_z           0.5;
+    // Exclude from smoothing cells outside these limits
+    min_z           $grid_min_z;
+    max_z           #calc " ${grid_max_z} * ${extent_z}";
+    min_x           #calc " ${grid_min_x} * ${extent_x_in}";
+    max_x           #calc " ${grid_max_x} * ${extent_x_out}";
+    min_y           #calc " ${grid_min_y} * ${extent_y}";
+    max_y           #calc " ${grid_max_y} * ${extent_y}";
 }
 
 //--- Adaptive mesh related parameters ---//
 refine
 {
-    min_x           -0.3;
-    min_y           -0.3;
-    min_z           -0.4;
+    extent   0.55;
+    grid_min_x      $..grid.coordinates.x_min;
+    grid_max_x      $..grid.coordinates.x_max;
+    grid_min_y      $..grid.coordinates.y_min;
+    grid_max_y      $..grid.coordinates.y_max;
+    grid_min_z      $..grid.coordinates.z_min;
+    grid_max_z      $..grid.coordinates.z_max;
 
-    max_x           0.7;
-    max_y           0.3;
-    max_z           0.5;
+    // Exlude from refinement cells outside these limits
+    min_x           #calc " ${grid_min_x} * ${extent}";
+    max_x           #calc " ${grid_max_x} * ${extent}";
+    min_y           #calc " ${grid_min_y} * ${extent}";
+    max_y           #calc " ${grid_max_y} * ${extent}";
+    min_z           #calc " ${grid_min_z} * ${extent}";
+    max_z           #calc " ${grid_max_z} * ${extent}";
 }

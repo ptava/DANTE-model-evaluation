@@ -169,13 +169,13 @@ if [ ! -d "${local_props}/polyMesh" ]; then
     ./Allrun_pre "${smoothing}"
 else
     echo "Mesh already exists, skipping mesh creation."
-    cp -r 0.orig 0
 fi
 
 #------------------------------------------------------------------------------
 # Run the simulation in parallel
 
 echo "Running the simulation..."
+cp -r 0.orig 0
 runApplication decomposePar -force -constant
 runParallel $(getApplication)
 echo "Simulation completed."

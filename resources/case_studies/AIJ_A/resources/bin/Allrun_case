@@ -75,6 +75,11 @@ for source in "${!files_to_copy[@]}"; do
     }
 done
 
+cp -r "${dicts_resources}/helpers" "${local_dicts}/." || {
+    echo "Error copying helpers to ${local_dicts} folder" >&2
+    exit 1
+}
+
 cp -r "${functions_resources}" "${local_functions}" || {
     echo "Error copying function objects to ${local_dicts} folder" >&2
     exit 1
@@ -166,14 +171,13 @@ if [ ! -d "${local_props}/polyMesh" ]; then
     ./Allrun_pre "${smoothing}"
 else
     echo "Mesh already exists, skipping mesh creation."
-    cp -r 0.orig 0
 fi
 
 #------------------------------------------------------------------------------
 # Run the simulation in parallel
 
 echo "Running the simulation..."
-runParallel redistributePar -decompose -overwrite -constant
+cp -r 0.orig 0
 runParallel $(getApplication)
 echo "Simulation completed."
 
