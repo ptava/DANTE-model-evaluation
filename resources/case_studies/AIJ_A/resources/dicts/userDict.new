@@ -19,8 +19,8 @@ grid
     {
         // Multipliers to define the domain size based on building height
         multiplier_z     7.0;   // Use 5.625 to match other grid
-        multiplier_y     6.0;
-        multiplier_x_in  3.0;
+        multiplier_y     6.0;   // Use 6.875 to match other grid
+        multiplier_x_in  3.0;   // Use 2.85 to match other grid
         multiplier_x_out 9.0;
     }
 
