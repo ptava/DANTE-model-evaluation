@@ -115,18 +115,10 @@ edges
     arc 2  16 ( -$ogrid_radius 0              0        )
     arc 21 16 ( 0              $ogrid_radius  0        )
 
-    // Increasing mesh resolution I get inconsistency with projected faces on
-    // 'head' STL even if it has been constructed with those vertices and arcs
-    // -> substitute with edges projected vertically onto 'head'
-
-    // arc 6  11 ( 0              -$ogrid_radius $ogrid_z )
-    // arc 11 23 ( $ogrid_radius  0              $ogrid_z )
-    // arc 6  18 ( -$ogrid_radius 0              $ogrid_z )
-    // arc 23 18 ( 0              $ogrid_radius  $ogrid_z )
-    project 11 23 (head)
-    project 23 18 (head)
-    project 6 11 (head)
-    project 6 18 (head)
+    arc 6  11 ( 0              -$ogrid_radius $ogrid_z )
+    arc 11 23 ( $ogrid_radius  0              $ogrid_z )
+    arc 6  18 ( -$ogrid_radius 0              $ogrid_z )
+    arc 23 18 ( 0              $ogrid_radius  $ogrid_z )
 );
 
 // Generating MASTER blocks cells numbers and grading
