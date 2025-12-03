@@ -11,16 +11,17 @@ grid
 {
     building
     {
-        ratio            2;   // Experimental campaign: 2 x 1 x 1 building ratio
-        ref_size         0.08; // Reference size [m] = building side length
+        ratio            2;     // Experimental campaign: 2 x 1 x 1 building ratio
+        ref_size         0.08;  // Reference size [m] = building side length
     }
 
     surrounding
     {
-        // Multipliers to define the domain size based on building height
-        multiplier_z     7.0;   // Use 5.625 to match other grid
-        multiplier_y     6.0;   // Use 6.875 to match other grid
-        multiplier_x_in  3.0;   // Use 2.85 to match other grid
+        // Multipliers to define the domain size based on building height (to
+        // match other grid that reflect experimental campaign)
+        multiplier_z     5.625;
+        multiplier_y     6.875;
+        multiplier_x_in  2.85;
         multiplier_x_out 9.0;
     }
 
@@ -29,10 +30,13 @@ grid
         // Overall cells count based on cells size in specific regions and
         // scaling factor named 'cells_scaling'.
         // - cells_scaling:
-        //      ⇲ cells_scaling = 1.0 -> nCells ~= 65M
-        //      ⇲ cells_scaling = 1.5 -> nCells ~= 20M
-        //      ⇲ cells_scaling = 2.0 -> nCells ~= 9M
-        //      ⇲ cells_scaling = 3.0 -> nCells ~= 3M
+        //      ⇲ 1.0  -> nCells ~= 110M
+        //      ⇲ 1.1  -> nCells ~= 84M
+        //      ⇲ 1.25 -> nCells ~= 57M
+        //      ⇲ 1.5  -> nCells ~= 33M
+        //      ⇲ 2.0  -> nCells ~= 14M
+        //      ⇲ 2.5  -> nCells ~= 8M
+        //      ⇲ 3.0  -> nCells ~= 4M
         // - cells_size_0: 
         //      ⇲ boundary layer first cell height
         //      ⇲ isotropic cell size near building corners
@@ -47,13 +51,13 @@ grid
         // - cells_size_5:
         //      ⇲ cell size in the far field (top/outlet)
 
-        cells_scaling    1.0;
-        cell_size_0      #calc " ${cells_scaling} * 0.0001";    
-        cell_size_1      #calc " ${cells_scaling} * 0.0014 ";
-        cell_size_2      #calc " ${cells_scaling} * 0.0020 ";
-        cell_size_3      #calc " ${cells_scaling} * 0.0040 ";
-        cell_size_4      #calc " ${cells_scaling} * 0.0080 ";
-        cell_size_5      #calc " ${cells_scaling} * 0.0120 ";
+        cells_scaling    2.0;
+        cell_size_0      #calc " ${cells_scaling} * 0.0001 ";
+        cell_size_1      #calc " ${cells_scaling} * 0.0010 ";
+        cell_size_2      #calc " ${cells_scaling} * 0.0015 ";
+        cell_size_3      #calc " ${cells_scaling} * 0.0025 ";
+        cell_size_4      #calc " ${cells_scaling} * 0.0060 ";
+        cell_size_5      #calc " ${cells_scaling} * 0.0090 ";
 
         // O-grid extent
         xyz_distance     $..building.ref_size;
@@ -141,7 +145,7 @@ grid
             (
                 0.20
                 0.55
-                0.90
+                0.85
                 0.50
                 0.0
                 0.70
@@ -198,10 +202,11 @@ grid
 //--- Smoothing-related parameters ---//
 protected
 {
-    extent_x_in		0.6;
-    extent_x_out	0.4;
-    extent_y		0.6;
-    extent_z		0.5;
+    // No need: set to 1.0
+    extent_x_in	1.0;
+    extent_x_out	1.0;
+    extent_y		1.0;
+    extent_z		1.0;
     grid_min_x      $..grid.coordinates.x_min;
     grid_max_x      $..grid.coordinates.x_max;
     grid_min_y      $..grid.coordinates.y_min;
