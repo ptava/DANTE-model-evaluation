@@ -178,6 +178,8 @@ fi
 
 echo "Running the simulation..."
 cp -r 0.orig 0
+runParallel redistributePar -decompose
+runParallel renumberMesh
 runParallel $(getApplication)
 echo "Simulation completed."
 

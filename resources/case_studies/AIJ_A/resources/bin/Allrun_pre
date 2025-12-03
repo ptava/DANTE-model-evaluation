@@ -17,29 +17,21 @@ runApplication blockMesh
 # Check cfMesh availability and smooth grid with improveMeshQuality utility
 if [ "$smoothing" = "true" ]; then
     if command -v myimproveMeshQuality >/dev/null 2>&1; then
-	runApplication -s smoothing decomposePar -constant
-    runParallel -s smoothing topoSet -dict system/topoSetDict.smoothing
-	runParallel checkMesh
-    runParallel myimproveMeshQuality -constrainedCellSet protected_cells
-	runApplication -s smoothing reconstructParMesh -constant -fullMatch
-	runParallel -s decompose redistributePar -decompose -constant -overwrite
-    runParallel -s smoothed checkMesh -allTopology -allGeometry -constant
+    runApplication -s smoothing topoSet -dict system/topoSetDict.smoothing
+    runApplication myimproveMeshQuality -constrainedCellSet protected_cells
+    runApplication -s smoothed checkMesh -allTopology -allGeometry -constant
     else
         echo "improveMeshQuality command not found. Please install cfMesh"
         echo "integration to use smoothing."
         echo "Skipping smoothing..."
-        runParallel -s decompose redistributePar -decompose -constant -overwrite
-        runParallel checkMesh
+        runApplication checkMesh
     fi
 fi
 
 # improveMeshQuality does not preserve cellZones
 # => workaround with different dictionary or re-run.
 # leave this to point out the utility reuired fix
-runParallel -s smoothing.again topoSet -dict system/topoSetDict.smoothing
-runParallel -s refinement topoSet -dict system/topoSetDict.refinement
-
-# Renumber
-runParallel renumberMesh -overwrite -constant
+runApplication -s smoothing.again topoSet -dict system/topoSetDict.smoothing
+runApplication -s refinement topoSet -dict system/topoSetDict.refinement
 
 #------------------------------------------------------------------------------
