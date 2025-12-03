@@ -8,7 +8,6 @@
 
 type            coded;
 libs            ("libutilityFunctionObjects.so");
-writeControl    writeTime;
 timeStart       1.3;
 timeEnd         2.0;
 executeControl  runTime;
@@ -77,6 +76,7 @@ localCode
 codeInclude
 #{
     #include "turbulenceModel.H"
+    #include "surfaceFields.H"
 #};
 
 codeOptions
@@ -150,8 +150,10 @@ codeExecute
         return false;
     }
 
+    // TO DO: flip loop order
     for (const auto& dnI : directions_)
     {
+	const word fldName = foName_ + dnI;
         const vector dVec(dirDict_.lookup(dnI));
 
         if (mag(dVec) < SMALL)
@@ -174,15 +176,13 @@ codeExecute
             return false;
         }
 
-
         for (const auto& pId : patchIDs)
         {
             const word patchName = pbm[pId].name();
-            const word fldName = foName_ + patchName + dnI;
 
-            volScalarField* deltaPlusPtr =
-                getOrCreateField<volScalarField>(fldName, mesh());
-            volScalarField& deltaPlus = *deltaPlusPtr;
+            surfaceScalarField* deltaPlusPtr =
+                getOrCreateField<surfaceScalarField>(fldName, mesh());
+            surfaceScalarField& deltaPlus = *deltaPlusPtr;
 
             const fvPatch& fvp = mesh().boundary()[pId];
             scalarField& pf = deltaPlus.boundaryFieldRef()[pId];
@@ -192,7 +192,8 @@ codeExecute
             const pointField& pts = mesh().points();
 
             // Unit normals (area-normal / |area|)
-            const vectorField nHat = fvp.nf();
+            tmp<vectorField> tnHat = fvp.nf(); 
+            const vectorField& nHat = tnHat();
 
             // wall shear on this patch
             const vectorField& wssP = wss.boundaryField()[pId];
@@ -208,7 +209,7 @@ codeExecute
                 const face& f = faces[fId];
 
                 // Project user direction into face plane
-                const vector nh = nHat[fi];
+                const vector& nh = nHat[fi];
                 vector t = dHat - (dHat & nh)*nh;
                 const vector tHat = t/mag(t);
 

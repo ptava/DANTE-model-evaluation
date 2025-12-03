@@ -6,7 +6,7 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-deltaPlus1
+deltaPlus2
 {
     #include        "templates/FO_deltaPlusTemplate"
     patches         ( side1 side2 );
@@ -15,7 +15,7 @@ deltaPlus1
         x           (1 0 0);     // streamwise
         z           (0 0 1);     // spanwise
     }
-    wssField        wallShearStress;
+    wssField        wallShearStressMean;
 }
 
 // ************************************************************************* //

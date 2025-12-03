@@ -1,0 +1,54 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+deltaPlus
+{
+    type			surfaces;
+    enabled	        	yes;
+    libs			("libsampling.so");
+    surfaceFormat		vtp;
+    writeControl		writeTime;
+    fields			(deltaPlusx deltaPlusz);
+    interpolationScheme		none;
+
+    surfaces
+    (
+        ground
+        {
+            type                patch;
+            interpolate         false;
+            patches             (ground);
+        }
+        front
+        {
+            type                patch;
+            interpolate         false;
+            patches             (front);
+        }
+        sides
+	{
+            type                patch;
+            interpolate         false;
+            patches             (side1 side2);
+        }
+        roof
+        {
+            type                patch;
+            interpolate         false;
+            patches             (roof);
+        }
+        back
+        {
+            type                patch;
+            interpolate         false;
+            patches             (back);
+        }
+    );
+}
+ 
+// ************************************************************************* //
