@@ -14,8 +14,8 @@ isoSurfaces2
     timeStart       2.7;
     timeEnd         3.0;
     surfaceFormat   vtk;
-    writeControl    timeStep;
-    writeInterval   4;
+    writeControl    runTime;
+    writeInterval   0.01;
     fields          (p);
     interpolationScheme cellPointFace;
 
@@ -24,15 +24,15 @@ isoSurfaces2
         q1
         {
             type            isoSurface;
-            isoField        Q;
-	        isoValue        1500;
+	    isoField        Q;
+	    isoValue        1500;
             interpolate     true;
         }
         q3
         {
             type            isoSurface;
-            isoField        Q;
-	        isoValue        1850;
+	    isoField        Q;
+	    isoValue        1850;
             interpolate     true;
         }
      );

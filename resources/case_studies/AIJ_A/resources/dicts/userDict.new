@@ -37,6 +37,9 @@ grid
         //      ⇲ 2.0  -> nCells ~= 14M
         //      ⇲ 2.5  -> nCells ~= 8M
         //      ⇲ 3.0  -> nCells ~= 4M
+        //      ⇲ 5.0  -> nCells ~= 1M
+        //      ⇲ 7.0  -> nCells ~= 384K
+        //      ⇲ 8.0  -> nCells ~= 272K
         // - cells_size_0: 
         //      ⇲ boundary layer first cell height
         //      ⇲ isotropic cell size near building corners

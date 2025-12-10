@@ -6,15 +6,18 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-yPlus
+yPlus1
 {
     type			surfaces;
     enabled	        	yes;
     libs			("libsampling.so");
     surfaceFormat		vtp;
-    writeControl		writeTime;
     fields			(yPlus);
     interpolationScheme		none;
+    timeStart       		2.0;
+    timeEnd         		3.0;
+    writeControl    		runTime;
+    writeInterval   		0.05;
 
     surfaces
     (

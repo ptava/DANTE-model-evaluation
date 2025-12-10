@@ -18,8 +18,10 @@ groundyPlus
     regionType      patch;
     name            ground;
     operation       max;
-    writeControl    timeStep;
-    writeInterval   10;
+    timeStart       2.0; 
+    timeEnd         3.0; 
+    writeControl    runTime; 
+    writeInterval   0.05;
 }
 
 // Check yPlus value on building walls
@@ -34,8 +36,10 @@ buildingyPlus
     regionType      patch;
     name            building;
     operation       max;
-    writeControl    timeStep;
-    writeInterval   10;
+    timeStart       2.0; 
+    timeEnd         3.0; 
+    writeControl    runTime; 
+    writeInterval   0.05;
 }
 
 // ************************************************************************* //

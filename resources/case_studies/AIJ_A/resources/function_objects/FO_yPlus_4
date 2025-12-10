@@ -12,8 +12,11 @@ yPlus
     libs            (fieldFunctionObjects);
     region          region0;
     log             true;
-    executeControl  timeStep;
-    executeInterval 10;
+    timeStart       2.0;
+    timeEnd         3.0;
+    surfaceFormat   vtk;
+    executeControl  runTime;
+    executeInterval 0.05;
     writeControl    writeTime;
 }
 
