@@ -132,7 +132,6 @@ inline void printBlockInfo
     os << "g"  << tag << token::SPACE << "(";
     forAll(grading, i)
     {
-        os.precision(15);
         os << grading[i] << token::SPACE;
     }
     os << ")" << token::END_STATEMENT << endl;

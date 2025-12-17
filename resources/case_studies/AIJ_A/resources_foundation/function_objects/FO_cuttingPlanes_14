@@ -11,7 +11,7 @@ cuttingPlaneY
     type                surfaces;
     libs                ("libsampling.so");
     surfaceFormat       vtk;
-    fields              ( error nut nutnu );
+    fields              ( U UMean nut nutnu );
     interpolationScheme cell;
     startTime           1.3;
     endTime             2.0;
@@ -39,7 +39,7 @@ cuttingPlaneZ
     type                surfaces;
     libs                ("libsampling.so");
     surfaceFormat       vtk;
-    fields              ( error nut nutnu );
+    fields              ( U UMean nut nutnu );
     interpolationScheme cell;
     startTime           1.3;
     endTime             2.0;

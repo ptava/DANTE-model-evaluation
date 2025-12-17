@@ -88,10 +88,8 @@ cp -r "${data_resources}/boundaryData" "${local_props}/." || {
 
 protected_fos=(
     "FO_Q_3.1"
-    "FO_yPlus_4"
-    "FO_sampleyPlus_5"
-    "FO_residuals_6"
     "FO_isoSurfaces_15.1"
+    "FO_residuals_6"
     "FO_setMaxCo_16"
     "FO_setRelaxationFactors_17"
     "FO_setOuterCorrectors_18"
@@ -177,6 +175,7 @@ fi
 echo "Running the simulation..."
 cp -r 0.orig 0
 runApplication decomposePar -force -constant
+runParallel renumberMesh -overwrite
 runParallel $(getApplication)
 echo "Simulation completed."
 

@@ -6,18 +6,17 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-// Note: sasRefineIndicator and the other fields are shifted by 1 time step
 refinementY
 {
     type                surfaces;
     libs                ("libsampling.so");
     surfaceFormat       vtk;
-    fields              ( cellError sasRefineIndicator );
+    fields              ( sasRefineIndicator );
     startTime           2.7;
     endTime             3.0;
-    writeControl        timeStep;
+    writeControl        runTime;
     executeAtStart      false;
-    writeInterval       4;
+    writeInterval       0.01;
     interpolationScheme none;
 
     surfaces
@@ -33,17 +32,17 @@ refinementY
     );
 }
 
-// Note: sasRefineIndicator and the other fields are shifted by 1 time step
 refinementZ
 {
     type                surfaces;
     libs                ("libsampling.so");
     surfaceFormat       vtk;
-    fields              ( cellError sasRefineIndicator );
+    fields              ( sasRefineIndicator );
     startTime           2.7;
     endTime             3.0;
-    writeControl        timeStep;
-    writeInterval       4;
+    writeControl        runTime;
+    executeAtStart      false;
+    writeInterval       0.01;
     interpolationScheme none;
 
     surfaces

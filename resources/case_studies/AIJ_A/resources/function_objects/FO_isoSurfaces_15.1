@@ -8,32 +8,32 @@
 
 isoSurfaces2
 {
-    type            surfaces;
-    enabled	        yes;
-    libs            ("libsampling.so");
-    timeStart       2.7;
-    timeEnd         3.0;
-    surfaceFormat   vtk;
-    writeControl    runTime;
-    writeInterval   0.01;
-    fields          (p);
+    type                surfaces;
+    enabled             yes;
+    libs                ("libsampling.so");
+    timeStart           2.7;
+    timeEnd             3.0;
+    surfaceFormat       vtk;
+    writeControl        runTime;
+    writeInterval       0.01;
+    fields              (p);
     interpolationScheme cellPointFace;
 
     surfaces
     (
         q1
         {
-            type            isoSurface;
-	    isoField        Q;
-	    isoValue        1500;
-            interpolate     true;
+            type        isoSurface;
+            isoField    Q;
+            isoValue    1500;
+            interpolate true;
         }
         q3
         {
-            type            isoSurface;
-	    isoField        Q;
-	    isoValue        1850;
-            interpolate     true;
+            type        isoSurface;
+            isoField    Q;
+            isoValue    1850;
+            interpolate true;
         }
      );
 }

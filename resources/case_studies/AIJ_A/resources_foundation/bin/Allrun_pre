@@ -17,8 +17,4 @@ runApplication blockMesh
 runApplication checkMesh
 runApplication -s smoothing topoSet -dict system/topoSetDict.smoothing
 runApplication -s refinement topoSet -dict system/topoSetDict.refinement
-
-# Renumbering
-runApplication renumberMesh -overwrite -constant
-
 #------------------------------------------------------------------------------

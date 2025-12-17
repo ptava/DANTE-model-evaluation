@@ -14,9 +14,9 @@ isoSurfaces2
     startTime       2.7;
     endTime         3.0;
     surfaceFormat   vtk;
-    writeControl    timeStep;
+    writeControl    runTime;
+    writeInterval   0.01;
     executeAtStart  false;
-    writeInterval   4;
     fields          (p);
     interpolationScheme cellPointFace;
 

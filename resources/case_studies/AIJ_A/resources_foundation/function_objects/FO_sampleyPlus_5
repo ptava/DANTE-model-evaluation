@@ -14,12 +14,14 @@ groundyPlus
     fields         (yPlus);
     writeFields    false;
     log            false;
-    surfaceFormat  none;
+    select         patch;
     patch          ground;
     operation      max;
-    writeControl   timeStep;
+    startTime      2.0;
+    endTime        3.0;
+    writeControl   runTime;
+    writeInterval  0.05;
     executeAtStart false;
-    writeInterval  10;
 }
 
 // Check yPlus value on building walls
@@ -30,12 +32,14 @@ buildingyPlus
     fields         (yPlus);
     writeFields    false;
     log            false;
-    surfaceFormat  none;
+    select         patch;
     patch          building;
     operation      max;
-    writeControl   timeStep;
+    startTime      2.0;
+    endTime        3.0;
+    writeControl   runTime;
+    writeInterval  0.05;
     executeAtStart false;
-    writeInterval  10;
 }
 
 // ************************************************************************* //

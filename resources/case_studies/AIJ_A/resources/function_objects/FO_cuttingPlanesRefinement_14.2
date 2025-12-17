@@ -6,13 +6,15 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-// Note: sasRefineIndicator and the other fields are shifted by 1 time step
+// Note: function object originally used to access 'cellError',
+// 'expectedCellError', and 'sasRefineIndicator'. The latter is shifted by 1 
+// with respect the previous two time step
 refinementY1
 {
     type          surfaces;
     libs          (sampling);
     surfaceFormat vtk;
-    fields        ( cellError expectedCellError sasRefineIndicator );
+    fields        ( sasRefineIndicator );
     timeStart     1.0;
     timeEnd       2.0;
     writeControl  runTime;
@@ -29,13 +31,12 @@ refinementY1
     }
 }
 
-// Note: sasRefineIndicator and the other fields are shifted by 1 time step
 refinementZ1
 {
     type          surfaces;
     libs          (sampling);
     surfaceFormat vtk;
-    fields        ( cellError expectedCellError sasRefineIndicator );
+    fields        ( sasRefineIndicator );
     timeStart     1.0;
     timeEnd       2.0;
     writeControl  runTime;

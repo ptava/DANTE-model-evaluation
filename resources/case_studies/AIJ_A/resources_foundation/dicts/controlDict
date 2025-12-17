@@ -1,5 +1,5 @@
 /*--------------------------------*- C++ -*----------------------------------*\
-  =========                 |
+ =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     | Website:  https://openfoam.org
     \\  /    A nd           | Version:  dev
@@ -50,6 +50,16 @@ maxCo             2.5;
 
 runTimeModifiable yes;
 
+foStart           2.0;      // start of acquisition
+
+foEnd             3.0;      // end of acquisition
+
+foDeltaT          0.05;     // acquisition time
+
+foDeltaThf        0.01;     // high frequency acuisition time
+
+refinementDeltaT  4;        // timesteps between refinements
+
 libs (
     "libatmosphericModels.so"
 );
@@ -59,6 +69,11 @@ OptimisationSwitches
     fileModificationSkew     0.5;
     // fileModificationChecking timeStampMaster;
     // fileHandler              collated;
+}
+
+DebugSwitches
+{
+    // myrefiner    1;
 }
 
 // ************************************************************************* //
