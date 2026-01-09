@@ -41,12 +41,13 @@ cuttingPlaneZ
     surfaceFormat       vtk;
     fields              ( U UMean nut nutnu );
     interpolationScheme cell;
-    startTime           "${foLfStart}";
-    endTime             "${foLfEnd}";
+    startTime           $../controlDict!foLfStart;
+    endTime             $../controlDict!foLfEnd;
     executeControl      runTime;
-    executeInterval     "${foLfDeltaT}";
+    executeInterval     $../controlDict!foLfDeltaT;
     writeControl        runTime;
-    writeInterval       "${foLfDeltaT}";
+    executeAtStart      false;
+    writeInterval       $../controlDict!foLfDeltaT;
 
     surfaces
     (
