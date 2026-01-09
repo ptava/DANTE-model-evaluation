@@ -1,0 +1,168 @@
+#!/bin/bash
+cd "${0%/*}" || exit                        
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions 
+
+#------------------------------------------------------------------------------
+
+# User parameters
+n_proc=16        # Set number of processors for parallel computing
+scenario="H2"     # Scenario tag (H0, H1, or H2)
+direction="45deg" # Flow direction tag (0deg, 22deg, 45deg)
+scale=0.05       # Set cells number scaling parameter
+smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
+refinement=false # Set to True if you want to refine the mesh
+
+# Local folders
+local_resources="resources" # Directory with resources
+local_dicts="system"        # Directory for local dictionaries
+local_props="constant"      # Directory for local properties
+
+local_functions="${local_dicts}/function_objects" # Directory for local function objects
+local_geometry="${local_props}/triSurface" # Directory for local geometries
+
+#------------------------------------------------------------------------------
+# Source utility functions
+
+. ./Util_functions || {
+    echo "Util_functions not found in current folder" >&2
+    exit 1
+}
+. ./Set_scenario || {
+    echo "Set_scenario not found in current folder" >&2
+   exit 1
+}
+
+#------------------------------------------------------------------------------
+# Copy source files
+
+resources=$(check_resources -r "${local_resources}") || {
+    echo "Error checking resources" >&2
+    exit 1
+}
+read -r dicts_resources \
+        data_resources \
+        geometry_resources \
+        props_resources \
+        functions_resources <<< ${resources}
+
+declare -A files_to_copy=(
+    ["${dicts_resources}/topoSetDict.refinement"]="${local_dicts}/topoSetDict.refinement"
+    ["${dicts_resources}/decomposeParDict"]="${local_dicts}/decomposeParDict"
+    ["${dicts_resources}/fvSolution"]="${local_dicts}/fvSolution"
+    ["${dicts_resources}/fvSchemes"]="${local_dicts}/fvSchemes"
+    ["${dicts_resources}/functions"]="${local_dicts}/functions"
+    ["${dicts_resources}/controlDict"]="${local_dicts}/controlDict"
+    ["${dicts_resources}/userDict"]="${local_dicts}/userDict"
+    ["${dicts_resources}/meshDict"]="${local_dicts}/meshDict"
+    ["${props_resources}/transportProperties"]="${local_props}/transportProperties"
+    ["${props_resources}/turbulenceProperties"]="${local_props}/turbulenceProperties"
+)
+
+if [ "${refinement}" = "true" ]; then
+    files_to_copy["${dicts_resources}/dynamicMeshDict"]="${local_props}/dynamicMeshDict"
+fi
+
+for source in "${!files_to_copy[@]}"; do
+    target="${files_to_copy[$source]}"
+    copy_file_if_exists "$source" "$target" || {
+        echo "Error copying $source to $target" >&2
+        exit 1
+    }
+done
+
+cp -r ${functions_resources} ${local_functions} || {
+    echo "Error copying function objects to ${local_functions}" >&2
+    exit 1
+}
+
+cp -r ${geometry_resources} ${local_geometry} || {
+    echo "Error copying geometry resources to ${local_geometry}" >&2
+    exit 1
+}
+
+set_scenario \
+    --geom-tag ${scenario} \
+    --dir-tag ${direction} \
+    --folder ${local_geometry} \
+    --dicts-resources ${dicts_resources} \
+    --stl-resources ${geometry_resources} \
+    --data-resources ${data_resources} || {
+    echo "Error setting scenario" >&2
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Make changes in files
+
+refinement_fos=(
+    "FO_sasRefineIndicator_8.8"
+    "FO_cuttingPlanesRefinement_14.2"
+    "FO_cuttingPlanesRefinement_14.3"
+    "FO_refinementInfo_19"
+)
+
+set_fos "${local_functions}" "${local_dicts}/functions" || {
+    echo "Error setting function objects" >&2
+    exit 1
+}
+
+if [ "${refinement}" = true ]; then
+    set_lib "libmyfiniteVolume.so" "${local_dicts}/controlDict" || {
+        echo "Error setting finite volume library" >&2
+        exit 1
+    } && echo "⇲ Set mytimeVaryingMappedFixedValue boundary condition"
+    set_lib "libmyfvMeshTopoChangers.so" "${local_dicts}/controlDict" || {
+        echo "Error setting dynamic mesh library" >&2
+        exit 1
+    }
+    set_lib "libmyincompressibleMomentumTransportModels.so" "${local_dicts}/controlDict" || {
+        echo "Error setting turbulence models library" >&2
+        exit 1
+    }
+    set_lib "libfvMeshDistributors.so" "${local_dicts}/controlDict" || {
+        echo "Error setting mesh distribution library" >&2
+        exit 1
+    }
+    set_turbulence_model "mykOmegaSSTSAS" "${local_props}/turbulenceProperties" || {
+        echo "Error setting turbulence model" >&2
+        exit 1
+    }
+else
+    for fo in "${refinement_fos[@]}"; do
+        set_fo_states "off" "${local_functions}/${fo}" || {
+            echo "Error disabling function object $fo" >&2
+            exit 1
+        }
+    done
+fi
+
+set_scaling $scale "${local_dicts}/userDict" || {
+    echo "Error setting cells scaling" >&2
+    exit 1
+}
+set_parallel $n_proc "${local_dicts}/decomposeParDict" || {
+    echo "Error setting number of processors" >&2
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+# Create the computation domain if has not been created yet
+
+if [ ! -d "${local_props}/polyMesh" ]; then
+    echo "Creating the mesh..."
+    ./Allrun_pre "${smoothing}"
+else
+    echo "Mesh already exists, skipping mesh creation."
+fi
+
+#------------------------------------------------------------------------------
+# Run the simulation in parallel
+
+echo "Running the simulation..."
+cp -r 0.orig 0
+runParallel redistributePar -decompose -overwrite -constant
+runParallel renumberMesh -constant -overwrite
+runParallel $(getApplication)
+echo "Simulation completed."
+
+#------------------------------------------------------------------------------

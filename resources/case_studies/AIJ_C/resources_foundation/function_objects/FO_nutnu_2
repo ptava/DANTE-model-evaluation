@@ -1,0 +1,68 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+-------------------------------------------------------------------------------
+Description
+    Compute nut/nu field
+\*---------------------------------------------------------------------------*/
+
+nutnu
+{
+	type		    coded;
+    libs            ("libutilityFunctionObjects.so");
+	name		    nutnu;      
+    enabled         true;
+    log             true;
+    startTime       $../controlDict!foLfStart;
+    endTime         $../controlDict!foLfEnd;
+    executeControl  runTime;
+    executeInterval $../controlDict!foLfDeltaT;
+    writeControl    writeTime;
+    executeAtStart  false;
+
+    codeExecute
+    #{
+        auto* nutnuPtr =
+            mesh().foundObject<volScalarField>("nutnu")
+            ? &mesh().lookupObjectRef<volScalarField>("nutnu")
+            : nullptr;
+
+        if (!nutnuPtr)
+        {
+            Info<< "Create nutnu field" << nl;
+            nutnuPtr = new volScalarField
+            (
+                IOobject
+                (
+                    "nutnu",
+                    mesh().time().name(),
+                    mesh(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh(),
+                dimensionedScalar("zero", dimArea/dimTime, 0)
+            );
+            nutnuPtr->store();
+            nutnuPtr = &mesh().lookupObjectRef<volScalarField>("nutnu");
+        }
+        auto& nutnu = *nutnuPtr;
+        const auto& nut = mesh().lookupObject<volScalarField>("nut");
+        const auto& nu = mesh().lookupObject<volScalarField>("nu");
+        Info<< "Computing nutnu field\n" << endl;
+        nutnu.primitiveFieldRef() = nut.primitiveField() / nu.primitiveField();
+    #};
+
+    codeWrite
+    #{
+        const volScalarField& nutnu =
+            mesh().lookupObjectRef<volScalarField>("nutnu");
+        nutnu.write();
+        Info<< "Written nutnu field\n" << endl;
+    #};
+}
+
+// ************************************************************************* //

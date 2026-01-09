@@ -1,0 +1,60 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// User-defined parameters
+#include "userDict"
+
+actions
+(
+
+    //--- Define region for refinement ---//
+
+    // Create a box
+    {
+        name        refine_cells;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( $refine/min_x $refine/min_y $refine/min_z )
+                    ( $refine/max_x $refine/max_y $refine/max_z );
+            inside  true;
+        }
+    }
+
+    // Remove 'bl_cells' from 'refine_cells' set
+    // {
+    //     name        refine_cells;
+    //     type        cellSet;
+    //     action      delete;
+    //     source      cellToCell;
+    //     set         bl_cells;
+    // }
+
+    // from cellSet to cellZone
+    {
+        name        refine_cells;
+        type        cellZoneSet;
+        action      new;
+        source      setToCellZone;
+        set         refine_cells;
+        zone        refine_cells;
+    }
+
+);
+
+// ************************************************************************* //

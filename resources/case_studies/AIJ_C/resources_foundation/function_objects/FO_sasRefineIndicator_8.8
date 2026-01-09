@@ -1,0 +1,28 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+sasRefineIndicator
+{
+    libs             ("libmyfieldFunctionObjects.so");
+    type             sasRefineIndicator;
+    result           sasRefineIndicator;
+    enabled          true;
+    executeControl   timeStep;
+    executeInterval  1;
+    writeControl     writeTime;
+    executeAtStart   false;
+    regionName       refine_cells;
+    focusRegion      core;
+    transferFunction oddScaler;
+    weight1          1;
+    weight2          1;
+    sigma            1;
+}
+
+
+// ************************************************************************* //

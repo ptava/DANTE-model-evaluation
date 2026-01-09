@@ -1,0 +1,95 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+nOutCorr
+{
+    type            coded;
+    libs            ("libutilityFunctionObjects.so");
+    name            decreaseNcorr;
+    enabled         true;
+    executeControl  runTime;
+    executeInterval 0.15;
+    writeControl    none;
+    executeAtStart  false;
+
+    defaultValue    5;
+    minValue        1;
+    rampDown        1;
+
+    startTime       0;
+    endTime         #calc "${startTime} + ${executeInterval} * ${defaultValue}";
+
+    codeInclude
+    #{
+        #include "IOdictionary.H"
+    #};
+
+    codeData
+    #{
+        label defaultValue_;
+        label minValue_;
+        label rampDown_;
+        autoPtr<IOdictionary> fvSolutionDictPtr_;
+    #};
+
+    codeRead
+    #{
+        defaultValue_ = dict.lookupOrDefault<scalar>("defaultValue", 5);
+        minValue_ = dict.lookupOrDefault<label>("minValue", 1);
+        rampDown_ = dict.lookupOrDefault<label>("rampDown", 1);
+        fvSolutionDictPtr_.reset
+        (
+            new IOdictionary
+            (
+                IOobject
+                (
+                    "fvSolution",
+                    mesh().time().system(),
+                    mesh(),
+                    IOobject::MUST_READ,
+                    IOobject::AUTO_WRITE
+                )
+            )
+        );
+
+        const dictionary& fvSolutionDict = *fvSolutionDictPtr_;
+
+        if (!fvSolutionDict.found("PIMPLE"))
+        {
+            FatalIOErrorInFunction(fvSolutionDict)
+                << "Missing 'PIMPLE' sub-dictionary in fvSolution." << nl
+                << exit(FatalIOError);
+        }
+    #};
+
+    codeExecute
+    #{
+        if (fvSolutionDictPtr_.valid()) fvSolutionDictPtr_->regIOobject::read();
+
+        IOdictionary& fvSolutionDict = *fvSolutionDictPtr_;
+        dictionary pimpleDict = fvSolutionDict.subDict("PIMPLE");
+
+        const label& nOuterCorr =
+            pimpleDict.lookupOrDefault("nOuterCorrectors", defaultValue_);
+        label newOuterCorr = max(minValue_, nOuterCorr - rampDown_);
+
+        if(newOuterCorr == nOuterCorr)
+        {
+            Info << "nOuterCorrectors is already at minimum value of: "
+                 << newOuterCorr << endl;
+            return 1;
+        }
+
+        pimpleDict.set("nOuterCorrectors", newOuterCorr);
+        fvSolutionDict.set("PIMPLE", pimpleDict);
+        fvSolutionDict.regIOobject::write();
+
+        Info << "Updated nOuterCorrectors to: " << newOuterCorr << endl;
+    #};
+}
+
+// ************************************************************************* //

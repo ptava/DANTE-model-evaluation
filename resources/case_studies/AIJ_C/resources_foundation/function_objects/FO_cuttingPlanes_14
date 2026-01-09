@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+cuttingPlaneY
+{
+    type                surfaces;
+    libs                ("libsampling.so");
+    surfaceFormat       vtk;
+    fields              ( U UMean nut nutnu );
+    interpolationScheme cell;
+    startTime           $../controlDict!foLfStart;
+    endTime             $../controlDict!foLfEnd;
+    executeControl      runTime;
+    executeInterval     $../controlDict!foLfDeltaT;
+    writeControl        runTime;
+    executeAtStart      false;
+    writeInterval       $../controlDict!foLfDeltaT;
+
+    surfaces
+    (
+        yNormal
+        {
+            type      cuttingPlane;
+            planeType pointAndNormal;
+            point     (0 0 0);
+            normal    (0 1 0);
+        }
+    );
+}
+
+
+cuttingPlaneZ
+{
+    type                surfaces;
+    libs                ("libsampling.so");
+    surfaceFormat       vtk;
+    fields              ( U UMean nut nutnu );
+    interpolationScheme cell;
+    startTime           $../controlDict!foLfStart;
+    endTime             $../controlDict!foLfEnd;
+    executeControl      runTime;
+    executeInterval     $../controlDict!foLfDeltaT;
+    writeControl        runTime;
+    writeInterval       $../controlDict!foLfDeltaT;
+
+    surfaces
+    (
+        zNormal
+        {
+            type      cuttingPlane;
+            planeType pointAndNormal;
+            point     (0 0 0.04);
+            normal    (0 0 1);
+        }
+    );
+}
+
+
+
+// ************************************************************************* //

@@ -1,0 +1,24 @@
+#!/bin/bash
+cd "${0%/*}" || exit                                # Run from this directory
+. ${WM_PROJECT_DIR:?}/bin/tools/RunFunctions        # Tutorial run functions
+#------------------------------------------------------------------------------
+
+# Check smoothing argument
+if [ -z "$1" ]; then
+    echo "No argument supplied. Using default value: False"
+    smoothing="false"
+else
+    smoothing=$1
+    [ "$smoothing" == "true" ] && echo "Smoothing not available"
+fi
+
+# Run applications: create grid
+runApplication blockMesh
+runApplication surfaceFeatures
+runParallel -s preprocess redistributePar -decompose -constant
+runParallel -s background checkMesh
+runParallel snappyHexMesh -overwrite
+runParallel -s castellated checkMesh
+runApplication -s preprocess redistributePar -reconstruct -constant
+runApplication -s refinement topoSet -dict system/topoSetDict.refinement
+#------------------------------------------------------------------------------

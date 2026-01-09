@@ -1,0 +1,86 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+ =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      controlDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+application       foamRun;
+
+solver            incompressibleFluid;
+
+startFrom         startTime;
+
+startTime         0;
+
+stopAt            endTime;
+
+endTime           3.0;
+
+deltaT            0.0005;
+
+writeControl      runTime;
+
+writeInterval     3.0;
+
+purgeWrite        0;
+
+writeFormat       binary;
+
+writePrecision    6;
+
+writeCompression  off;
+
+timeFormat        general;
+
+timePrecision     6;
+
+adjustTimeStep    yes;
+
+maxCo             2.5;
+
+runTimeModifiable yes;
+
+foStartAverage    2.0;      // time to start averaging
+
+foEndAverage      3.0;      // time to end averaging
+
+foLfStart         2.0;      // start of acquisition (low frequency)
+
+foLfEnd           3.0;      // end of acquisition (low frequency)
+
+foLfDeltaT        0.05;     // acquisition time (low frequency)
+
+foHfStart         2.0;      // start of acquisition (high frequency)
+
+foHfEnd           3.0;      // end of acquisition (high frequency)
+
+foHfDeltaT        0.01;     // acquisition time (high frequency)
+
+libs (
+    "libatmosphericModels.so"
+);
+
+OptimisationSwitches
+{
+    fileModificationSkew     0.5;
+    // fileModificationChecking timeStampMaster;
+    // fileHandler              collated;
+}
+
+DebugSwitches
+{
+    // sasRefineIndicator 1;
+    // myrefiner    1;
+}
+
+// ************************************************************************* //

@@ -1,0 +1,199 @@
+#!/bin/bash
+###############################################################################
+# Set_scenario [--tag <tag>] [--folder <path-to-folder>] [--resources <path-to-resources>]
+#
+# - To be used in already prepared case folder.
+# - Define the case geometry/triSurface folder with stl files
+# - Copy scenario-related dictionaries
+# - <tag> cab be one of the following: H0, H1, H2
+#
+###############################################################################
+
+#--- Default --#
+TAG="H2"
+DIR="45deg"
+HEIGHT=0.2
+GEOMETRY_FOLDER="constant/geometry"
+DICTS_DIR="resources/dicts"
+STL_DIR="resources/geometry"
+DATA_DIR="resources/data"
+USER_DICT="system/userDict"
+
+#--- Source utility functions ---#
+. ./Util_functions || {
+    echo "Util_functions not found in current folder" >&2
+    return 1
+}
+
+usage() {
+    cat <<EOF
+    Usage: $0 [OPTIONS] --tag <tag>
+
+    Prepare case based on scenario selected by <tag>.
+
+    Options:
+        -g, --geom-tag <tag> Prepare case for the specified geometry scenario tag (H0, H1 or H2)
+        -d, --dir-tag <tag> Prepare case for the specific flow direction tag (0deg, 22deg, 45deg)
+        -f, --folder <path-to-geometry-folder> Specify the folder to store stl files (default: constant/geometry)
+        --dicts-resources <path-to-dicts-folder> Specify the folder containing scenario-related dictionaries (default: resources/dicts)
+        --stl-resources <path-to-stl-folder> Specify the folder containing stl files (default: resources/geometry)
+        --data-resources <path-to-data-folder> Specify the folder containing initial and boundary conditions (default: resources/data)
+        -h, --help  Show this help message and exit
+EOF
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -t|--geom-tag)
+                TAG="$2"
+                shift 2
+                ;;
+            -d|--dir-tag)
+                DIR="$2"
+                shift 2
+                ;;
+            -f|--folder)
+                GEOMETRY_FOLDER="$2"
+                shift 2
+                ;;
+            --dicts-resources)
+                DICTS_DIR="$2"
+                shift 2
+                ;;
+            --stl-resources)
+                STL_DIR="$2"
+                shift 2
+                ;;
+            --data-resources)
+                DATA_DIR="$2"
+                shift 2
+                ;;
+            -h|--help)
+                usage
+                return 0
+                ;;
+            -*)
+                echo "Unknown option: $1"
+                usage
+                return 1
+                ;;
+            *)
+                echo "Unknown parameter: $1"
+                return 1
+                ;;
+        esac
+    done
+
+    # Sanity checks
+    if [[ ! -d "${DICTS_DIR}" ]]; then
+        echo "Error: Dicts folder '${DICTS_DIR}' does not exist." >&2
+        return 1
+    fi
+
+    if [[ ! -d "${STL_DIR}" ]]; then
+        echo "Error: Geometry folder '${STL_DIR}' does not exist." >&2
+        return 1
+    fi
+
+    if [[ ! -d "${DATA_DIR}" ]]; then
+        echo "Error: Data folder '${DATA_DIR}' does not exist." >&2
+        return 1
+    fi
+}
+
+set_geometries() {
+
+    # Copy geometry files to the specified folder
+    copy_file_if_exists "${STL_DIR}/BASE.stl" "${GEOMETRY_FOLDER}/."
+
+    case "${TAG}" in
+        H0)
+            echo "+--- Base stl file included"
+            ;;
+        H1)
+            copy_file_if_exists "${STL_DIR}/H1.stl" "${GEOMETRY_FOLDER}/."
+            echo "+--- H1 stl file included"
+            ;;
+        H2)
+            copy_file_if_exists "${STL_DIR}/H2.stl" "${GEOMETRY_FOLDER}/."
+            HEIGHT=0.4
+            echo "+--- H2 stl file included"
+            ;;
+        *)
+            echo "Error: Unknown scenario tag '${TAG}'. Supported tags are H0, H1, and H2." >&2
+            return 1
+    esac
+
+    # Copy scenario-related dictionaries
+    local surfaceFeaturesSource="${DICTS_DIR}/surfaceFeaturesDict_${TAG}"
+    local snappyHexSource="${DICTS_DIR}/snappyHexMeshDict_${TAG}"
+    local snappyHexTarget="system/snappyHexMeshDict"
+    local surfaceFeaturesTarget="system/surfaceFeaturesDict"
+    copy_file_if_exists "$snappyHexSource" "$snappyHexTarget"
+    copy_file_if_exists "$surfaceFeaturesSource" "$surfaceFeaturesTarget"
+
+    # Copy scenario-related initial conditions
+    local dataSource="${DATA_DIR}/boundaryData_${DIR}"
+    local dataTarget="constant/boundaryData"
+
+    cp -r "${dataSource}" "${dataTarget}" || {
+        echo "Error: Failed to copy boundary data from '${dataSource}' to '${dataTarget}'." >&2
+        return 1
+    }
+
+    echo "+--- Scenario-related dictionaries included"
+}
+
+change_domain() {
+    if ! command -v foamDictionary >/dev/null 2>&1; then
+        echo "Error: foamDictionary not found in PATH." >&2
+        return 1
+    fi
+
+    blockMeshDict_target="system/blockMeshDict"
+
+    echo "+--- Setting computational domain: this will affect user dictionary"
+
+    case "${DIR}" in
+        0deg)
+            blockMeshDict_source="${DICTS_DIR}/blockMeshDict_parallel"
+            copy_file_if_exists "${blockMeshDict_source}" "${blockMeshDict_target}"
+
+            foamDictionary -entry background/max_x -set 3.4 "${USER_DICT}"
+            foamDictionary -entry background/max_y -set 1.4 "${USER_DICT}"
+            foamDictionary -entry refinement/r1/max_y -set 0.9 "${USER_DICT}"
+
+            echo "+--- Computational domain set for 0deg inflow direction"
+            ;;
+        22deg)
+            blockMeshDict_source="${DICTS_DIR}/blockMeshDict_notParallel"
+            copy_file_if_exists "${blockMeshDict_source}" "${blockMeshDict_target}"
+
+            foamDictionary -entry background/max_x -set 3.2 "${USER_DICT}"
+            foamDictionary -entry background/max_y -set 2.8 "${USER_DICT}"
+            foamDictionary -entry refinement/r1/max_y -set 1.2 "${USER_DICT}"
+
+            echo "+--- Computational domain set for 22deg inflow direction"
+            ;;
+        45deg)
+            blockMeshDict_source="${DICTS_DIR}/blockMeshDict_notParallel"
+            copy_file_if_exists "${blockMeshDict_source}" "${blockMeshDict_target}"
+
+            echo "+--- Computational domain set for 45deg inflow direction"
+            ;;
+        *)
+            echo "Error: Unknown direction tag '${DIR}'. Supported tags are 0deg, 22deg, and 45deg." >&2
+            return 1
+            ;;
+    esac
+}
+
+#--- Entry point ---#
+set_scenario() {
+    parse_args "$@"
+    echo "Preparing test case for scenario '${TAG}'-'${DIR}'..."
+    set_geometries
+    change_domain
+    echo "Completed setting up the scenario '${TAG}'-'${DIR}'."
+}

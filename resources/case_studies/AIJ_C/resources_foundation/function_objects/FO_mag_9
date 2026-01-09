@@ -1,0 +1,44 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+mag1
+{
+    type            mag;
+    libs            ("libfieldFunctionObjects.so");
+    field           UMean;
+    result          UMeanMag;
+    region          region0;
+    enabled         true;
+    log             true;
+    startTime       $../controlDict!foLfStart;
+    endTime         $../controlDict!foLfEnd;
+    executeControl  runTime;
+    executeInterval $../controlDict!foLfDeltaT;
+    writeControl    none;
+    executeAtStart  false;
+}
+
+mag2
+{
+    type            mag;
+    libs            ("libfieldFunctionObjects.so");
+    field           wallShearStressMean;
+    result          wallShearStressMeanMag;
+    region          region0;
+    enabled         true;
+    log             true;
+    startTime       $../controlDict!foLfStart;
+    endTime         $../controlDict!foLfEnd;
+    executeControl  runTime;
+    executeInterval $../controlDict!foLfDeltaT;
+    writeControl    none;
+    executeAtStart  false;
+}
+
+
+// ************************************************************************* //

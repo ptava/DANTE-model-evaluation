@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+// Check yPlus value on ground wall
+groundyPlus
+{
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    select         patch;
+    patch          ground;
+    operation      max;
+    startTime      $../controlDict!foLfStart;
+    endTime        $../controlDict!foLfEnd;
+    writeControl   runTime;
+    writeInterval  $../controlDict!foLfDeltaT;
+    executeAtStart false;
+}
+
+// Check yPlus value on building walls
+skyscraperyPlus
+{
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    select         patch;
+    patch          skyscraper;
+    operation      max;
+    startTime      $../controlDict!foLfStart;
+    endTime        $../controlDict!foLfEnd;
+    writeControl   runTime;
+    writeInterval  $../controlDict!foLfDeltaT;
+    executeAtStart false;
+}
+
+// Check yPlus value on building walls
+buildingsyPlus
+{
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    select         patch;
+    patch          buildings;
+    operation      max;
+    startTime      $../controlDict!foLfStart;
+    endTime        $../controlDict!foLfEnd;
+    writeControl   runTime;
+    writeInterval  $../controlDict!foLfDeltaT;
+    executeAtStart false;
+}
+
+// ************************************************************************* //

@@ -1,0 +1,137 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+-------------------------------------------------------------------------------
+Description
+    Sample scalar qualntities along lines to be compared with experimental data
+\*---------------------------------------------------------------------------*/
+
+lines
+{
+    type                sets;
+    enabled             yes;
+    libs                ("libsampling.so");
+    interpolationScheme cellPoint;
+    setFormat           raw;
+    fields              (kMean UMeanMag);
+    startTime           $../controlDict!foLfStart;
+    endTime             $../controlDict!foLfEnd;
+    executeControl      runTime;
+    executeInterval     $../controlDict!foLfDeltaT;
+    writeControl        runTime;
+    writeInterval       $../controlDict!foLfDeltaT;
+
+    sets
+    (
+		// Lines for plane <Plane XY@0.02>
+		line_-0.3_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.3 -0.5 0.02);
+			end                (-0.3 0.5 0.02);
+			nPoints            500;
+		}
+		line_-0.25_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.25 -0.5 0.02);
+			end                (-0.25 0.5 0.02);
+			nPoints            500;
+		}
+		line_-0.2_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.2 -0.5 0.02);
+			end                (-0.2 0.5 0.02);
+			nPoints            500;
+		}
+		line_-0.15_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.15 -0.5 0.02);
+			end                (-0.15 0.5 0.02);
+			nPoints            500;
+		}
+		line_-0.1_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.1 -0.5 0.02);
+			end                (-0.1 0.5 0.02);
+			nPoints            500;
+		}
+		line_-0.05_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (-0.05 -0.5 0.02);
+			end                (-0.05 0.5 0.02);
+			nPoints            500;
+		}
+		line_0_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.0 -0.5 0.02);
+			end                (0.0 0.5 0.02);
+			nPoints            500;
+		}
+		line_0.05_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.05 -0.5 0.02);
+			end                (0.05 0.5 0.02);
+			nPoints            500;
+		}
+		line_0.1_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.1 -0.5 0.02);
+			end                (0.1 0.5 0.02);
+			nPoints            500;
+		}
+		line_0.15_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.15 -0.5 0.02);
+			end                (0.15 0.5 0.02);
+			nPoints            500;
+		}
+		line_0.2_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.2 -0.5 0.02);
+			end                (0.2 0.5 0.02);
+			nPoints            500;
+		}
+		line_0.25_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.25 -0.5 0.02);
+			end                (0.25 0.5 0.02);
+			nPoints            500;
+		}
+		line_0.3_0.02
+		{
+			type               lineUniform;
+			axis               y;
+			start              (0.3 -0.5 0.02);
+			end                (0.3 0.5 0.02);
+			nPoints            500;
+		}
+    );
+}
+
+// *********************************************************************** //

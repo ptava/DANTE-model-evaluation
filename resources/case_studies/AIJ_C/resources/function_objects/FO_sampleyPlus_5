@@ -22,8 +22,8 @@ groundyPlus
     writeInterval   10;
 }
 
-// Check yPlus value on building walls
-buildingyPlus
+// Check yPlus value on buildings walls
+skyscraperyPlus
 {
     type            surfaceFieldValue;
     libs            ("libfieldFunctionObjects.so");
@@ -32,7 +32,23 @@ buildingyPlus
     log             false;
     surfaceFormat   none;
     regionType      patch;
-    name            building;
+    name            skyscraper;
+    operation       max;
+    writeControl    timeStep;
+    writeInterval   10;
+}
+
+// Check yPlus value on buildings walls
+buildingsyPlus
+{
+    type            surfaceFieldValue;
+    libs            ("libfieldFunctionObjects.so");
+    fields          (yPlus);
+    writeFields     false;
+    log             false;
+    surfaceFormat   none;
+    regionType      patch;
+    name            buildings;
     operation       max;
     writeControl    timeStep;
     writeInterval   10;
