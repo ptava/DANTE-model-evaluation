@@ -24,13 +24,13 @@ startTime         0;
 
 stopAt            endTime;
 
-endTime           2.0;
+endTime           3.0;
 
 deltaT            0.0005;
 
 writeControl      runTime;
 
-writeInterval     2.0;
+writeInterval     3.0;
 
 purgeWrite        0;
 
@@ -50,15 +50,21 @@ maxCo             2.5;
 
 runTimeModifiable yes;
 
-foStart           2.0;      // start of acquisition
+foStartAverage    2.0;      // time to start averaging
 
-foEnd             3.0;      // end of acquisition
+foEndAverage      3.0;      // time to end averaging
 
-foDeltaT          0.05;     // acquisition time
+foLfStart         2.0;      // start of acquisition (low frequency)
 
-foDeltaThf        0.01;     // high frequency acuisition time
+foLfEnd           3.0;      // end of acquisition (low frequency)
 
-refinementDeltaT  4;        // timesteps between refinements
+foLfDeltaT        0.05;     // acquisition time (low frequency)
+
+foHfStart         2.0;      // start of acquisition (high frequency)
+
+foHfEnd           3.0;      // end of acquisition (high frequency)
+
+foHfDeltaT        0.01;     // acquisition time (high frequency)
 
 libs (
     "libatmosphericModels.so"
@@ -73,6 +79,7 @@ OptimisationSwitches
 
 DebugSwitches
 {
+    // sasRefineIndicator 1;
     // myrefiner    1;
 }
 

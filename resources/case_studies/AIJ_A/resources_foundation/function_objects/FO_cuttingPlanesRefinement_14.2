@@ -12,11 +12,12 @@ refinementY1
     libs                ("libsampling.so");
     surfaceFormat       vtk;
     fields              ( sasRefineIndicator );
-    startTime           1.0;
-    endTime             2.0;
+    startTime           $../controlDict!foLfStart;
+    endTime             $../controlDict!foLfEnd;
     writeControl        runTime;
     executeAtStart      false;
-    writeInterval       0.05;
+    writeInterval       $../controlDict!foLfDeltaT;
+    enabled             true;
     interpolationScheme none;
 
     surfaces
@@ -34,14 +35,14 @@ refinementY1
 
 refinementZ1
 {
-    type               surfaces;
-    libs               ("libsampling.so");
-    surfaceFormat      vtk;
-    fields             ( sasRefineIndicator );
-    startTime          1.0;
-    endTime            2.0;
-    writeControl       runTime;
-    writeInterval      0.05;
+    type                surfaces;
+    libs                ("libsampling.so");
+    surfaceFormat       vtk;
+    fields              ( sasRefineIndicator );
+    startTime           "${foLfStart}";
+    endTime             "${foLfEnd}";
+    writeControl        runTime;
+    writeInterval       "${foLfDeltaT}";
     interpolationScheme none;
 
     surfaces

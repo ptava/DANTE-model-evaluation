@@ -7,9 +7,6 @@ cd "${0%/*}" || exit
 # User parameters
 n_proc=16        # Set number of processors for parallel computing
 scale=0.25       # Set cells number scaling parameter
-delta_t=0.05     # Set acquisition time of post-processing
-start_time=2.0   # Set time to start averaging the solution (end of transient startup)
-end_time=3.0     # Set time to end the simulation
 smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
 refinement=false # Set to True if you want to refine the mesh
 
@@ -86,15 +83,6 @@ cp -r "${data_resources}/boundaryData" "${local_props}/." || {
 #------------------------------------------------------------------------------
 # Make changes in files
 
-protected_fos=(
-    "FO_Q_3.1"
-    "FO_isoSurfaces_15.1"
-    "FO_residuals_6"
-    "FO_setMaxCo_16"
-    "FO_setRelaxationFactors_17"
-    "FO_setOuterCorrectors_18"
-)
-
 refinement_fos=(
     "FO_sasRefineIndicator_8.8"
     "FO_cuttingPlanesRefinement_14.2"
@@ -110,12 +98,6 @@ set_fos "${local_functions}" "${local_dicts}/functions" || {
 }
 
 if [ "${refinement}" = true ]; then
-    protected_fos+=(
-        ${refinement_fos[0]}
-        ${refinement_fos[2]}
-        ${refinement_fos[3]}
-    )
-
     set_lib "libmyfiniteVolume.so" "${local_dicts}/controlDict" || {
         echo "Error setting finite volume library" >&2
         exit 1
@@ -145,10 +127,6 @@ else
     done
 fi
 
-set_acquisition_time $delta_t $start_time $end_time $local_functions "${protected_fos[@]}" || {
-    echo "Error setting acquisition time" >&2
-    exit 1
-}
 set_scaling $scale "${local_dicts}/userDict" || {
     echo "Error setting cells scaling" >&2
     exit 1
@@ -157,7 +135,6 @@ set_parallel $n_proc "${local_dicts}/decomposeParDict" || {
     echo "Error setting number of processors" >&2
     exit 1
 }
-
 
 #------------------------------------------------------------------------------
 # Create the computation domain if has not been created yet
@@ -175,7 +152,7 @@ fi
 echo "Running the simulation..."
 cp -r 0.orig 0
 runApplication decomposePar -force -constant
-runParallel renumberMesh -overwrite
+runParallel renumberMesh -constant -overwrite
 runParallel $(getApplication)
 echo "Simulation completed."
 

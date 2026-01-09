@@ -64,4 +64,4 @@ Two possibilities to build the grid are provided. The second grid scales better 
     ! Set `refineScale` in `dynamicMeshDict` as a Function1 to smoothly increase the number of refined cells over time
 
 
-* Prepared for OpenFOAM by ESI-OpenCFD and OpenFOAM Foundation
+* Prepared for OpenFOAM by ESI-OpenCFD (v2412 - *resources*) and OpenFOAM Foundation (v13 - *foundation*)

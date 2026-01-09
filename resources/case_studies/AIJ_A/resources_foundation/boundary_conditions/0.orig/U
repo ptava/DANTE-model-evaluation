@@ -26,6 +26,7 @@ boundaryField
     inlet
     {
         type            timeVaryingMappedFixedValue;
+        mapMethod       nearest;
         offset          constant (0 0 0);
     }
     outlet

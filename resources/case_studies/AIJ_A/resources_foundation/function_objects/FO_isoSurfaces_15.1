@@ -11,11 +11,11 @@ isoSurfaces2
     type            surfaces;
     enabled	        yes;
     libs            ("libsampling.so");
-    startTime       2.7;
-    endTime         3.0;
+    startTime       $../controlDict!foHfStart;
+    endTime         $../controlDict!foHfEnd;
     surfaceFormat   vtk;
     writeControl    runTime;
-    writeInterval   0.01;
+    writeInterval   $../controlDict!foHfDeltaT;
     executeAtStart  false;
     fields          (p);
     interpolationScheme cellPointFace;

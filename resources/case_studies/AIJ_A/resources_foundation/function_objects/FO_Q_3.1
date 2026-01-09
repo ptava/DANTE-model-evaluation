@@ -12,10 +12,10 @@ Q2
     libs            ("libfieldFunctionObjects.so");
     enabled         true;
     log             true;
-    startTime       2.7;
-    endTime         3.0;
+    startTime       $../controlDict!foHfStart;
+    endTime         $../controlDict!foHfEnd;
     executeControl  runTime;
-    executeInterval 0.01;
+    executeInterval $../controlDict!foHfDeltaT;
     writeControl    none;
     executeAtStart  false;
 }

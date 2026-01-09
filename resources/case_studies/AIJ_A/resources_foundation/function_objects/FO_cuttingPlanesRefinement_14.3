@@ -12,11 +12,12 @@ refinementY
     libs                ("libsampling.so");
     surfaceFormat       vtk;
     fields              ( sasRefineIndicator );
-    startTime           2.7;
-    endTime             3.0;
+    startTime           $../controlDict!foHfStart;
+    endTime             $../controlDict!foHfEnd;
     writeControl        runTime;
     executeAtStart      false;
-    writeInterval       0.01;
+    writeInterval       $../controlDict!foHfDeltaT;
+    enabled             false;
     interpolationScheme none;
 
     surfaces
@@ -38,11 +39,12 @@ refinementZ
     libs                ("libsampling.so");
     surfaceFormat       vtk;
     fields              ( sasRefineIndicator );
-    startTime           2.7;
-    endTime             3.0;
+    startTime           "${foHfStart}";
+    endTime             "${foHfEnd}";
     writeControl        runTime;
     executeAtStart      false;
-    writeInterval       0.01;
+    writeInterval       "${foHfDeltaT}";
+    enabled             false;
     interpolationScheme none;
 
     surfaces

@@ -15,10 +15,10 @@ mag1
     region          region0;
     enabled         true;
     log             true;
-    startTime       1.3;
-    endTime         2.0;
+    startTime       $../controlDict!foLfStart;
+    endTime         $../controlDict!foLfEnd;
     executeControl  runTime;
-    executeInterval 0.05;
+    executeInterval $../controlDict!foLfDeltaT;
     writeControl    none;
     executeAtStart  false;
 }
@@ -32,10 +32,10 @@ mag2
     region          region0;
     enabled         true;
     log             true;
-    startTime       1.3;
-    endTime         2.0;
+    startTime       $../controlDict!foLfStart;
+    endTime         $../controlDict!foLfEnd;
     executeControl  runTime;
-    executeInterval 0.05;
+    executeInterval $../controlDict!foLfDeltaT;
     writeControl    none;
     executeAtStart  false;
 }

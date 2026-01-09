@@ -17,10 +17,10 @@ groundyPlus
     select         patch;
     patch          ground;
     operation      max;
-    startTime      2.0;
-    endTime        3.0;
+    startTime      $../controlDict!foLfStart;
+    endTime        $../controlDict!foLfEnd;
     writeControl   runTime;
-    writeInterval  0.05;
+    writeInterval  $../controlDict!foLfDeltaT;
     executeAtStart false;
 }
 
@@ -35,10 +35,10 @@ buildingyPlus
     select         patch;
     patch          building;
     operation      max;
-    startTime      2.0;
-    endTime        3.0;
+    startTime      $../controlDict!foLfStart;
+    endTime        $../controlDict!foLfEnd;
     writeControl   runTime;
-    writeInterval  0.05;
+    writeInterval  $../controlDict!foLfDeltaT;
     executeAtStart false;
 }
 
