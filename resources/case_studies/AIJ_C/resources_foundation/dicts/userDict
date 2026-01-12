@@ -22,6 +22,8 @@ scenario
 
 refinement
 {
+    nCellsBetweenLevels  6;
+
     // refinement for wake region
     r1
     {
@@ -61,7 +63,11 @@ background
 {
     // Length of cubic cells in "uniform" region
     // be careful about this because we're doing only castellation with snappy
-    cells_scaling   0.05;
+    //      ⇲ 0.1  -> nCells ~= 650K
+    //      ⇲ 0.05 -> nCells ~= 2.0M
+    //      ⇲ 0.025-> nCells ~= 5.3M
+    cells_scaling   0.1;
+
 
     // Domain limit
     min_x   -1.4;
