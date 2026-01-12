@@ -39,10 +39,12 @@ refinementZ1
     libs                ("libsampling.so");
     surfaceFormat       vtk;
     fields              ( sasRefineIndicator );
-    startTime           "${foLfStart}";
-    endTime             "${foLfEnd}";
+    startTime           $../controlDict!foLfStart;
+    endTime             $../controlDict!foLfEnd;
     writeControl        runTime;
-    writeInterval       "${foLfDeltaT}";
+    executeAtStart      false;
+    writeInterval       $../controlDict!foLfDeltaT;
+    enabled             true;
     interpolationScheme none;
 
     surfaces
