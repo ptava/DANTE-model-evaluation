@@ -53,7 +53,6 @@ Two possibilities to build the grid are provided. The second grid scales better 
 * Mesh smoothing available based on external repository:
     - https://github.com/ptava/integration-cfmesh (for `improveMeshQuality` utility)
 
-
 * Adaptive mesh refinement based on additional external repositories:
     - https://github.com/ptava/kOmegaSSTSAS (for `mykOmegaSSTSAS` turbulence model)
     - https://github.com/ptava/dynamicFvMesh (for `mydynamicFvMesh` library)
@@ -62,6 +61,10 @@ Two possibilities to build the grid are provided. The second grid scales better 
     ! Set `dumpRefinementInfo` in `dynamicMeshDict` to true to use additional function objects such as `FO_cuttingPlanesRefinement` and `FO_refinementInfo`
 
     ! Set `refineScale` in `dynamicMeshDict` as a Function1 to smoothly increase the number of refined cells over time
+
+    ! Consider increasing 'nCorrectors' in `fvSolution` to improve stability when using AMR
+
+    ! Consider a smoother introduction of AMR to improve stability: change `refineScale` in `dynamicMeshDict`
 
 
 * Prepared for OpenFOAM by ESI-OpenCFD (v2412 - *resources*) and OpenFOAM Foundation (v13 - *foundation*)
