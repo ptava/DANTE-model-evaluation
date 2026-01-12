@@ -15,10 +15,8 @@ fi
 # Run applications: create grid
 runApplication blockMesh
 runApplication surfaceFeatures
-runParallel -s preprocess redistributePar -decompose -constant
-runParallel -s background checkMesh
-runParallel snappyHexMesh -overwrite
-runParallel -s castellated checkMesh
-runApplication -s preprocess redistributePar -reconstruct -constant
+runApplication -s background checkMesh
+runApplication snappyHexMesh -overwrite
+runApplication -s castellated checkMesh
 runApplication -s refinement topoSet -dict system/topoSetDict.refinement
 #------------------------------------------------------------------------------

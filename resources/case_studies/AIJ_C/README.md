@@ -27,6 +27,7 @@ Refinement regions limits and background-mesh-related parameters are defined in 
 
 - *set_scenario* utility function modify domain extents and refinement regions based on the selected scenario.
 - if user changes domain extents then *points* files in *boundaryData* need to be manually edited to match new domain dimensions.
+- *snappyHexMesh* by default runs in serial due to possible bug with *overwrite* option
 
 
 |   Dictionary file        | Description                    |
