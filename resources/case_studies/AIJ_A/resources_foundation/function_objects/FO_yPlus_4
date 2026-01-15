@@ -12,11 +12,11 @@ yPlus
     libs            ("libfieldFunctionObjects.so");
     region          region0;
     log             true;
+    executeAtStart  true;
     startTime       $../controlDict!foLfStart;
     endTime         $../controlDict!foLfEnd;
     executeControl  runTime;
     executeInterval $../controlDict!foLfDeltaT;
-    executeAtStart  false;
     writeControl    writeTime;
 }
 

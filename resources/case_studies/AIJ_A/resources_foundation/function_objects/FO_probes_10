@@ -13,17 +13,17 @@ probes
 {
     type            probes;
     libs            ("libsampling.so");
-    enabled         yes;
+    enabled         true;
+    executeAtStart  true;
+    fields          (UMeanMag kMean);
     startTime       $../controlDict!foLfStart;
     endTime         $../controlDict!foLfEnd;
     executeControl  runTime;
     executeInterval $../controlDict!foLfDeltaT;
     writeControl    runTime;
-    executeAtStart  false;
     writeInterval   $../controlDict!foLfDeltaT;
     setFormat       csv;
     interpolationScheme	cellPoint;
-    fields          (UMeanMag kMean);
 
     probeLocations
     (

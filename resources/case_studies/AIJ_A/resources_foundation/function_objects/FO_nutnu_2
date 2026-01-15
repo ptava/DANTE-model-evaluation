@@ -21,7 +21,7 @@ nutnu
     executeControl  runTime;
     executeInterval $../controlDict!foLfDeltaT;
     writeControl    writeTime;
-    executeAtStart  false;
+    executeAtStart  true;
 
     codeExecute
     #{

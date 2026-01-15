@@ -23,6 +23,7 @@ lines
     executeInterval     $../controlDict!foLfDeltaT;
     writeControl        runTime;
     writeInterval       $../controlDict!foLfDeltaT;
+    executeAtStart      true;
 
     sets
     (

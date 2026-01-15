@@ -16,7 +16,8 @@ Q1
     endTime         $../controlDict!foLfEnd;
     executeControl  runTime;
     executeInterval $../controlDict!foLfDeltaT;
-    writeControl    none;
+    writeControl    writeTime;
+    executeAtStart  true;
 }
 
 

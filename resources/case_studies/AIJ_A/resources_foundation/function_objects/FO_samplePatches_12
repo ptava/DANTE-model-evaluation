@@ -16,12 +16,12 @@ sampledPatches
     fields              (wallShearStress wallShearStreesMean yPlus);
     region              region0;
     enabled             true;
+    executeAtStart      true;
     startTime           $../controlDict!foLfStart;
     endTime             $../controlDict!foLfEnd;
     executeControl      runTime;
     executeInterval     $../controlDict!foLfDeltaT;
     writeControl        runTime;
-    executeAtStart      false;
     writeInterval       $../controlDict!foLfDeltaT;
     patches
     (

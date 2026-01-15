@@ -19,8 +19,8 @@ mag1
     endTime         $../controlDict!foLfEnd;
     executeControl  runTime;
     executeInterval $../controlDict!foLfDeltaT;
-    writeControl    none;
-    executeAtStart  false;
+    writeControl    writeTime;
+    executeAtStart  true;
 }
 
 mag2
@@ -36,8 +36,8 @@ mag2
     endTime         $../controlDict!foLfEnd;
     executeControl  runTime;
     executeInterval $../controlDict!foLfDeltaT;
-    writeControl    none;
-    executeAtStart  false;
+    writeControl    writeTime;
+    executeAtStart  true;
 }
 
 

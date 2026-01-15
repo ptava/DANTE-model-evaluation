@@ -11,10 +11,10 @@ nOutCorr
     libs            ("libutilityFunctionObjects.so");
     name            decreaseNcorr;
     enabled         true;
+    executeAtStart  false;
     executeControl  runTime;
     executeInterval 0.15;
     writeControl    none;
-    executeAtStart  false;
 
     defaultValue    5;
     minValue        1;

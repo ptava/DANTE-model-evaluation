@@ -6,7 +6,7 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-refinementY
+refinementY2
 {
     type                surfaces;
     libs                ("libsampling.so");
@@ -15,9 +15,9 @@ refinementY
     startTime           $../controlDict!foHfStart;
     endTime             $../controlDict!foHfEnd;
     writeControl        runTime;
-    executeAtStart      false;
     writeInterval       $../controlDict!foHfDeltaT;
-    enabled             false;
+    enabled             true;
+    executeAtStart      true;
     interpolationScheme none;
 
     surfaces
@@ -33,7 +33,7 @@ refinementY
     );
 }
 
-refinementZ
+refinementZ2
 {
     type                surfaces;
     libs                ("libsampling.so");
@@ -42,10 +42,9 @@ refinementZ
     startTime           $../controlDict!foHfStart;
     endTime             $../controlDict!foHfEnd;
     writeControl        runTime;
-    executeAtStart      false;
     writeInterval       $../controlDict!foHfDeltaT;
-    enabled             false;
-
+    enabled             true;
+    executeAtStart      true;
     interpolationScheme none;
 
     surfaces

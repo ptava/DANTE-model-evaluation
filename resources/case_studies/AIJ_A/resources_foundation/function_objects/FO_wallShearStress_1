@@ -12,12 +12,12 @@ wallShearStress
     libs            ("libfieldFunctionObjects.so");
     region          region0;
     enabled         true;
+    executeAtStart  true;
     log             true;
     startTime       $../controlDict!foStartAverage;
     endTime         $../controlDict!foEndAverage;
     executeControl  timeStep;
     writeControl    writeTime;
-    executeAtStart  false;
 }
 
 

@@ -20,7 +20,7 @@ fieldAverage
     endTime          $../controlDict!foEndAverage;
     executeControl   timeStep;
     writeControl     writeTime;
-    executeAtStart   false;
+    executeAtStart   true;
 
     fields
     (

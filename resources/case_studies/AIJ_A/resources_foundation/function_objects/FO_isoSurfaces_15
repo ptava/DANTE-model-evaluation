@@ -15,7 +15,7 @@ isoSurfaces1
     endTime             $../controlDict!foLfEnd;
     surfaceFormat       vtk;
     writeControl        runTime;
-    executeAtStart      false;
+    executeAtStart      true;
     writeInterval       $../controlDict!foLfDeltaT;
     fields              (nutnu);
     interpolationScheme cellPointFace;

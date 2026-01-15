@@ -18,7 +18,7 @@ cuttingPlaneY
     executeControl      runTime;
     executeInterval     $../controlDict!foLfDeltaT;
     writeControl        runTime;
-    executeAtStart      false;
+    executeAtStart      true;
     writeInterval       $../controlDict!foLfDeltaT;
 
     surfaces
@@ -46,7 +46,7 @@ cuttingPlaneZ
     executeControl      runTime;
     executeInterval     $../controlDict!foLfDeltaT;
     writeControl        runTime;
-    executeAtStart      false;
+    executeAtStart      true;
     writeInterval       $../controlDict!foLfDeltaT;
 
     surfaces

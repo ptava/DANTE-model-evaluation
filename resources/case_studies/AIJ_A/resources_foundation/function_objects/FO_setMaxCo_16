@@ -16,10 +16,10 @@ maxCo
     libs            ("libutilityFunctionObjects.so");
     name            maxCoRampDown;
     enabled         true;
+    executeAtStart  false;
     executeControl  timeStep;
     executeInterval 10;
     writeControl    none;
-    executeAtStart  false;
 
     rampDown        0.01;
     minValue        0.20;
