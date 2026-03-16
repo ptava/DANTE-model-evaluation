@@ -63,8 +63,8 @@ background
 {
     // Length of cubic cells in "uniform" region
     // be careful about this because we're doing only castellation with snappy
-    //      ⇲ 0.1  -> nCells ~= 650K
-    //      ⇲ 0.05 -> nCells ~= 2.0M
+    //      ⇲ 0.1  -> nCells ~= 670K
+    //      ⇲ 0.05 -> nCells ~= 2.6M
     //      ⇲ 0.025-> nCells ~= 5.3M
     cells_scaling   0.1;
 
@@ -238,5 +238,5 @@ refine
 
     max_x           0.7;
     max_y           0.7;
-    max_z           0.7;
+    max_z           0.8;
 }

@@ -10,6 +10,7 @@ relaxationFactor
 {
     libs            ("libutilityFunctionObjects.so");
     type            coded;
+    enabled	    false;
     name            relaxationFactor;
     executeControl  runTime;
     executeInterval 0.015;

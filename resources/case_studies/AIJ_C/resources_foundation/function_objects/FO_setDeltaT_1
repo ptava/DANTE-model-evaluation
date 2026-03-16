@@ -6,22 +6,23 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-sasRefineIndicator
+setDeltaT
 {
-    libs             ("libmyfieldFunctionObjects.so");
-    type             sasRefineIndicator;
-    result           sasRefineIndicator;
-    enabled          true;
-    executeAtStart   false;
-    executeControl   timeStep;
-    executeInterval  1;
-    writeControl     writeTime;
-    cellZone         refine_cells;
-    focusRegion      core;
-    transferFunction oddScaler;
-    weight1          1;
-    weight2          1;
-    sigma            1;
+    libs            ("libutilityFunctionObjects.so");
+    type            setTimeStep;
+    enabled         true;
+
+    deltaT
+    {
+        type            table;
+        values
+        (
+            (0.25       1e-3)
+            (1.9        5e-5)
+        );
+        interpolationScheme     linear;
+        outOfBounds     clamp;
+    }
 }
 
 

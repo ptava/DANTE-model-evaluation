@@ -14,7 +14,7 @@ relaxationFactor
     executeControl  runTime;
     executeInterval 0.015;
     writeControl    none;
-    enabled         true;
+    enabled         false;
     executeAtStart  false;
 
     maxValue        1.0;

@@ -15,7 +15,7 @@ maxCo
     type            coded;
     libs            ("libutilityFunctionObjects.so");
     name            maxCoRampDown;
-    enabled         true;
+    enabled         false;
     executeControl  timeStep;
     executeInterval 10;
     writeControl    none;
