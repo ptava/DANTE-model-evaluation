@@ -1,0 +1,93 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  dev
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      dynamicMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+topoChanger
+{
+    type               myrefiner;
+    refineInterval     1;
+    maxCells           1000000;
+    field              sasRefineIndicator;
+    nBufferLayers      1;
+    dumpLevel          true;
+    unrefineLevel      0;
+    lowerRefineLevel   0;
+    nBufferLayers      1;
+    dumpLevel          true;
+    dumpRefinementInfo true;
+    correctFluxes      (
+        ( phi none )
+        ( phi_0 none )
+        ( phi_0_0 none )
+        ( ddt0(phi) none )
+    );
+    refineScale
+    {
+        type           table;
+        outOfBounds    clamp;
+        values         ((0.005 0.0) (0.6 0.1) (1.0 0.5) (2.0 1.0));
+    }
+
+    refinementRegions
+    {
+        r1
+        {
+            cellZone           r1;
+            refineInterval     1;
+            maxRefinement      2;
+            maxCells           1000000;
+            field              sasRefineIndicator;
+            unrefineLevel      0;
+            lowerRefineLevel   0;
+        }
+
+        r2
+        {
+            cellZone           r2;
+            maxRefinement      3;
+            field              sasRefineIndicator;
+            unrefineLevel      0;
+            lowerRefineLevel   0;
+        }
+
+        r3
+        {
+            cellZone           r3;
+            maxRefinement      4;
+            field              sasRefineIndicator;
+            unrefineLevel      0;
+            lowerRefineLevel   0;
+        }
+    }
+}
+
+distributor
+{
+    type                   distributor;
+
+    maxImbalance           0.1;
+
+    redistributionInterval 50;
+
+    constraints
+    {
+       refinementHistory
+       {
+           type    refinementHistory;
+       }
+    }
+}
+
+// ************************************************************************* //

@@ -1,0 +1,134 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Create cellZones for the refinement regions (r1, r2 and r3) using topoSet
+// CellZones have no cells in common
+
+// User-defined parameters
+#include "userDict"
+
+actions
+(
+
+    // Create a box for inner refinement region (r3)
+    {
+        name        r3;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( $refinement/r3/min_x $refinement/r3/min_y $refinement/r3/min_z )
+                    ( $refinement/r3/max_x $refinement/r3/max_y $refinement/r3/max_z );
+            inside  true;
+        }
+    }
+
+    // Create a box for the next, outer, refinement region (r2)
+    {
+        name        r3plusr2;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( $refinement/r2/min_x $refinement/r2/min_y $refinement/r2/min_z )
+                    ( $refinement/r2/max_x $refinement/r2/max_y $refinement/r2/max_z );
+            inside  true;
+        }
+    }
+
+    // Create a box for the next, outer, refinement region (r1)
+    {
+        name        r3plusr2plusr1;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( $refinement/r1/min_x $refinement/r1/min_y $refinement/r1/min_z )
+                    ( $refinement/r1/max_x $refinement/r1/max_y $refinement/r1/max_z );
+            inside  true;
+        }
+    }
+
+    // Create a cellSet for refinement field calculation
+    {
+        name        refine_cells;
+        type        cellZoneSet;
+        action      new;
+        source      setToCellZone;
+        set         r3plusr2plusr1;
+        zone        refine_cells;
+    }
+
+    // Subtract the inner regions (r2 and r3) from the outer region (r1) to create a shell for r1
+    {
+        name        r3plusr2plusr1;
+        type        cellSet;
+        action      delete;
+        source      cellToCell;
+        sourceInfo
+        {
+            set     r3plusr2;
+        }
+    }
+
+    // Subtract the inner region (r3) from the outer region (r2) to create a shell for r2
+    {
+        name        r3plusr2;
+        type        cellSet;
+        action      delete;
+        source      cellToCell;
+        sourceInfo
+        {
+            set     r3;
+        }
+    }
+
+    // from cellSet to cellZone
+    {
+        name        r3;
+        type        cellZoneSet;
+        action      new;
+        source      setToCellZone;
+        set         r3;
+        zone        r3;
+    }
+
+
+    // from cellSet to cellZone
+    {
+        name        r2;
+        type        cellZoneSet;
+        action      new;
+        source      setToCellZone;
+        set         r3plusr2;
+        zone        r2;
+    }
+
+    // From cellSet to cellZone
+    {
+        name        r1;
+        type        cellZoneSet;
+        action      new;
+        source      setToCellZone;
+        set         r3plusr2plusr1;
+        zone        r1;
+    }
+);
+
+// ************************************************************************* //
