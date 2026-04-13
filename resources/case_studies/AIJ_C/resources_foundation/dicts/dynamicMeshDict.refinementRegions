@@ -45,9 +45,7 @@ topoChanger
         r1
         {
             cellZone           r1;
-            refineInterval     1;
             maxRefinement      2;
-            maxCells           1000000;
             field              sasRefineIndicator;
             unrefineLevel      0;
             lowerRefineLevel   0;

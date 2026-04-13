@@ -1,0 +1,66 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+// Check yPlus value on ground wall
+groundyPlus_from45to22
+{
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    select         patch;
+    patch          ground;
+    operation      max;
+    enabled        false;
+    startTime      $../controlDict!foLfStart2;
+    endTime        $../controlDict!foLfEnd2;
+    writeControl   runTime;
+    writeInterval  $../controlDict!foLfDeltaT;
+    executeAtStart false;
+}
+
+// Check yPlus value on building walls
+skyscraperyPlus_from45to22
+{
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    select         patch;
+    patch          skyscraper;
+    operation      max;
+    enabled        false;
+    startTime      $../controlDict!foLfStart2;
+    endTime        $../controlDict!foLfEnd2;
+    writeControl   runTime;
+    writeInterval  $../controlDict!foLfDeltaT;
+    executeAtStart false;
+}
+
+// Check yPlus value on building walls
+buildingsyPlus_from45to22
+{
+    type           surfaceFieldValue;
+    libs           ("libfieldFunctionObjects.so");
+    fields         (yPlus);
+    writeFields    false;
+    log            false;
+    select         patch;
+    patch          buildings;
+    operation      max;
+    enabled        false;
+    startTime      $../controlDict!foLfStart2;
+    endTime        $../controlDict!foLfEnd2;
+    writeControl   runTime;
+    writeInterval  $../controlDict!foLfDeltaT;
+    executeAtStart false;
+}
+
+// ************************************************************************* //

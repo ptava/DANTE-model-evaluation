@@ -1,0 +1,36 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+
+sampledPatches_from45to22
+{
+    type                surfaces;
+    libs                ("libsampling.so");
+    interpolationScheme cell;
+    surfaceFormat       vtk;
+    fields              (wallShearStress wallShearStreesMean yPlus);
+    region              region0;
+    enabled             false;
+    startTime           $../controlDict!foLfStart2;
+    endTime             $../controlDict!foLfEnd2;
+    executeControl      runTime;
+    executeInterval     $../controlDict!foLfDeltaT;
+    writeControl        runTime;
+    executeAtStart      false;
+    writeInterval       $../controlDict!foLfDeltaT;
+    patches
+    (
+        roof
+        side1
+        side2
+        front
+        back
+        ground
+    );
+}
+
+// ************************************************************************* //

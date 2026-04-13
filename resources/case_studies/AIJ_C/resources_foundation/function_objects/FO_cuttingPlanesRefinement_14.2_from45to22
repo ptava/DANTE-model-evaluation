@@ -1,0 +1,34 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+\*---------------------------------------------------------------------------*/
+
+refinementY1_from45to22
+{
+    type                surfaces;
+    libs                ("libsampling.so");
+    surfaceFormat       vtk;
+    fields              ( sasRefineIndicator );
+    startTime           $../controlDict!foLfStart2;
+    endTime             $../controlDict!foLfEnd2;
+    writeControl        runTime;
+    executeAtStart      false;
+    writeInterval       $../controlDict!foLfDeltaT;
+    enabled             false;
+
+    surfaces
+    (
+        yNormal
+        {
+            type        cuttingPlane;
+            planeType   pointAndNormal;
+            point       (0 0 0);
+            normal      (0 1 0);
+        }
+    );
+}
+
+
+// ************************************************************************* //

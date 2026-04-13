@@ -66,6 +66,18 @@ foHfEnd           3.0;      // end of acquisition (high frequency)
 
 foHfDeltaT        0.01;     // acquisition time (high frequency)
 
+foStartAverage2   4.2;      // time to start averaging for from45to22
+
+foEndAverage2     5.2;      // time to end averaging for from45to22
+
+foLfStart2        4.2;      // start of acquisition (low frequency, from45to22)
+
+foLfEnd2          5.2;      // end of acquisition (low frequency, from45to22)
+
+foHfStart2        4.2;      // start of acquisition (high frequency, from45to22)
+
+foHfEnd2          5.2;      // end of acquisition (high frequency, from45to22)
+
 libs (
     "libatmosphericModels.so"
 );

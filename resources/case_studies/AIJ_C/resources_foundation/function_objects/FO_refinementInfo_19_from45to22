@@ -1,0 +1,30 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+// Note: requires activation of dumpRefinementIndo in dynamicMeshDict
+refinementInfo_from45to22
+{
+    libs            ("libmyutilityFunctionObjects.so");
+    type            refinementInfo;
+    enabled         false;
+    executeControl  timeStep;
+    executeInterval 4;
+    writeControl    timeStep;
+    executeAtStart  false;
+    writeInterval   4;
+    refinementParameters
+    (
+        "nTotToRefine"
+        "nTotRefined"
+        "nTotUnrefined"
+        "lowerLimit"
+        "upperLimit"
+    );
+}
+
+
+// ************************************************************************* //

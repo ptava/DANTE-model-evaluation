@@ -33,7 +33,7 @@ usage() {
 
     Options:
         -g, --geom-tag <tag> Prepare case for the specified geometry scenario tag (H0, H1 or H2)
-        -d, --dir-tag <tag> Prepare case for the specific flow direction tag (0deg, 22deg, 45deg)
+        -d, --dir-tag <tag> Prepare case for the specific flow direction tag (0deg, 22deg, 45deg, from45to22)
         -f, --folder <path-to-geometry-folder> Specify the folder to store stl files (default: constant/geometry)
         --dicts-resources <path-to-dicts-folder> Specify the folder containing scenario-related dictionaries (default: resources/dicts)
         --stl-resources <path-to-stl-folder> Specify the folder containing stl files (default: resources/geometry)
@@ -134,8 +134,23 @@ set_geometries() {
     copy_file_if_exists "$surfaceFeaturesSource" "$surfaceFeaturesTarget"
 
     # Copy scenario-related initial conditions
-    local dataSource="${DATA_DIR}/boundaryData_${DIR}"
+    local dataTag="${DIR}"
+    if [[ "${DIR}" == "from45to22" ]]; then
+        dataTag="from45to22"
+    fi
+
+    local dataSource="${DATA_DIR}/boundaryData_${dataTag}"
     local dataTarget="constant/boundaryData"
+
+    if [[ ! -d "${dataSource}" ]]; then
+        if [[ "${DIR}" == "from45to22" ]]; then
+            echo "Error: '${dataSource}' is required for the 45deg-to-22deg transition case." >&2
+            echo "Create the composite boundaryData set before using '--dir-tag from45to22'." >&2
+        else
+            echo "Error: Data folder '${dataSource}' does not exist." >&2
+        fi
+        return 1
+    fi
 
     cp -r "${dataSource}" "${dataTarget}" || {
         echo "Error: Failed to copy boundary data from '${dataSource}' to '${dataTarget}'." >&2
@@ -154,6 +169,8 @@ change_domain() {
     blockMeshDict_target="system/blockMeshDict"
 
     echo "+--- Setting computational domain: this will affect user dictionary"
+
+    foamDictionary -entry scenario/flowDirection -set "${DIR}" "${USER_DICT}"
 
     case "${DIR}" in
         0deg)
@@ -176,14 +193,19 @@ change_domain() {
 
             echo "+--- Computational domain set for 22deg inflow direction"
             ;;
-        45deg)
+        45deg|from45to22)
             blockMeshDict_source="${DICTS_DIR}/blockMeshDict_notParallel"
             copy_file_if_exists "${blockMeshDict_source}" "${blockMeshDict_target}"
 
-            echo "+--- Computational domain set for 45deg inflow direction"
+            if [[ "${DIR}" == "from45to22" ]]; then
+                foamDictionary -entry endTime -set 5.2 "system/controlDict"
+                echo "+--- Computational domain set for the 45deg-based from45to22 transition"
+            else
+                echo "+--- Computational domain set for 45deg inflow direction"
+            fi
             ;;
         *)
-            echo "Error: Unknown direction tag '${DIR}'. Supported tags are 0deg, 22deg, and 45deg." >&2
+            echo "Error: Unknown direction tag '${DIR}'. Supported tags are 0deg, 22deg, 45deg, and from45to22." >&2
             return 1
             ;;
     esac

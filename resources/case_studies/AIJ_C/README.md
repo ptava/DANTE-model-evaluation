@@ -22,6 +22,8 @@
 
 To generate the grid with SnappyHexMesh, we need to create a background mesh via blockMesh and then use the snappyHexMesh utility. Already defined to account for multiple directions of the inflow.
 
+The `flowDirection` option in `system/userDict` supports the standard `0deg`, `22deg`, and `45deg` cases, plus `from45to22`. The transition case keeps the 45deg grid/domain setup and expects a dedicated `boundaryData_from45to22` data set that encodes the 45deg acquisition, the transient switch, the stabilization period, and the 22deg acquisition window.
+
 This meshing procedure can be applied to all scenarios, with central building height set to 0H, 1H, and 2H (set `case` variable in `userDict` file, values available `0H`, `1H`, `2H`).
 Refinement regions limits and background-mesh-related parameters are defined in `userDict` file, along with the scaling parameter `cells_scaling` (this parameter is the actual characteristic length of cubes of main region of interest.
 
@@ -44,6 +46,5 @@ Refinement regions limits and background-mesh-related parameters are defined in 
 | BASE.stl          | common to all configurations (no central building)|
 | 1H.stl            | central building height equal to 1H               |
 | 2H.stl            | central building height equal to 2H               |
-
 
 

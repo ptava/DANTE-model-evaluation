@@ -7,7 +7,7 @@ cd "${0%/*}" || exit
 # User parameters
 n_proc=16        # Set number of processors for parallel computing
 scenario="H2"     # Scenario tag (H0, H1, or H2)
-direction="45deg" # Flow direction tag (0deg, 22deg, 45deg)
+direction="45deg" # Flow direction tag (0deg, 22deg, 45deg, from45to22)
 scale=0.05       # Set cells number scaling parameter
 smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
 refinement=false # Set to True if you want to refine the mesh
@@ -101,10 +101,81 @@ refinement_fos=(
     "FO_refinementInfo_19"
 )
 
+transition_refinement_fos=(
+    "FO_cuttingPlanesRefinement_14.2_from45to22"
+    "FO_cuttingPlanesRefinement_14.3_from45to22"
+    "FO_sasRefineIndicator_8.8_from45to22"
+    "FO_refinementInfo_19_from45to22"
+)
+
 set_fos "${local_functions}" "${local_dicts}/functions" || {
     echo "Error setting function objects" >&2
     exit 1
 }
+
+transition_fos=(
+    "FO_Q_3_from45to22"
+    "FO_Q_3.1_from45to22"
+    "FO_cuttingPlanes_14_from45to22"
+    "FO_fieldAverage_8_from45to22"
+    "FO_isoSurfaces_15_from45to22"
+    "FO_isoSurfaces_15.1_from45to22"
+    "FO_lines_11_from45to22"
+    "FO_mag_9_from45to22"
+    "FO_nutnu_2_from45to22"
+    "FO_probes_10_from45to22"
+    "FO_reattachmentLines_13_from45to22"
+    "FO_samplePatches_12_from45to22"
+    "FO_sampleyPlus_5_from45to22"
+    "FO_wallShearStress_1_from45to22"
+    "FO_yPlus_4_from45to22"
+)
+
+if [ "${direction}" = "from45to22" ]; then
+    for fo in "${transition_fos[@]}"; do
+        set_fo_states "on" "${local_functions}/${fo}" || {
+            echo "Error enabling transition function object $fo" >&2
+            exit 1
+        }
+    done
+
+    if [ "${refinement}" = true ]; then
+        for fo in "${transition_refinement_fos[@]}"; do
+            set_fo_states "on" "${local_functions}/${fo}" || {
+                echo "Error enabling transition refinement function object $fo" >&2
+                exit 1
+            }
+        done
+
+        for fo in "FO_sasRefineIndicator_8.8" "FO_refinementInfo_19"; do
+            set_fo_states "off" "${local_functions}/${fo}" || {
+                echo "Error disabling original refinement function object $fo" >&2
+                exit 1
+            }
+        done
+    else
+        for fo in "${transition_refinement_fos[@]}"; do
+            set_fo_states "off" "${local_functions}/${fo}" || {
+                echo "Error disabling transition refinement function object $fo" >&2
+                exit 1
+            }
+        done
+    fi
+else
+    for fo in "${transition_fos[@]}"; do
+        set_fo_states "off" "${local_functions}/${fo}" || {
+            echo "Error disabling transition function object $fo" >&2
+            exit 1
+        }
+    done
+
+    for fo in "${transition_refinement_fos[@]}"; do
+        set_fo_states "off" "${local_functions}/${fo}" || {
+            echo "Error disabling transition refinement function object $fo" >&2
+            exit 1
+        }
+    done
+fi
 
 if [ "${refinement}" = true ]; then
     set_lib "libmyfiniteVolume.so" "${local_dicts}/controlDict" || {
