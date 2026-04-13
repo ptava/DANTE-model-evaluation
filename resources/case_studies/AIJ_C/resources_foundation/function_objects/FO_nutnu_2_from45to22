@@ -44,7 +44,7 @@ nutnu_from45to22
                     IOobject::NO_WRITE
                 ),
                 mesh(),
-                dimensionedScalar("zero", dimArea/dimTime, 0)
+                dimensionedScalar("zero", dimless, 0)
             );
             nutnuPtr->store();
             nutnuPtr = &mesh().lookupObjectRef<volScalarField>("nutnu");
