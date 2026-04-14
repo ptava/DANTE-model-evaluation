@@ -6,7 +6,7 @@
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 
-cuttingPlaneY_from45to22
+cuttingPlaneXY_from45to22
 {
     type                surfaces;
     libs                ("libsampling.so");
@@ -24,12 +24,12 @@ cuttingPlaneY_from45to22
 
     surfaces
     (
-        yNormal
+        xyNormal
         {
             type      cuttingPlane;
             planeType pointAndNormal;
             point     (0 0 0);
-            normal    (0 1 0);
+            normal    (1 1 0);
         }
     );
 }
@@ -56,7 +56,35 @@ cuttingPlaneZ_from45to22
         {
             type      cuttingPlane;
             planeType pointAndNormal;
-            point     (0 0 0.04);
+            point     (0 0 0.19);
+            normal    (0 0 1);
+        }
+    );
+}
+
+
+cuttingPlaneZ_transition_from45to22
+{
+    type                surfaces;
+    libs                ("libsampling.so");
+    surfaceFormat       vtk;
+    fields              ( U UMean nut nutnu );
+    interpolationScheme cell;
+    enabled             false;
+    startTime           $../controlDict!foLfEnd;
+    endTime             $../controlDict!foLfStart2;
+    executeControl      runTime;
+    executeInterval     $../controlDict!foLfDeltaT;
+    writeControl        runTime;
+    writeInterval       $../controlDict!foLfDeltaT;
+
+    surfaces
+    (
+        zNormal
+        {
+            type      cuttingPlane;
+            planeType pointAndNormal;
+            point     (0 0 0.19);
             normal    (0 0 1);
         }
     );

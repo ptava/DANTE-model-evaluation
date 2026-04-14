@@ -13,9 +13,10 @@ scenario
                             // "1H" - includes "BASE.stl" and "1H.stl"
                             // "2H" - includes "BASE.stl" and "2H.stl"
     flowDirection   "45deg"; // Options:
-                            // " 0deg"   - flow in +x direction
-                            // " 22deg"  - flow in +x and +y directions
-                            // " 45deg"  - flow in +x and +y directions
+                            // " 0deg"         - flow in +x direction
+                            // " 22deg"        - flow in +x and +y directions
+                            // " 45deg"        - flow in +x and +y directions
+                            // " from45to22"   - 45deg grid with a 45->22 transition
 }
 
 

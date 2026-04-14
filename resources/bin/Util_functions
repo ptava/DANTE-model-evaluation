@@ -150,7 +150,7 @@ set_parallel() {
 #
 ###############################################################################
 set_fos() {
-    local fo_name_pattern="^FO_.*_([0-9]+\.?[0-9]*)$"
+    local fo_name_pattern="^FO_.*_([0-9]+\.?[0-9]*)"
     local fo_dir="$1"
     local functions_file="$2"
 
@@ -214,6 +214,7 @@ set_fos() {
 set_fo_states() {
     local enabled="$1"
     local function_object_file="$2"
+    local action="Updating"
 
     if [[ -z "${enabled}" || -z "${function_object_file}" ]]; then
         echo "Usage: set_fo_states <on|off|true|false|1|0> " \
@@ -231,11 +232,20 @@ set_fo_states() {
         return 1
     fi
 
+    case "${enabled}" in
+        on|true|yes|1)
+            action="Enabling"
+            ;;
+        off|false|no|0)
+            action="Disabling"
+            ;;
+    esac
+
     for dictionary in $(foamDictionary -keywords "${function_object_file}"); do
         foamDictionary -entry ${dictionary}/enabled \
             -set "${enabled}" \
             "${function_object_file}" > /dev/null 2>&1
-        echo "Disabling '${dictionary}' in '${function_object_file}'."
+        echo "${action} '${dictionary}' in '$(basename "${function_object_file}")' -> enabled=${enabled}"
     done
 }
 
@@ -342,15 +352,18 @@ check_if_empty() {
 set_lib() {
     local tok="$1"
     local file="$2"
+    local escaped_tok=""
 
     if [[ -z "$tok" || -z "$file" || ! -f "$file" || ! -w "$file" ]]; then
         echo "Usage: set_lib <token> <dictionary> (file must exist and be writable)" >&2
         return 1
     fi
 
+    escaped_tok=$(printf '%s\n' "$tok" | sed 's/[][(){}.^$*+?|\\/]/\\&/g')
+
     # INLINE form: libs ( banana pinto );
     if grep -qE '^[[:space:]]*libs[[:space:]]*\([^)]*\);' "$file"; then
-        if grep -qE "^[[:space:]]*libs[[:space:]]*\([^)]*\b$tok\b[^)]*\);" \
+        if grep -qE "^[[:space:]]*libs[[:space:]]*\([^)]*\"${escaped_tok}\"[^)]*\);" \
             "$file"; then
             echo "Token '$tok' already present (inline)." >&2
             return 0
@@ -358,12 +371,13 @@ set_lib() {
         sed -E -i \
             "s/^([[:space:]]*libs[[:space:]]*\([^)]*)\);/\1 \"$tok\");/" "$file"
         echo "Inserting '$tok' into inline libs(...)."
+        return 0
     fi
 
     # MULTILINE form
     if grep -qE '^[[:space:]]*libs[[:space:]]*\($' "$file"; then
         if sed -nE "/^[[:space:]]*libs[[:space:]]*\($/,/^[[:space:]]*\);/p" \
-            "$file" | grep -qw "$tok"; then
+            "$file" | grep -qE "^[[:space:]]*\"${escaped_tok}\"[[:space:]]*$"; then
             echo "Token '$tok' already present (multiline)." >&2
             return 0
         fi

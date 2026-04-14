@@ -7,7 +7,7 @@ cd "${0%/*}" || exit
 # User parameters
 n_proc=16         # Set number of processors for parallel computing
 scenario="H2"     # Scenario tag (H0, H1, or H2)
-direction="45deg" # Flow direction tag (0deg, 22deg, 45deg)
+direction="45deg" # Flow direction tag (0deg, 22deg, 45deg, from45to22)
 scale=0.05        # Set cells number scaling parameter
 delta_t=0.05      # Set acquisition time of post-processing
 start_time=1.3    # Set time to start averaging the solution (end of transient startup)

@@ -5,7 +5,7 @@
 |   \\  /    A nd           | Website:  www.openfoam.com                      |
 \*---------------------------------------------------------------------------*/
 
-refinementY1_from45to22
+refinementXY1_from45to22
 {
     type                surfaces;
     libs                ("libsampling.so");
@@ -17,15 +17,44 @@ refinementY1_from45to22
     executeAtStart      false;
     writeInterval       $../controlDict!foLfDeltaT;
     enabled             false;
+    interpolationScheme none;
 
     surfaces
     (
-        yNormal
+        xyNormal
         {
             type        cuttingPlane;
             planeType   pointAndNormal;
             point       (0 0 0);
-            normal      (0 1 0);
+            normal      (1 1 0);
+            interpolate false;
+        }
+    );
+}
+
+refinementZ1_from45to22
+{
+    type                surfaces;
+    libs                ("libsampling.so");
+    surfaceFormat       vtk;
+    fields              ( sasRefineIndicator );
+    startTime           $../controlDict!foLfStart2;
+    endTime             $../controlDict!foLfEnd2;
+    writeControl        runTime;
+    executeAtStart      false;
+    writeInterval       $../controlDict!foLfDeltaT;
+    enabled             false;
+    interpolationScheme none;
+
+    surfaces
+    (
+        zNormal
+        {
+            type        cuttingPlane;
+            planeType   pointAndNormal;
+            point       (0 0 0.19);
+            normal      (0 0 1);
+            interpolate false;
         }
     );
 }

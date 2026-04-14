@@ -11,6 +11,14 @@ direction="45deg" # Flow direction tag (0deg, 22deg, 45deg, from45to22)
 scale=0.05       # Set cells number scaling parameter
 smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
 refinement=false # Set to True if you want to refine the mesh
+acq_start=2.0    # Start time for averaging and for low/high-frequency acquisition
+acq_stop=3.0     # Stop time for averaging and low-frequency acquisition
+hf_stop=3.0      # Stop time for high-frequency acquisition
+acq_start2=4.2   # from45to22 only: start time for the second averaging/acquisition window
+acq_stop2=5.2    # from45to22 only: stop time for second averaging/low-frequency acquisition
+hf_stop2=5.2     # from45to22 only: stop time for second high-frequency acquisition
+lf_dt=0.05       # Low-frequency acquisition interval
+hf_dt=0.01       # High-frequency acquisition interval
 
 # Local folders
 local_resources="resources" # Directory with resources
@@ -81,12 +89,20 @@ cp -r ${geometry_resources} ${local_geometry} || {
 }
 
 set_scenario \
-    --geom-tag ${scenario} \
-    --dir-tag ${direction} \
-    --folder ${local_geometry} \
-    --dicts-resources ${dicts_resources} \
-    --stl-resources ${geometry_resources} \
-    --data-resources ${data_resources} || {
+    --geom-tag "${scenario}" \
+    --dir-tag "${direction}" \
+    --folder "${local_geometry}" \
+    --dicts-resources "${dicts_resources}" \
+    --stl-resources "${geometry_resources}" \
+    --data-resources "${data_resources}" \
+    --acq-start "${acq_start}" \
+    --acq-stop "${acq_stop}" \
+    --hf-stop "${hf_stop}" \
+    --acq-start2 "${acq_start2}" \
+    --acq-stop2 "${acq_stop2}" \
+    --hf-stop2 "${hf_stop2}" \
+    --lf-dt "${lf_dt}" \
+    --hf-dt "${hf_dt}" || {
     echo "Error setting scenario" >&2
     exit 1
 }
@@ -104,8 +120,6 @@ refinement_fos=(
 transition_refinement_fos=(
     "FO_cuttingPlanesRefinement_14.2_from45to22"
     "FO_cuttingPlanesRefinement_14.3_from45to22"
-    "FO_sasRefineIndicator_8.8_from45to22"
-    "FO_refinementInfo_19_from45to22"
 )
 
 set_fos "${local_functions}" "${local_dicts}/functions" || {
@@ -146,13 +160,6 @@ if [ "${direction}" = "from45to22" ]; then
                 exit 1
             }
         done
-
-        for fo in "FO_sasRefineIndicator_8.8" "FO_refinementInfo_19"; do
-            set_fo_states "off" "${local_functions}/${fo}" || {
-                echo "Error disabling original refinement function object $fo" >&2
-                exit 1
-            }
-        done
     else
         for fo in "${transition_refinement_fos[@]}"; do
             set_fo_states "off" "${local_functions}/${fo}" || {
@@ -178,10 +185,30 @@ else
 fi
 
 if [ "${refinement}" = true ]; then
+    for fo in "${refinement_fos[@]}"; do
+        set_fo_states "on" "${local_functions}/${fo}" || {
+            echo "Error enabling function object $fo" >&2
+            exit 1
+        }
+    done
+
     set_lib "libmyfiniteVolume.so" "${local_dicts}/controlDict" || {
         echo "Error setting finite volume library" >&2
         exit 1
     } && echo "⇲ Set mytimeVaryingMappedFixedValue boundary condition"
+
+    for field in "0.orig/U" "0.orig/k" "0.orig/omega"; do
+        if [ -f "${field}" ]; then
+            foamDictionary -entry boundaryField/inlet/type \
+                -set mytimeVaryingMappedFixedValue \
+                "${field}" > /dev/null 2>&1 || {
+                    echo "Error setting inlet boundary condition in ${field}" >&2
+                    exit 1
+                }
+            echo "Set inlet BC in '${field}' -> mytimeVaryingMappedFixedValue"
+        fi
+    done
+
     set_lib "libmyfvMeshTopoChangers.so" "${local_dicts}/controlDict" || {
         echo "Error setting dynamic mesh library" >&2
         exit 1

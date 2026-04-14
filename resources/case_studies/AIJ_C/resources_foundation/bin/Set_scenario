@@ -18,6 +18,15 @@ DICTS_DIR="resources/dicts"
 STL_DIR="resources/geometry"
 DATA_DIR="resources/data"
 USER_DICT="system/userDict"
+CONTROL_DICT="system/controlDict"
+ACQ_START="2.0"
+ACQ_STOP="3.0"
+HF_STOP="3.0"
+ACQ_START2="4.2"
+ACQ_STOP2="5.2"
+HF_STOP2="5.2"
+LF_DT="0.05"
+HF_DT="0.01"
 
 #--- Source utility functions ---#
 . ./Util_functions || {
@@ -38,6 +47,14 @@ usage() {
         --dicts-resources <path-to-dicts-folder> Specify the folder containing scenario-related dictionaries (default: resources/dicts)
         --stl-resources <path-to-stl-folder> Specify the folder containing stl files (default: resources/geometry)
         --data-resources <path-to-data-folder> Specify the folder containing initial and boundary conditions (default: resources/data)
+        --acq-start <time> Set averaging and acquisition start time
+        --acq-stop <time> Set averaging and low-frequency acquisition stop time
+        --hf-stop <time> Set high-frequency acquisition stop time
+        --acq-start2 <time> Set start time for the second from45to22 acquisition window
+        --acq-stop2 <time> Set stop time for the second from45to22 low-frequency acquisition window
+        --hf-stop2 <time> Set high-frequency stop time for the second from45to22 acquisition window
+        --lf-dt <time> Set low-frequency acquisition interval
+        --hf-dt <time> Set high-frequency acquisition interval
         -h, --help  Show this help message and exit
 EOF
 }
@@ -67,6 +84,38 @@ parse_args() {
                 ;;
             --data-resources)
                 DATA_DIR="$2"
+                shift 2
+                ;;
+            --acq-start)
+                ACQ_START="$2"
+                shift 2
+                ;;
+            --acq-stop)
+                ACQ_STOP="$2"
+                shift 2
+                ;;
+            --hf-stop)
+                HF_STOP="$2"
+                shift 2
+                ;;
+            --acq-start2)
+                ACQ_START2="$2"
+                shift 2
+                ;;
+            --acq-stop2)
+                ACQ_STOP2="$2"
+                shift 2
+                ;;
+            --hf-stop2)
+                HF_STOP2="$2"
+                shift 2
+                ;;
+            --lf-dt)
+                LF_DT="$2"
+                shift 2
+                ;;
+            --hf-dt)
+                HF_DT="$2"
                 shift 2
                 ;;
             -h|--help)
@@ -99,6 +148,54 @@ parse_args() {
     if [[ ! -d "${DATA_DIR}" ]]; then
         echo "Error: Data folder '${DATA_DIR}' does not exist." >&2
         return 1
+    fi
+}
+
+set_acquisition_window() {
+    if ! command -v foamDictionary >/dev/null 2>&1; then
+        echo "Error: foamDictionary not found in PATH." >&2
+        return 1
+    fi
+
+    if [[ ! -f "${CONTROL_DICT}" ]]; then
+        echo "Error: Control dictionary '${CONTROL_DICT}' does not exist." >&2
+        return 1
+    fi
+
+    local simulation_end="${ACQ_STOP}"
+    if [[ "${DIR}" == "from45to22" ]]; then
+        simulation_end="${ACQ_STOP2}"
+    fi
+
+    foamDictionary -entry "endTime" -set "${simulation_end}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+
+    foamDictionary -entry "foStartAverage" -set "${ACQ_START}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+    foamDictionary -entry "foLfStart" -set "${ACQ_START}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+    foamDictionary -entry "foHfStart" -set "${ACQ_START}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+
+    foamDictionary -entry "foEndAverage" -set "${ACQ_STOP}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+    foamDictionary -entry "foLfEnd" -set "${ACQ_STOP}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+    foamDictionary -entry "foHfEnd" -set "${HF_STOP}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+
+    if [[ "${DIR}" == "from45to22" ]]; then
+        foamDictionary -entry "foStartAverage2" -set "${ACQ_START2}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+        foamDictionary -entry "foLfStart2" -set "${ACQ_START2}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+        foamDictionary -entry "foHfStart2" -set "${ACQ_START2}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+
+        foamDictionary -entry "foEndAverage2" -set "${ACQ_STOP2}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+        foamDictionary -entry "foLfEnd2" -set "${ACQ_STOP2}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+        foamDictionary -entry "foHfEnd2" -set "${HF_STOP2}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+    fi
+
+    foamDictionary -entry "foLfDeltaT" -set "${LF_DT}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+    foamDictionary -entry "foHfDeltaT" -set "${HF_DT}" "${CONTROL_DICT}" > /dev/null 2>&1 || return 1
+
+    echo "+--- Acquisition window set: endTime=${simulation_end}, lfDt=${LF_DT}, hfDt=${HF_DT}"
+    if [[ "${DIR}" == "from45to22" ]]; then
+        echo "+--- Primary window: start=${ACQ_START}, stop=${ACQ_STOP}, hfStop=${HF_STOP}"
+        echo "+--- Transition window: start=${ACQ_START2}, stop=${ACQ_STOP2}, hfStop=${HF_STOP2}"
+    else
+        echo "+--- Window: start=${ACQ_START}, stop=${ACQ_STOP}, hfStop=${HF_STOP}"
     fi
 }
 
@@ -198,7 +295,6 @@ change_domain() {
             copy_file_if_exists "${blockMeshDict_source}" "${blockMeshDict_target}"
 
             if [[ "${DIR}" == "from45to22" ]]; then
-                foamDictionary -entry endTime -set 5.2 "system/controlDict"
                 echo "+--- Computational domain set for the 45deg-based from45to22 transition"
             else
                 echo "+--- Computational domain set for 45deg inflow direction"
@@ -217,5 +313,6 @@ set_scenario() {
     echo "Preparing test case for scenario '${TAG}'-'${DIR}'..."
     set_geometries
     change_domain
+    set_acquisition_window
     echo "Completed setting up the scenario '${TAG}'-'${DIR}'."
 }
