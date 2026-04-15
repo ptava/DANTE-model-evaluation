@@ -245,7 +245,7 @@ set_fo_states() {
         foamDictionary -entry ${dictionary}/enabled \
             -set "${enabled}" \
             "${function_object_file}" > /dev/null 2>&1
-        echo "${action} '${dictionary}' in '$(basename "${function_object_file}")' -> enabled=${enabled}"
+        echo "${action} '${dictionary}' in '$(basename "${function_object_file}")'"
     done
 }
 

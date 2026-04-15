@@ -1,0 +1,77 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  v2412                                 |
+|   \\  /    A nd           | Website:  www.openfoam.com                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      topoSetDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Create a wake-oriented shell cellZone for dynamic refinement
+// The shell is the wake refinement box with only r3 removed from it
+
+// User-defined parameters
+#include "userDict"
+
+actions
+(
+
+    // Create the inner region to subtract from the wake shell
+    {
+        name        r3;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( $refinement/r3/min_x $refinement/r3/min_y $refinement/r3/min_z )
+                    ( $refinement/r3/max_x $refinement/r3/max_y $refinement/r3/max_z );
+            inside  true;
+        }
+    }
+
+    // Create the outer wake refinement box
+    {
+        name        refine_cells;
+        type        cellSet;
+        action      new;
+        source      boxToCell;
+        sourceInfo
+        {
+            box     ( $wakeRefinement/min_x $wakeRefinement/min_y $wakeRefinement/min_z )
+                    ( $wakeRefinement/max_x $wakeRefinement/max_y $wakeRefinement/max_z );
+            inside  true;
+        }
+    }
+
+    // Exclude only r3 from the wake refinement box
+    {
+        name        refine_cells;
+        type        cellSet;
+        action      delete;
+        source      cellToCell;
+        sourceInfo
+        {
+            set     r3;
+        }
+    }
+
+    // From cellSet to cellZone
+    {
+        name        refine_cells;
+        type        cellZoneSet;
+        action      new;
+        source      setToCellZone;
+        set         refine_cells;
+        zone        refine_cells;
+    }
+);
+
+// ************************************************************************* //

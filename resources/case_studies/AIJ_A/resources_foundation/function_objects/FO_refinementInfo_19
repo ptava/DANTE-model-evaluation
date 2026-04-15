@@ -23,6 +23,7 @@ refinementInfo
         "nTotToRefine"
         "nTotRefined"
         "nTotUnrefined"
+        "nAtMaxRefinement"
         "lowerLimit"
         "upperLimit"
     );

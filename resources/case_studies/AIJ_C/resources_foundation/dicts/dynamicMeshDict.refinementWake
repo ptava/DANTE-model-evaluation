@@ -29,7 +29,7 @@ topoChanger
     field              sasRefineIndicator;
 
     unrefineLevel      0;
-    
+
     lowerRefineLevel   0;
 
     nBufferLayers      1;

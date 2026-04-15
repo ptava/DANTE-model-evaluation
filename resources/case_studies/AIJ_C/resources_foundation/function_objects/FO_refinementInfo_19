@@ -13,15 +13,17 @@ refinementInfo
     type            refinementInfo;
     enabled         true;
     executeControl  timeStep;
-    executeInterval 4;
+    executeInterval $../controlDict!foRefinementInterval;
     writeControl    timeStep;
     executeAtStart  false;
-    writeInterval   4;
+    writeInterval   $../controlDict!foRefinementInterval;
     refinementParameters
     (
+        "nCells"
         "nTotToRefine"
         "nTotRefined"
         "nTotUnrefined"
+        "nAtMaxRefinement"
         "lowerLimit"
         "upperLimit"
     );

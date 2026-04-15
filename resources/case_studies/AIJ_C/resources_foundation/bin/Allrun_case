@@ -11,6 +11,7 @@ direction="45deg" # Flow direction tag (0deg, 22deg, 45deg, from45to22)
 scale=0.05       # Set cells number scaling parameter
 smoothing=false  # Set to True if you want to smooth the mesh (requires cfmesh)
 refinement=false # Set to True if you want to refine the mesh
+refinement_interval=4 # Interval shared by dynamicMeshDict and FO_refinementInfo
 acq_start=2.0    # Start time for averaging and for low/high-frequency acquisition
 acq_stop=3.0     # Stop time for averaging and low-frequency acquisition
 hf_stop=3.0      # Stop time for high-frequency acquisition
@@ -104,6 +105,11 @@ set_scenario \
     --lf-dt "${lf_dt}" \
     --hf-dt "${hf_dt}" || {
     echo "Error setting scenario" >&2
+    exit 1
+}
+
+foamDictionary -entry "foRefinementInterval" -set "${refinement_interval}" "${local_dicts}/controlDict" > /dev/null 2>&1 || {
+    echo "Error setting refinement interval in controlDict" >&2
     exit 1
 }
 

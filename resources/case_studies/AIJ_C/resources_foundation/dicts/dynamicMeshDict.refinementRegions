@@ -17,7 +17,7 @@ FoamFile
 topoChanger
 {
     type               myrefiner;
-    refineInterval     1;
+    refineInterval     $../system/controlDict!foRefinementInterval;
     maxCells           1000000;
     field              sasRefineIndicator;
     nBufferLayers      1;

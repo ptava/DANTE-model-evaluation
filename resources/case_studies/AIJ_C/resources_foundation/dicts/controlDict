@@ -66,6 +66,8 @@ foHfEnd           3.0;      // end of acquisition (high frequency)
 
 foHfDeltaT        0.01;     // acquisition time (high frequency)
 
+foRefinementInterval 4;     // refinement cadence for mesh and refinementInfo
+
 foStartAverage2   4.2;      // time to start averaging for from45to22
 
 foEndAverage2     5.2;      // time to end averaging for from45to22
