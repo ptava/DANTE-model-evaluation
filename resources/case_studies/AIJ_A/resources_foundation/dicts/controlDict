@@ -66,6 +66,10 @@ foHfEnd           2.3;      // end of acquisition (high frequency)
 
 foHfDeltaT        0.01;     // acquisition time (high frequency)
 
+foSpecStart       2.0;      // start of acquisition (force coefficients and spectral probes)
+
+foSpecEnd         3.0;      // end of acquisition (force coefficients and spectral probes)
+
 libs (
     "libatmosphericModels.so"
 );
