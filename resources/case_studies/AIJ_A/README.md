@@ -66,5 +66,12 @@ Two possibilities to build the grid are provided. The second grid scales better 
 
     ! Consider a smoother introduction of AMR to improve stability: change `refineScale` in `dynamicMeshDict`
 
+* Available function objects in `resources_foundation/function_objects` briefly cover:
+    - wall diagnostics and near-wall metrics (`FO_wallShearStress`, `FO_yPlus`, `FO_sampleyPlus`)
+    - flow-field post-processing and statistics (`FO_Q`, `FO_mag`, `FO_fieldAverage`, `FO_isoSurfaces`, `FO_forceCoeffs`, `FO_nutnu`)
+    - sampling on probes, lines, planes, and patches (`FO_probes`, `FO_probesSpectral`, `FO_lines`, `FO_cuttingPlanes`, `FO_samplePatches`, `FO_reattachmentLines`)
+    - solver and runtime controls (`FO_residuals`, `FO_setDeltaT`, `FO_setMaxCo`, `FO_setOuterCorrectors`, `FO_setRelaxationFactors`)
+    - AMR indicators and diagnostics (`FO_sasRefineIndicator`, `FO_cuttingPlanesRefinement`, `FO_refinementInfo`)
+
 
 * Prepared for OpenFOAM by ESI-OpenCFD (v2412 - *resources*) and OpenFOAM Foundation (v13 - *foundation*)

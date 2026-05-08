@@ -25,19 +25,24 @@ probesSpectral
     writeControl    timeStep;
     writeInterval   1;
     setFormat       csv;
-    interpolationScheme cellPoint;
+    interpolationScheme cell;
 
     probeLocations
     (
+        // roof
         (0.0   0.0   0.17)
         (0.04  0.0   0.17)
         (0.06  0.0   0.17)
         (0.10  0.0   0.17)
+        // side
         (0.0  -0.05  0.10)
+        (0.04 -0.05  0.10)
         (0.06 -0.05  0.10)
         (0.10 -0.05  0.10)
+        // wake
         (0.16  0.0   0.10)
         (0.16 -0.09  0.10)
+        (0.26  0.0   0.10)
     );
 }
 
